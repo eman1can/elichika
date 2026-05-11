@@ -8,12 +8,15 @@ import (
 	"elichika/gamedata"
 	"elichika/generic"
 	"elichika/subsystem/user_authentication"
+	"elichika/subsystem/user_reference_book"
 	"elichika/subsystem/user_card"
 	"elichika/subsystem/user_lesson_deck"
 	"elichika/subsystem/user_live_deck"
 	"elichika/subsystem/user_live_party"
 	"elichika/subsystem/user_member"
 	"elichika/subsystem/user_suit"
+	"elichika/subsystem/user_unlock_scene"
+	"elichika/subsystem/user_content"
 	"elichika/userdata"
 	"elichika/utils"
 
@@ -46,23 +49,23 @@ func CreateNewAccount(ctx *gin.Context, userId int32, passWord string) int32 {
 		}
 		status := client.UserStatus{
 			LastLoginAt:                             time.Now().Unix(),
-			Rank:                                    1,
+			Rank:                                    320,
 			RecommendCardMasterId:                   100011001, // Honoka
 			MaxFriendNum:                            99,
 			LivePointFullAt:                         time.Now().Unix(),
-			LivePointBroken:                         10000,
+			LivePointBroken:                         420,
 			LivePointSubscriptionRecoveryDailyCount: 1,
 			LivePointSubscriptionRecoveryDailyResetAt: 1688137200,
 			ActivityPointCount:                        3,
 			ActivityPointResetAt:                      1688137200,
 			ActivityPointPaymentRecoveryDailyCount:    10,
 			ActivityPointPaymentRecoveryDailyResetAt:  1688137200,
-			GameMoney:                                 1000000000,
-			CardExp:                                   1000000000,
-			FreeSnsCoin:                               50000,
-			AppleSnsCoin:                              25000,
-			GoogleSnsCoin:                             25000,
-			SubscriptionCoin:                          50000,
+			GameMoney:                                 1073741823,
+			CardExp:                                   1073741823,
+			FreeSnsCoin:                               357913941,
+			AppleSnsCoin:                              357913941,
+			GoogleSnsCoin:                             357913941,
+			SubscriptionCoin:                          1073741823,
 			LatestLiveDeckId:                          1,
 			MainLessonDeckId:                          1,
 			FavoriteMemberId:                          1,
@@ -118,8 +121,11 @@ func CreateNewAccount(ctx *gin.Context, userId int32, passWord string) int32 {
 				ViewStatus:               1,
 				IsNew:                    false,
 			})
+		}
+
+		for _, card := range gamedata.Card {
 			cards = append(cards, client.UserCard{
-				CardMasterId:               member.MemberInit.SuitMasterId,
+				CardMasterId:               card.Id,
 				Level:                      1,
 				Exp:                        0,
 				LovePoint:                  0,
@@ -128,8 +134,8 @@ func CreateNewAccount(ctx *gin.Context, userId int32, passWord string) int32 {
 				IsAwakeningImage:           false,
 				IsAllTrainingActivated:     false,
 				TrainingActivatedCellCount: 0,
-				MaxFreePassiveSkill:        1, // all R
-				Grade:                      0,
+				MaxFreePassiveSkill:        card.PassiveSkillSlot, // all R
+				Grade:                      5,
 				TrainingLife:               0,
 				TrainingAttack:             0,
 				TrainingDexterity:          0,
@@ -147,19 +153,43 @@ func CreateNewAccount(ctx *gin.Context, userId int32, passWord string) int32 {
 		}
 		user_member.InsertMembers(session, members)
 		user_card.InsertCards(session, cards)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeAccessory, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeEvent, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeFreeLive, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeLesson, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeMemberGuild, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeReferenceBookSelect, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeShopEventExchange, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeShopItemExchange, enum.UnlockSceneStatusOpened)
+		user_unlock_scene.UnlockScene(session, enum.UnlockSceneTypeStoryMember, enum.UnlockSceneStatusOpened)
+		for i := 1001; i <= 1024; i++ {
+			user_reference_book.InsertUserReferenceBook(session, int32(i))
+		}
 	}
 	{ // all the costumes that can't be obtained from maxing cards
 		suits := []client.UserSuit{}
 
 		for _, suit := range gamedata.Suit {
-			if suit.SuitReleaseRoute == 2 {
-				suits = append(suits, client.UserSuit{
-					SuitMasterId: suit.Id,
-					IsNew:        false,
-				})
-			}
+			suits = append(suits, client.UserSuit{
+				SuitMasterId: suit.Id,
+				IsNew:        false,
+			})
 		}
 		user_suit.InsertUserSuits(session, suits)
+		for _, bg := range gamedata.CustomBackground {
+			user_content.AddContent(session, client.Content{
+				ContentType:   enum.ContentTypeCustomBackground,
+				ContentId:     bg.Id,
+				ContentAmount: 1,
+			})
+		}
+		for _, emblm := range gamedata.Emblem {
+			user_content.AddContent(session, client.Content{
+				ContentType:   enum.ContentTypeEmblem,
+				ContentId:     emblm.Id,
+				ContentAmount: 1,
+			})
+		}
 	}
 	{ // show formation
 		liveDecks := []client.UserLiveDeck{}

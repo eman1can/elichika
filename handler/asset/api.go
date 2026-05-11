@@ -3,39 +3,30 @@ package asset
 import (
 	"elichika/router"
 	"elichika/utils"
-	"net/http"
-	"os"
 
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func staticApi(ctx *gin.Context) {
-	file := ctx.Param("path")
-	path := "static" + file
+	masterVersion, exist := ctx.GetQuery("master")
+	utils.MustExist(exist)
+	file, exist := ctx.GetQuery("file")
+	utils.MustExist(exist)
+	startString, exist := ctx.GetQuery("start")
+	utils.MustExist(exist)
+	start, err := strconv.Atoi(startString)
+	utils.CheckErr(err)
+	sizeString, exist := ctx.GetQuery("size")
+	utils.MustExist(exist)
+	size, err := strconv.Atoi(sizeString)
+	utils.CheckErr(err)
 
-	info, err := os.Stat(path)
-	if err != nil {
-		ctx.Status(http.StatusNotFound)
-		return
-	}
-
-	startString, startStringExist := ctx.GetQuery("start")
-	sizeString, sizeStringExist := ctx.GetQuery("size")
-
-	if startStringExist && sizeStringExist {
-		start, err := strconv.Atoi(startString)
-		utils.CheckErr(err)
-		size, err := strconv.Atoi(sizeString)
-		utils.CheckErr(err)
-
-		sendRange(ctx, path, start, size)
-	} else {
-		sendFile(ctx, path, info.Size())
-	}
+	sendRange(ctx, fmt.Sprintf("static/%s/%s", masterVersion, file), start, size)
 }
 
 func init() {
-	router.AddHandler("/static", "GET", "/*path", staticApi)
+	router.AddHandler("/static_api", "GET", "/", staticApi)
 }

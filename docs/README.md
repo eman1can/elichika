@@ -92,7 +92,39 @@ TODO(docs): Add specific docs for specific contents if necessary.
     - [ ] Mining (exchange) event.
     - [ ] SBL event.
     - [ ] Voltage ranking event.
-
+- [ ] Adding New Content
+    - [x] Use generate random ID if variable is None & hash uint32 asset path.
+	- [x] Custom unique ID variable.
+		- Expect DLP
+    - [x] Zip installation method.
+    - [x] Working Encryption data by default key is 0.
+    - [x] Adding table same as official.
+    - [X] Working downloadable asset.
+	- [x] Costume
+		- There is no way build assetbundle costume.
+		- Alternate color not supported.
+		- Custom physics would require unity editor thing.
+		- Can only modify exist costume asset with UABE/UABEA.
+	- [x] Live
+		- Can only reuse id on each gimmick.
+	- [x] DLP
+		- This code need improvement.
+		- No reward received.
+		- Pressing help button will cause softlock.
+	- [x] Card
+		- Same as costume issue
+		- Skill icon is filled but some unused need do.
+		- Bond story & Voice navigation will return as default because there is no way to create new one.
+		- KO, ZH & JA dictionary skill is not writen, only english right now.
+		- Gacha voice is working but background music will stop immediately.
+		- Playing on custom live will ended if the active skill is activated (acbmaker code missing).
+        - Training tree parameter is missing for each role.
+		- Dual skill not supported, A and B condition is doable later.
+        - Only JP Client Android working right now.
+	- [ ] SBL
+		- still not implemented based on fork, do i need make script?
+	- [ ] Accessory (not necessary)
+	
 ## How the embedded version work
 
 If you want to learn more about embedded version, checkout the [embedded project](https://github.com/arina999999997/elichika_embedded).

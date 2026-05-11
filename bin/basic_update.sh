@@ -10,13 +10,13 @@ mv -f userdata.db ../userdata.db.temp && \
 mv -f serverdata.db ../serverdata.db.temp && \
 mv -f config.json ../config.json.temp && \
 echo "Backed up databases, reinstalling" && \
-cd .. && rm -rf elichika && \
-curl -L https://raw.githubusercontent.com/arina999999997/elichika/master/bin/install.sh | bash && \
+cd .. && rm -rf elichika2 && \
+curl -L https://gitlab.com/tatara_hisoka/elichika/-/raw/main/bin/install.sh | bash && \
 echo "Restoring old databases" && \
-mv userdata.db.temp elichika/userdata.db && \
-mv serverdata.db.temp elichika/serverdata.db && \
-mv config.json.temp elichika/config.json && \
-cd elichika && \
+mv userdata.db.temp elichika2/userdata.db && \
+mv serverdata.db.temp elichika2/serverdata.db && \
+mv config.json.temp elichika2/config.json && \
+cd elichika2 && \
 ./elichika rebuild_assets && \
 echo "Updated succesfully!"
 
