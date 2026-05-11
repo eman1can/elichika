@@ -30,6 +30,11 @@ If the internal server extraction was successful, internal server will be run:
 - You will see various messages pop on the screen, to signal that the server is starting.
 - Once the message stop, the server is done loading and you can play.
 
+If using the android emulator, run below for the server to connect properly
+
+> adb reverse tcp:8080 tcp:8080
+
+
 #### Updating
 
 As the server is still in development, it will get updates from time to time. If you want the new version with more content, you have to update. To do this:

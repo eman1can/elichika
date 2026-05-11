@@ -3,10 +3,11 @@ elichika
 static/
 
 .vscode/
+.idea/
 
 
 backup/
-
+apk
 raw_data/
 local_git_server/
 *.exe
