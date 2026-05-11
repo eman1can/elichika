@@ -80,8 +80,6 @@ func AddTemplates(path string) {
 }
 
 func Router(r *gin.Engine) {
-	r.Static("/static", config.StaticDataPath)
-
 	r.StaticFile("/favicon.ico", config.RootPath+"webui/favicon.ico")
 
 	funcs := template.FuncMap{}

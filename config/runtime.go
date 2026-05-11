@@ -11,8 +11,8 @@ import (
 
 type RuntimeConfig struct {
 	ServerAddress            *string `json:"server_address" of_label:"Server's address"`
-	CdnServer                *string `json:"cdn_server" of_label:"CDN server's address"`
-	CdnPartialFileCapability *string `json:"cdn_partial_file_capability" of_type:"select" of_options:"Has static partial file\nstatic_file\nHas partial file mapping\nmapped_file\nHas range API\nhas_range_api\nNothing\nnothing" of_label:"CDN server's partial file capability" `
+	ServerCdn                *string `json:"server_cdn" of_label:"CDN Server to request files from. Defaults to internal w/ through cache."`
+	StaticProxyCdn           *string `json:"static_proxy_cdn" of_label:"Upstream CDN to proxy-cache missing static files from (leave empty to disable)"`
 	AdminPassword            *string `json:"admin_password" of_label:"Admin password" of_type:"password""`
 	TapBondGain              *int32  `json:"tap_bond_gain" of_label:"Partner tap bond reward" of_attrs:"min=\"0\" max=\"20000000\"`
 	AutoJudgeType            *int32  `json:"auto_judge_type" of_type:"select" of_options:"None\n1\nMiss\n10\nBad\n12\nGood\n14\nGreat\n20\nPerfect\n30" of_label:"Autoplay judge type"`
@@ -29,8 +29,8 @@ type RuntimeConfig struct {
 func defaultConfigs() *RuntimeConfig {
 	configs := RuntimeConfig{
 		ServerAddress:            new(string),
-		CdnServer:                new(string),
-		CdnPartialFileCapability: new(string),
+		ServerCdn:                new(string),
+		StaticProxyCdn:           new(string),
 		AdminPassword:            new(string),
 		TapBondGain:              new(int32),
 		AutoJudgeType:            new(int32),
@@ -44,8 +44,8 @@ func defaultConfigs() *RuntimeConfig {
 		MaintenanceUrl:           new(string),
 	}
 	*configs.ServerAddress = "0.0.0.0:8080"
-	*configs.CdnServer = "https://llsifas.imsofucking.gay/static/"
-	*configs.CdnPartialFileCapability = "nothing"
+	*configs.ServerCdn = "http://localhost:8080"
+	*configs.StaticProxyCdn = "https://llsifas.imsofucking.gay/static/"
 	*configs.AdminPassword = ""
 	*configs.TapBondGain = 20
 	*configs.AutoJudgeType = enum.JudgeTypeGreat
@@ -80,9 +80,6 @@ func Load(p string) *RuntimeConfig {
 			f.Set(reflect.ValueOf(d).Elem().Field(i))
 		}
 		log.Println(reflect.TypeOf(c).Field(i).Name, ": ", f.Elem())
-	}
-	if *c.CdnServer == "https://llsifas.catfolk.party/static/" {
-		*c.CdnServer = "https://llsifas.imsofucking.gay/static/"
 	}
 	return &c
 }
