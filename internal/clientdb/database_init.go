@@ -82,7 +82,6 @@ func initLocale(locale string) {
 		for scanner.Scan() {
 			_, err = session.Exec(scanner.Text())
 			utils.CheckErr(err)
-
 		}
 		utils.CheckErr(scanner.Err())
 	}
