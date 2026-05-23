@@ -1,0 +1,50 @@
+package user_accessory
+
+import (
+	"elichika/internal/client"
+	"elichika/internal/client/response"
+	"elichika/internal/config"
+	"elichika/internal/enum"
+	"elichika/internal/generic"
+	"elichika/internal/item"
+	"elichika/internal/subsystem/user_content"
+	"elichika/internal/subsystem/user_mission"
+	"elichika/internal/userdata"
+)
+
+func RarityUpAccessory(session *userdata.Session, userAccessoryId int64) response.AccessoryRarityUpResponse {
+	userAccessory := GetUserAccessory(session, userAccessoryId)
+	masterAccessory := session.Gamedata.Accessory[userAccessory.AccessoryMasterId]
+	masterAfterAccessory := masterAccessory.RarityUp.AfterAccessory
+
+	resp := response.AccessoryRarityUpResponse{
+		DoRarityUp: client.DoRarityUp{
+			BeforeAccessoryRarity: masterAccessory.Rarity.RarityType,
+			AfterAccessoryRarity:  masterAfterAccessory.RarityType,
+			DoRarityUpAddSkill:    userAccessory.PassiveSkill1Id.Value != *masterAfterAccessory.Grade[0].PassiveSkill1MasterId,
+		},
+		UserModelDiff: &session.UserModel,
+	}
+
+	// update the accessory
+	userAccessory.AccessoryMasterId = masterAfterAccessory.Id
+	userAccessory.Level = 1
+	userAccessory.Exp = 0
+	userAccessory.Grade = 0
+	userAccessory.PassiveSkill1Id = generic.NewNullable(*masterAfterAccessory.Grade[0].PassiveSkill1MasterId)
+	if masterAfterAccessory.Grade[0].PassiveSkill2MasterId != nil {
+		userAccessory.PassiveSkill2Id = generic.NewNullable(*masterAfterAccessory.Grade[0].PassiveSkill2MasterId)
+	}
+	userAccessory.AcquiredAt = session.Time.Unix()
+	UpdateUserAccessory(session, userAccessory)
+	// remove resource used
+
+	if config.Conf.ResourceConfig().ConsumePracticeItems {
+		user_content.RemoveContent(session, masterAccessory.RarityUp.RarityUpGroup.Resource)
+		user_content.RemoveContent(session, item.Gold.Amount(masterAccessory.Rarity.RarityUpMoney))
+	}
+	// mission
+	user_mission.UpdateProgress(session, enum.MissionClearConditionTypeCountAccessoryRarityUp, nil, nil,
+		user_mission.AddProgressHandler, int32(1))
+	return resp
+}

@@ -1,0 +1,38 @@
+package assetdata
+
+import (
+	"log"
+
+	"elichika/internal/utils"
+
+	"fmt"
+
+	"xorm.io/xorm"
+)
+
+type MetapackType struct {
+	MetapackName string `xorm:"pk 'metapack_name'"`
+	FileSize     int    `xorm:"'file_size'"`
+	Category     int    `xorm:"'category'"`
+}
+
+func loadMetapack(locale string, session *xorm.Session) {
+	log.Println("Loading Metapack")
+	metapacks := map[string]*MetapackType{}
+	err := session.Table("metapack").Find(&metapacks)
+	utils.CheckErr(err)
+	cnt := 0
+	for name, metapack := range metapacks {
+		previous, exist := Metapack[name]
+		if !exist {
+			cnt++
+			Metapack[name] = metapack
+			NameToLocale[name] = locale
+			continue
+		}
+		if (previous.FileSize != metapack.FileSize) || (previous.Category != metapack.Category) {
+			log.Panic(fmt.Sprint("Metapack name reused: ", *previous, *metapack, "\nLocale: ", locale, ", previous locale: ", NameToLocale[name]))
+		}
+	}
+	log.Printf("Loaded %d new metapack\n", cnt)
+}

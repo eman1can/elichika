@@ -41,7 +41,7 @@ These are the packages with functionaly outside of the common request handling s
     - Maybe the naming can be a bit better.
 
 ## Network layers
-- elichika/router: Define the network system register point. Also define the webui endpoints for now.
+- elichika/server: Define the network system register point. Also define the webui endpoints for now.
 - elichika/middleware: Define the common handling steps for client-server network endpoints.
 - elichika/locale: Implement the locale of the request.
 - elichika/handler: Declare (import) the network handlers to be used.

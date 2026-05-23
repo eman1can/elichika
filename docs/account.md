@@ -1,22 +1,25 @@
 # Account system
-Elichika actually support multiple accounts. This is the document for it, if you have a server with multiple people or just have multiple accounts for some reasons.
+The Elichika server supports multiple accounts, either multiple accounts for a single person or multiple different users.
 
 ## Account transfer
-You can use the account transfer system to switch / create account. Select ``transfer with password``. 
+You can use the account transfer system to switch account and to also create new accounts. The webui also includes a tool to create new accounts.
+Choose `Transfer with password` to transfer an account. Google Play Game Services does not currently work.
+
 ![Transfer system](images/transfer_1.png)
 
 Enter your user / player id and a password:
 
-- UserId is an non-negative integer with at most 9 digits.
-- If user is in the database, password will be checked against the stored password.
-- Otherwise a new account with that player id and password.
+- UserId is a non-negative integer with at most 9 digits.
+  - For switching between accounts, this is your `Player ID`.
+- If user is in the database, the password will be checked against the stored password.
+- If the user does not exist, then a new account will be made with the given user id and password
     - You can also leave the password empty.
-    - If you are not running the server yourself, it's highly recommended that you setup a password, because other user can take over your account if they know your user id.
+    - If you are not running the server yourself, it's highly recommended that you set a password, because other user can take over your account if they know your user id.
     - Passwords are securely stored with bcrypt.
 
 ![Set the id and password](images/transfer_2.png)
 
-After that, confirm the transfer and you can login with the new user id.
+After that, confirm the transfer, and you can log in with the new user id.
 
 ![Confirm transfer](images/transfer_3.png)
 
