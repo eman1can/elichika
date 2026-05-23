@@ -115,8 +115,8 @@ func (lm *Lesson) populate(gamedata *Gamedata) {
 
 	// TODO: Test / Implement enhancing items for skill drops
 	type SkillMemberChance struct {
-		MemberPositionId int32
-		MemberWeight     int32
+		PositionId int32
+		Weight     int32
 	}
 
 	var skillMemberChance []SkillMemberChance
@@ -126,27 +126,27 @@ func (lm *Lesson) populate(gamedata *Gamedata) {
 	utils.CheckErr(err)
 
 	for _, skillMemberChance := range skillMemberChance {
-		lm.SkillPosition.AddItem(skillMemberChance.MemberPositionId, skillMemberChance.MemberWeight)
+		lm.SkillPosition.AddItem(skillMemberChance.PositionId, skillMemberChance.Weight)
 	}
 
-	type LessonDropItemAmount struct {
+	type LessonDropAmount struct {
 		ItemId int32
 		Count  int32
 		Weight int32
 	}
 
-	var lessonDropItemAmount []LessonDropItemAmount
+	var lessonDropAmount []LessonDropAmount
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
-		err = session.Table("m_lesson_item_drop_amount").Find(&lessonDropItemAmount)
+		err = session.Table("m_lesson_drop_amount").Find(&lessonDropAmount)
 	})
 	utils.CheckErr(err)
 
 	lm.ItemAmount = map[int32]*drop.WeightedDropList[int32]{}
-	for _, lessonDropItemAmount := range lessonDropItemAmount {
-		if lm.ItemAmount[lessonDropItemAmount.ItemId] == nil {
-			lm.ItemAmount[lessonDropItemAmount.ItemId] = &drop.WeightedDropList[int32]{}
+	for _, dropAmount := range lessonDropAmount {
+		if lm.ItemAmount[dropAmount.ItemId] == nil {
+			lm.ItemAmount[dropAmount.ItemId] = &drop.WeightedDropList[int32]{}
 		}
-		lm.ItemAmount[lessonDropItemAmount.ItemId].AddItem(lessonDropItemAmount.Count, lessonDropItemAmount.Weight)
+		lm.ItemAmount[dropAmount.ItemId].AddItem(dropAmount.Count, dropAmount.Weight)
 	}
 }
 
