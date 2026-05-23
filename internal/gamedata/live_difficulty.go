@@ -7,7 +7,7 @@ import (
 	"elichika/internal/config"
 	"elichika/internal/enum"
 	"elichika/internal/generic"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"encoding/json"
 	"fmt"
@@ -93,7 +93,7 @@ func (ld *LiveDifficulty) populate(gamedata *Gamedata) {
 		err = session.Table("m_live_difficulty_mission").Where("live_difficulty_master_id = ?", ld.LiveDifficultyId).OrderBy("position").Find(&gamedata.LiveDifficulty[ld.LiveDifficultyId].Missions)
 	})
 
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	// if ld.LiveDifficultyId == 9999 || ld.LiveDifficultyId/10 == 6000000  {
 	// 	return
 	// }
@@ -101,12 +101,12 @@ func (ld *LiveDifficulty) populate(gamedata *Gamedata) {
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("m_live_difficulty_gimmick").Where("live_difficulty_master_id = ?", ld.LiveDifficultyId).Find(&ld.LiveDifficultyGimmicks)
 	})
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("m_live_difficulty_note_gimmick").Where("live_difficulty_id = ?", ld.LiveDifficultyId).Find(&ld.LiveDifficultyNoteGimmicks)
 	})
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	for i := range ld.LiveDifficultyNoteGimmicks {
 		ld.LiveDifficultyNoteGimmicks[i].populate()
 	}
@@ -141,7 +141,7 @@ func (ld *LiveDifficulty) loadSimpleLiveStage(gamedata *Gamedata) {
 		return // already loaded
 	}
 	// log.Println("Loading for", ld.LiveDifficultyId)
-	liveNotes := utils2.ReadAllText(fmt.Sprintf(config.RootPath+"assets/simple_stages/%d.json", ld.LiveDifficultyId))
+	liveNotes := utils.ReadAllText(fmt.Sprintf(config.RootPath+"assets/simple_stages/%d.json", ld.LiveDifficultyId))
 	if (liveNotes == "") || (ld.UnlockPattern == enum.LiveUnlockPatternTowerOnly) {
 
 		// song doesn't exist, use rule to find the original map
@@ -172,7 +172,7 @@ func (ld *LiveDifficulty) loadSimpleLiveStage(gamedata *Gamedata) {
 		}
 	} else {
 		err := json.Unmarshal([]byte(liveNotes), &ld.SimpleLiveStage)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 	}
 	if ld.SimpleLiveStage == nil {
 		log.Panic(fmt.Sprint("Error finding live stage for: ", ld.LiveDifficultyId))
@@ -200,7 +200,7 @@ func (ld *LiveDifficulty) ConstructLiveStage(gamedata *Gamedata) {
 	}
 
 	if !config.GenerateStageFromScratch { // load generated stage, it must exists
-		text := utils2.ReadAllText(fmt.Sprintf(config.RootPath+"assets/stages/%d.json", ld.LiveDifficultyId))
+		text := utils.ReadAllText(fmt.Sprintf(config.RootPath+"assets/stages/%d.json", ld.LiveDifficultyId))
 		if text == "" {
 			log.Panic(fmt.Sprintf("Stage %d doesn't exists in assets/stages", ld.LiveDifficultyId))
 		}
@@ -269,8 +269,8 @@ func (ld *LiveDifficulty) ConstructLiveStage(gamedata *Gamedata) {
 	// save the new map
 	{
 		output, err := json.Marshal(ld.LiveStage)
-		utils2.CheckErr(err)
-		utils2.WriteAllText(fmt.Sprintf(config.RootPath+"assets/stages/%d.json", ld.LiveDifficultyId), string(output))
+		utils.CheckErr(err)
+		utils.WriteAllText(fmt.Sprintf(config.RootPath+"assets/stages/%d.json", ld.LiveDifficultyId), string(output))
 	}
 
 	// check against pregenerated map
@@ -280,14 +280,14 @@ func (ld *LiveDifficulty) ConstructLiveStage(gamedata *Gamedata) {
 	if ld.UnlockPattern == enum.LiveUnlockPatternCoopOnly {
 		return
 	}
-	text := utils2.ReadAllText(fmt.Sprintf(config.RootPath+"assets/full_stages/%d.json", ld.LiveDifficultyId))
+	text := utils.ReadAllText(fmt.Sprintf(config.RootPath+"assets/full_stages/%d.json", ld.LiveDifficultyId))
 	if text == "" {
 		// log.Println("Newly generated map: ", ld.LiveDifficultyId)
 		return
 	}
 	pregeneratedStage := client.LiveStage{}
 	err := json.Unmarshal([]byte(text), &pregeneratedStage)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if !pregeneratedStage.IsSame(ld.LiveStage) {
 		log.Panic(fmt.Sprint("Difference detected for: ", ld.LiveDifficultyId, "\n", ld.LiveStage, "\n_______________\n", pregeneratedStage))
 	}
@@ -301,7 +301,7 @@ func loadLiveDifficulty(gamedata *Gamedata) {
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("m_live_difficulty").Find(&gamedata.LiveDifficulty)
 	})
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	// ordered iteration is important here
 	ids := []int32{}
 	for id := range gamedata.LiveDifficulty {

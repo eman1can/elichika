@@ -14,7 +14,7 @@ import (
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_live"
 	"elichika/internal/userdata"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +22,7 @@ import (
 func login(ctx *gin.Context) {
 	req := request.LoginRequest{}
 	err := json.Unmarshal(*ctx.MustGet("reqBody").(*json.RawMessage), &req)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 
 	session := ctx.MustGet("session").(*userdata.Session)
 
@@ -61,8 +61,8 @@ func login(ctx *gin.Context) {
 
 	{
 		backupText, err := json.Marshal(resp)
-		utils2.CheckErr(err)
-		utils2.WriteAllText(fmt.Sprint(config.UserDataBackupPath, "login_", session.UserId, ".json"), string(backupText))
+		utils.CheckErr(err)
+		utils.WriteAllText(fmt.Sprint(config.UserDataBackupPath, "login_", session.UserId, ".json"), string(backupText))
 	}
 }
 

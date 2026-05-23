@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"elichika/internal/enum"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"encoding/json"
 	"reflect"
@@ -62,14 +62,14 @@ func defaultConfigs() *RuntimeConfig {
 }
 
 func Load(p string) *RuntimeConfig {
-	if !utils2.PathExists(p) {
+	if !utils.PathExists(p) {
 		c := defaultConfigs()
 		c.Save(p)
 		return c
 	}
 
 	c := RuntimeConfig{}
-	err := json.Unmarshal([]byte(utils2.ReadAllText(p)), &c)
+	err := json.Unmarshal([]byte(utils.ReadAllText(p)), &c)
 	if err != nil {
 		log.Panic("config file is wrong, change/delete it and try again")
 	}
@@ -85,8 +85,8 @@ func Load(p string) *RuntimeConfig {
 
 func (c *RuntimeConfig) Save(p string) error {
 	data, err := json.Marshal(c)
-	utils2.CheckErr(err)
-	utils2.WriteAllText(p, string(data))
+	utils.CheckErr(err)
+	utils.WriteAllText(p, string(data))
 	return nil
 }
 

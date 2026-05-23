@@ -5,7 +5,7 @@ import (
 
 	"elichika/internal/client"
 	"elichika/internal/config"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"xorm.io/xorm"
 )
@@ -16,8 +16,8 @@ func InsertTrade(session *xorm.Session) {
 	file := config.ServerInitJsons + "trade.json"
 
 	trades := []client.Trade{}
-	err := json.Unmarshal([]byte(utils2.ReadAllText(file)), &trades)
-	utils2.CheckErr(err)
+	err := json.Unmarshal([]byte(utils.ReadAllText(file)), &trades)
+	utils.CheckErr(err)
 
 	for i, trade := range trades {
 		trades[i].EndAt.HasValue = false
@@ -28,10 +28,10 @@ func InsertTrade(session *xorm.Session) {
 			trades[i].Products.Slice[j] = product
 		}
 		_, err = session.Table("s_trade_product").Insert(trades[i].Products.Slice)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 	}
 	_, err = session.Table("s_trade").Insert(trades)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 }
 
 func init() {

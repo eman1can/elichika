@@ -12,7 +12,7 @@ import (
 	"elichika/internal/subsystem/user_content"
 	"elichika/internal/subsystem/user_status"
 	"elichika/internal/userdata"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +20,7 @@ import (
 func recoverAp(ctx *gin.Context) {
 	req := request.RecoverAPRequest{}
 	err := json.Unmarshal(*ctx.MustGet("reqBody").(*json.RawMessage), &req)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 
 	session := ctx.MustGet("session").(*userdata.Session)
 
@@ -38,7 +38,7 @@ func recoverAp(ctx *gin.Context) {
 		case item.StarGem.ContentId:
 			if session.UserStatus.ActivityPointPaymentRecoveryDailyResetAt <= session.Time.Unix() {
 				session.UserStatus.ActivityPointPaymentRecoveryDailyCount = 0
-				session.UserStatus.ActivityPointPaymentRecoveryDailyResetAt = utils2.BeginOfNextDay(session.Time).Unix()
+				session.UserStatus.ActivityPointPaymentRecoveryDailyResetAt = utils.BeginOfNextDay(session.Time).Unix()
 			}
 			newCount := session.UserStatus.ActivityPointPaymentRecoveryDailyCount + req.Count.Value
 			oldCount := session.UserStatus.ActivityPointPaymentRecoveryDailyCount

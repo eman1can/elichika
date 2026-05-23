@@ -8,21 +8,21 @@ import (
 	"elichika/internal/config"
 	"elichika/internal/encrypt"
 	"elichika/internal/userdata/database"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 )
 
 func randomKey() []byte {
 	// random 32 bytes
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	return b
 }
 
 // load the auth from database, or generate new one
 func (session *Session) fetchAuthenticationData() {
 	exist, err := session.Db.Table("u_authentication").Where("user_id = ?", session.UserId).Get(&session.AuthenticationData)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if !exist {
 		session.AuthenticationData = database.UserAuthentication{
 			AuthorizationKey: randomKey(),
@@ -36,7 +36,7 @@ func userAuthenticationDataFinalizer(session *Session) {
 		return
 	}
 	affected, err := session.Db.Table("u_authentication").Where("user_id = ?", session.UserId).AllCols().Update(&session.AuthenticationData)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if affected == 0 {
 		GenericDatabaseInsert(session, "u_authentication", session.AuthenticationData)
 	}
@@ -66,21 +66,21 @@ func (session *Session) SessionKey() []byte {
 
 func (session *Session) EncodedAuthorizationKey(mask64 string) string {
 	mask, err := base64.StdEncoding.DecodeString(mask64)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	randomBytes := encrypt.RSA_DecryptOAEP(mask, config.RootPath+"privatekey.pem")
-	newKey := utils2.Xor(randomBytes, []byte(session.AuthorizationKey()))
+	newKey := utils.Xor(randomBytes, []byte(session.AuthorizationKey()))
 	newKey64 := base64.StdEncoding.EncodeToString(newKey)
 	return newKey64
 }
 
 func (session *Session) EncodedSessionKey(mask64 string) string {
 	mask, err := base64.StdEncoding.DecodeString(mask64)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	randomBytes := encrypt.RSA_DecryptOAEP(mask, config.RootPath+"privatekey.pem")
 	serverEventReceiverKey, err := hex.DecodeString(config.ServerEventReceiverKey)
-	utils2.CheckErr(err)
-	newKey := utils2.Xor(randomBytes, []byte(session.SessionKey()))
-	newKey = utils2.Xor(newKey, serverEventReceiverKey)
+	utils.CheckErr(err)
+	newKey := utils.Xor(randomBytes, []byte(session.SessionKey()))
+	newKey = utils.Xor(newKey, serverEventReceiverKey)
 	newKey64 := base64.StdEncoding.EncodeToString(newKey)
 	return newKey64
 }

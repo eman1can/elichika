@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"elichika/internal/config"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"encoding/json"
 	"os"
@@ -50,7 +50,7 @@ func InitializeDailyTheater(session *xorm.Session) {
 	asiaTokyo, _ := time.LoadLocation("Asia/Tokyo")
 	memberRegex := regexp.MustCompile(`<:th_ch0[0-2][0-1][0-9]/>`)
 	filepath.Walk(config.AssetPath+"daily_theater", func(path string, info os.FileInfo, err error) error {
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 		if info.IsDir() {
 			return nil
 		}
@@ -58,21 +58,21 @@ func InitializeDailyTheater(session *xorm.Session) {
 			return nil
 		}
 		log.Printf("Parsing daily theater file: %s\n", path)
-		text := utils2.ReadAllText(path)
+		text := utils.ReadAllText(path)
 		dailyTheater := DailyTheater{}
 		err = json.Unmarshal([]byte(text), &dailyTheater)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 		dailyTheater.PublishedAt = time.Date(int(dailyTheater.Year), time.Month(dailyTheater.Month), int(dailyTheater.Day),
 			0, 0, 0, 0, asiaTokyo).Unix()
 
 		_, err = session.Table("s_daily_theater").Insert(dailyTheater)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 		memberMatches := memberRegex.FindAllString(dailyTheater.DetailText, -1)
 		members := map[int32]bool{}
 		for _, member := range memberMatches {
 			member = member[8:11]
 			memberId, err := strconv.Atoi(member)
-			utils2.CheckErr(err)
+			utils.CheckErr(err)
 			if memberId == 0 {
 				continue
 			}

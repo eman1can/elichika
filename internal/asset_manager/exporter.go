@@ -11,7 +11,7 @@ package asset_manager
 import (
 	"log"
 
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"xorm.io/xorm"
 )
@@ -28,18 +28,18 @@ func BackupCachedDatabase(locale string) {
 		}
 		log.Println("Error backing up for locale: ", locale, err)
 	}()
-	utils2.CopyFile(CachedDBName(locale), CachedDBName(locale)+".backup")
+	utils.CopyFile(CachedDBName(locale), CachedDBName(locale)+".backup")
 }
 
 func SetupCachedDatabaseTable(engine *xorm.Engine, tableName string, structure interface{}) {
 	exist, err := engine.Table(tableName).IsTableExist(tableName)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if exist {
 		err = engine.DropTables(tableName)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 	}
 	err = engine.Table(tableName).CreateTable(structure)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 }
 
 func SetupCachedDatabaseGenericAsset[Specifier AssetTypeSpecifier](engine *xorm.Engine) {
@@ -82,10 +82,10 @@ func ExportCachedData() {
 	for _, locale := range locales {
 		log.Printf("Setting up target database for locale: %s\n", locale)
 		engine, err := xorm.NewEngine("sqlite", CachedDBName(locale))
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 		SetupCachedDatabase(engine)
 		err = engine.Close()
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 		AssetDatabaseByLocale[locale] = NewAssetDatabaseForExporting(CachedDBName(locale))
 	}
 	for _, asset := range Assets {

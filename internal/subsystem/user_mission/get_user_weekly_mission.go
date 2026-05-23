@@ -4,7 +4,7 @@ import (
 	"elichika/internal/client"
 	"elichika/internal/generic"
 	"elichika/internal/userdata"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 )
 
 func getUserWeeklyMission(session *userdata.Session, missionId int32) client.UserWeeklyMission {
@@ -20,7 +20,7 @@ func getUserWeeklyMission(session *userdata.Session, missionId int32) client.Use
 	ptr = new(client.UserWeeklyMission)
 	exist, err := session.Db.Table("u_weekly_mission").Where("user_id = ? AND mission_m_id = ?",
 		session.UserId, missionId).Get(ptr)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if !exist { // create an empty mission
 		*ptr = client.UserWeeklyMission{
 			MissionMId:        missionId,
@@ -39,7 +39,7 @@ func getUserWeeklyMission(session *userdata.Session, missionId int32) client.Use
 		ptr.IsCleared = false
 		ptr.IsReceivedReward = false
 		ptr.NewExpiredAt = 0
-		ptr.ClearedExpiredAt = generic.NewNullable(utils2.StartOfNextWeek(session.Time).Unix())
+		ptr.ClearedExpiredAt = generic.NewNullable(utils.StartOfNextWeek(session.Time).Unix())
 	}
 	return *ptr
 }

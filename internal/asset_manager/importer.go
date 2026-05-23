@@ -14,7 +14,7 @@ package asset_manager
 import (
 	"log"
 
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"fmt"
 	"sort"
@@ -36,16 +36,16 @@ func ImportFromAssetsRepository() {
 }
 
 func ImportCachedAssets() {
-	if utils2.PathExists("asset_manager_cached_asset_ja.db") {
+	if utils.PathExists("asset_manager_cached_asset_ja.db") {
 		ImportAssetFromDatabase("asset_manager_cached_asset_ja.db", "ja")
 	}
-	if utils2.PathExists("asset_manager_cached_asset_en.db") {
+	if utils.PathExists("asset_manager_cached_asset_en.db") {
 		ImportAssetFromDatabase("asset_manager_cached_asset_en.db", "en")
 	}
-	if utils2.PathExists("asset_manager_cached_asset_ko.db") {
+	if utils.PathExists("asset_manager_cached_asset_ko.db") {
 		ImportAssetFromDatabase("asset_manager_cached_asset_ko.db", "ko")
 	}
-	if utils2.PathExists("asset_manager_cached_asset_zh.db") {
+	if utils.PathExists("asset_manager_cached_asset_zh.db") {
 		ImportAssetFromDatabase("asset_manager_cached_asset_zh.db", "zh")
 	}
 }
@@ -71,7 +71,7 @@ func ImportFromArchiveDatabases(dir, minTime, maxTime string) {
 		dir += "/"
 	}
 	engine, err := xorm.NewEngine("sqlite", dir+"version.db")
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	defer engine.Close()
 	type Version struct {
 		Region   string `xorm:"'region'"`
@@ -81,17 +81,17 @@ func ImportFromArchiveDatabases(dir, minTime, maxTime string) {
 	}
 	versions := []Version{}
 	err = engine.Table("version").Find(&versions)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	const layout = "2006-Jan-02 15:04"
 	for i := range versions {
 		timePoint, err := time.Parse(layout, strings.Trim(versions[i].Time, "\n"))
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 		versions[i].UnixTime = timePoint.Unix()
 	}
 	unixMin, err := time.Parse(layout, minTime)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	unixMax, err := time.Parse(layout, maxTime)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if unixMin.Unix() > unixMax.Unix() {
 		panic("minTime must be before or equal maxTime")
 	}
@@ -113,25 +113,25 @@ func ImportFromArchiveDatabases(dir, minTime, maxTime string) {
 		log.Printf("Loading from archive database, Region: %s, Time: %s, Hash: %s\n", version.Region, strings.Trim(version.Time, "\n"), version.Hash)
 		versionDir := fmt.Sprintf("%s%s-%s/", dir, version.Region, version.Hash)
 		if version.Region == "en" {
-			if utils2.PathExists(versionDir + "asset_i_en.db") {
+			if utils.PathExists(versionDir + "asset_i_en.db") {
 				ImportAssetFromDatabase(versionDir+"asset_i_en.db", "en")
 			} else {
 				log.Printf("WARNING: No en database\n")
 			}
-			if utils2.PathExists(versionDir + "asset_i_ko.db") {
+			if utils.PathExists(versionDir + "asset_i_ko.db") {
 				ImportAssetFromDatabase(versionDir+"asset_i_ko.db", "ko")
 			} else {
 				log.Printf("WARNING: No ko database\n")
 			}
-			if utils2.PathExists(versionDir + "asset_i_zh.db") {
+			if utils.PathExists(versionDir + "asset_i_zh.db") {
 				ImportAssetFromDatabase(versionDir+"asset_i_zh.db", "zh")
 			} else {
 				log.Printf("WARNING: No zh database\n")
 			}
 		} else if version.Region == "jp" {
-			if utils2.PathExists(versionDir + "asset_i_ja.db") {
+			if utils.PathExists(versionDir + "asset_i_ja.db") {
 				ImportAssetFromDatabase(versionDir+"asset_i_ja.db", "ja")
-			} else if utils2.PathExists(versionDir + "asset_i_ja_0.db") {
+			} else if utils.PathExists(versionDir + "asset_i_ja_0.db") {
 				ImportAssetFromDatabase(versionDir+"asset_i_ja_0.db", "ja")
 			} else {
 				log.Printf("WARNING: No ja database\n")

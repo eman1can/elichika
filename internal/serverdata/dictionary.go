@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"elichika/internal/config"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"xorm.io/xorm"
 )
@@ -17,7 +17,7 @@ type DictionaryItem struct {
 func initDictionary(session *xorm.Session) {
 	var err error
 
-	text := utils2.ReadAllText(config.AssetPath + "dictionary.json")
+	text := utils.ReadAllText(config.AssetPath + "dictionary.json")
 	type DictionaryValue struct {
 		Ja *string `json:"ja"`
 		En *string `json:"en"`
@@ -26,7 +26,7 @@ func initDictionary(session *xorm.Session) {
 	}
 	values := map[string]DictionaryValue{}
 	err = json.Unmarshal([]byte(text), &values)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	items := map[string][]DictionaryItem{}
 	for id, value := range values {
 		items["ja"] = append(items["ja"], DictionaryItem{
@@ -48,7 +48,7 @@ func initDictionary(session *xorm.Session) {
 	}
 	for language, values := range items {
 		_, err = session.Table("s_dictionary_" + language).Insert(values)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 	}
 }
 

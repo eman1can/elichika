@@ -5,7 +5,7 @@ import (
 
 	"elichika/internal/client"
 	"elichika/internal/config"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 
 	"xorm.io/xorm"
 )
@@ -55,7 +55,7 @@ func InitGacha(session *xorm.Session) {
 
 	// this is the same for everything
 	masterdata, err := xorm.NewEngine("sqlite", config.GlMasterdataPath+"masterdata.db")
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	// 9 groups for now:
 	// (R, SR, UR) * (muse, aqours, niji)
 	weight := make(map[int]int64)
@@ -68,13 +68,13 @@ func InitGacha(session *xorm.Session) {
 			cardMasterIds := []int32{}
 			err := masterdata.Table("m_card").Where("card_rarity_type = ? AND member_m_id / 100 == ?", rarity, school).
 				Cols("id").Find(&cardMasterIds)
-			utils2.CheckErr(err)
+			utils.CheckErr(err)
 			for _, cardMasterId := range cardMasterIds {
 				_, err := session.Table("s_gacha_card").Insert(GachaCard{
 					GroupMasterId: groupMasterId,
 					CardMasterId:  cardMasterId,
 				})
-				utils2.CheckErr(err)
+				utils.CheckErr(err)
 			}
 			session.Table("s_gacha_group").Insert(GachaGroup{
 				GroupMasterId: groupMasterId,
@@ -110,15 +110,15 @@ func InitGacha(session *xorm.Session) {
 
 func InsertGacha(session *xorm.Session, file string) {
 	// insert gacha from json format, with some exceptions.
-	gachaJsons := utils2.ReadAllText(file)
+	gachaJsons := utils.ReadAllText(file)
 
 	gachas := []client.Gacha{}
 	err := json.Unmarshal([]byte(gachaJsons), &gachas)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 
 	gachaSetups := []GachaSetupInfo{}
 	err = json.Unmarshal([]byte(gachaJsons), &gachaSetups)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 
 	for pos, gacha := range gachas {
 		serverGacha := ServerGacha{
@@ -134,7 +134,7 @@ func InsertGacha(session *xorm.Session, file string) {
 		}
 		serverGacha.ClientGacha = gacha
 		_, err = session.Table("s_gacha").Insert(serverGacha)
-		utils2.CheckErr(err)
+		utils.CheckErr(err)
 	}
 }
 
@@ -148,8 +148,4 @@ func init() {
 	addTable("s_gacha_group", GachaGroup{}, nil)
 	addTable("s_gacha_card", GachaCard{}, nil)
 	addTable("s_gacha", ServerGacha{}, gachaInitializer)
-	// InitTable("s_gacha_guarantee", GachaGuarantee{}, overwrite)
-	// InitTable("s_gacha", ServerGacha{}, overwrite)
-	// InitTable("s_gacha_group", GachaGroup{}, overwrite)
-	// InitTable("s_gacha_card", GachaCard{}, overwrite)
 }

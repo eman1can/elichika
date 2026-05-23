@@ -4,7 +4,7 @@ import (
 	"elichika/internal/client"
 	"elichika/internal/generic"
 	"elichika/internal/userdata"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 )
 
 func getUserDailyMission(session *userdata.Session, missionId int32) client.UserDailyMission {
@@ -20,7 +20,7 @@ func getUserDailyMission(session *userdata.Session, missionId int32) client.User
 	ptr = new(client.UserDailyMission)
 	exist, err := session.Db.Table("u_daily_mission").Where("user_id = ? AND mission_m_id = ?",
 		session.UserId, missionId).Get(ptr)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	if !exist { // create an empty mission
 		*ptr = client.UserDailyMission{
 			MissionMId:        missionId,
@@ -37,7 +37,7 @@ func getUserDailyMission(session *userdata.Session, missionId int32) client.User
 		ptr.MissionStartCount = ptr.MissionCount
 		ptr.IsCleared = false
 		ptr.IsReceivedReward = false
-		ptr.ClearedExpiredAt = generic.NewNullable(utils2.BeginOfNextDay(session.Time).Unix())
+		ptr.ClearedExpiredAt = generic.NewNullable(utils.BeginOfNextDay(session.Time).Unix())
 	}
 	return *ptr
 }

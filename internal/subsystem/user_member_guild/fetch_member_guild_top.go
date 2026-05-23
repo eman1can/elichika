@@ -10,7 +10,7 @@ import (
 	"elichika/internal/subsystem/user_info_trigger"
 	"elichika/internal/subsystem/user_present"
 	"elichika/internal/userdata"
-	utils2 "elichika/internal/utils"
+	"elichika/internal/utils"
 )
 
 // this response has 3 different states it can return:
@@ -36,7 +36,7 @@ func FetchMemberGuildTop(session *userdata.Session) response.FetchMemberGuildTop
 	resultTriggers := []client.UserInfoTriggerBasic{}
 	err := session.Db.Table("u_info_trigger_basic").Where("user_id = ? AND info_trigger_type = ?",
 		session.UserId, enum.InfoTriggerTypeMemberGuildRankingShowResult).Find(&resultTriggers)
-	utils2.CheckErr(err)
+	utils.CheckErr(err)
 	hasResultTrigger := false
 	for i, trigger := range resultTriggers {
 		if trigger.LimitAt.Value >= session.Time.Unix() {
@@ -65,7 +65,7 @@ func FetchMemberGuildTop(session *userdata.Session) response.FetchMemberGuildTop
 			userRank, err = session.Db.Table("u_member_guild").Where("member_master_id = ? AND member_guild_id = ? AND total_point > ?",
 				memberMasterId, previousMemberGuildId, userMemberGuild.TotalPoint).OrderBy("total_point DESC").
 				Limit(int(session.Gamedata.MemberGuildRankingRewardInside[memberMasterId].RankNumberLimit)).Count()
-			utils2.CheckErr(err)
+			utils.CheckErr(err)
 			userRank++
 			if int32(userRank) > session.Gamedata.MemberGuildRankingRewardInside[memberMasterId].RankNumberLimit {
 				// having rally power and rank 0 mean unranked
@@ -126,7 +126,7 @@ func FetchMemberGuildTop(session *userdata.Session) response.FetchMemberGuildTop
 				rank, err = session.Db.Table("u_member_guild").Where("member_master_id = ? AND member_guild_id = ? AND total_point > ?",
 					memberMasterId, currentMemberGuildId, currentUserTotalPoint).OrderBy("total_point DESC").
 					Limit(int(session.Gamedata.MemberGuildRankingRewardInside[memberMasterId].RankNumberLimit)).Count()
-				utils2.CheckErr(err)
+				utils.CheckErr(err)
 				rank++
 				if int32(rank) > session.Gamedata.MemberGuildRankingRewardInside[memberMasterId].RankNumberLimit {
 					rank = 0
@@ -137,7 +137,7 @@ func FetchMemberGuildTop(session *userdata.Session) response.FetchMemberGuildTop
 				MemberGuildUserRankingOrder: int32(rank),
 				MemberGuildUserRankingPoint: currentUserTotalPoint,
 				DailyCoopPoint:              GetDailyCoopPoint(session),
-				CoopRewardPeriodAt:          generic.NewNullable(utils2.NextMidDay(session.Time).Unix()),
+				CoopRewardPeriodAt:          generic.NewNullable(utils.NextMidDay(session.Time).Unix()),
 			}
 		}
 	}
