@@ -24,6 +24,10 @@ func discoverMigrations(path string, migrations *generic.List[Migration]) {
 	files, err := os.ReadDir(path)
 	utils.CheckErr(err)
 	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
 		name := file.Name()
 		migrations.Append(Migration{
 			Name:     name,
