@@ -10,8 +10,6 @@ import (
 )
 
 func resultLesson(ctx *gin.Context) {
-	// there is no request body
-
 	session := ctx.MustGet("session").(*userdata.Session)
 
 	resp := user_lesson.ResultLesson(session)

@@ -40,7 +40,7 @@ var (
 	GlLanguages = []string{"en", "ko", "zh"}
 	JpLanguages = []string{"ja"}
 
-	ServerInitJsons = RootPath + "server init jsons/"
+	ServerInitJsons = RootPath + "assets/serverdata/"
 	Conf            = &RuntimeConfig{}
 
 	GenerateStageFromScratch = false

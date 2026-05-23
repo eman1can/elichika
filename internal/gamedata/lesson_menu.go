@@ -11,20 +11,13 @@ import (
 )
 
 type LessonMenu struct {
-	// from m_lesson_menu
 	Id int32 `xorm:"pk"`
-	// PassiveSkillDropGroupId int32
-	// Name string
-	// ThumbnailMAssetPath string
-	// ThumbnailSAssetPath string
-	// BackgroundImagePath string
-	// BgmPath string
-	DefaultDrop *drop.WeightedDropList[client.LessonDropItem]           `xorm:"-"`
-	Drop        map[int32]*drop.WeightedDropList[client.LessonDropItem] `xorm:"-"`
+
+	DefaultItemDrop *drop.WeightedDropList[client.LessonDropItem]           `xorm:"-"`
+	ItemDrop        map[int32]*drop.WeightedDropList[client.LessonDropItem] `xorm:"-"`
 }
 
 func (lm *LessonMenu) populate(gamedata *Gamedata) {
-
 	type LessonDropContent struct {
 		ContentType   int32
 		ContentId     int32
@@ -33,15 +26,15 @@ func (lm *LessonMenu) populate(gamedata *Gamedata) {
 		Rarity        int32
 	}
 
-	contents := []LessonDropContent{}
+	var contents []LessonDropContent
 	var err error
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("m_lesson_drop_content").Where("lesson_menu_master_id == ?", lm.Id).Find(&contents)
 	})
 	utils.CheckErr(err)
-	lm.DefaultDrop = &drop.WeightedDropList[client.LessonDropItem]{}
+	lm.DefaultItemDrop = &drop.WeightedDropList[client.LessonDropItem]{}
 	for _, content := range contents {
-		lm.DefaultDrop.AddItem(client.LessonDropItem{
+		lm.DefaultItemDrop.AddItem(client.LessonDropItem{
 			ContentType:   content.ContentType,
 			ContentId:     content.ContentId,
 			ContentAmount: content.ContentAmount,
@@ -54,19 +47,19 @@ func (lm *LessonMenu) populate(gamedata *Gamedata) {
 		TargetRarity          int32
 		MagnificationWeight   int32
 	}
-	enhancingItems := []LessonEnhancingItemDropRate{}
+	var enhancingItems []LessonEnhancingItemDropRate
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("m_lesson_enhancing_item_effect_drop_rate").Find(&enhancingItems)
 	})
 	utils.CheckErr(err)
-	lm.Drop = map[int32]*drop.WeightedDropList[client.LessonDropItem]{}
+	lm.ItemDrop = map[int32]*drop.WeightedDropList[client.LessonDropItem]{}
 	for _, rate := range enhancingItems {
-		if lm.Drop[rate.LessonEnhancingItemId] == nil {
-			lm.Drop[rate.LessonEnhancingItemId] = &drop.WeightedDropList[client.LessonDropItem]{}
+		if lm.ItemDrop[rate.LessonEnhancingItemId] == nil {
+			lm.ItemDrop[rate.LessonEnhancingItemId] = &drop.WeightedDropList[client.LessonDropItem]{}
 		}
 		for _, content := range contents {
 			if content.Rarity == rate.TargetRarity {
-				lm.Drop[rate.LessonEnhancingItemId].AddItem(client.LessonDropItem{
+				lm.ItemDrop[rate.LessonEnhancingItemId].AddItem(client.LessonDropItem{
 					ContentType:   content.ContentType,
 					ContentId:     content.ContentId,
 					ContentAmount: content.ContentAmount,

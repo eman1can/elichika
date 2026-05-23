@@ -1,6 +1,8 @@
 package serverdata
 
 import (
+	"elichika/internal/config"
+	"elichika/internal/parser"
 	"log"
 
 	"elichika/internal/db"
@@ -34,6 +36,21 @@ func addTable(tableName string, structure interface{}, initializer Initializer) 
 	}
 	serverDataTableNameToInterface[tableName] = structure
 	serverDataTableNameToInitializer[tableName] = initializer
+}
+
+func loadTable(tableName string, structure interface{}) {
+	file := config.ServerInitJsons + tableName + ".json"
+
+	var data []interface{}
+	parser.ParseJson(file, &data)
+
+	tableInitializer := func(session *xorm.Session) {
+		for item := range data {
+			_, err := session.Table(tableName).Insert(item)
+			utils.CheckErr(err)
+		}
+	}
+	addTable(tableName, structure, tableInitializer)
 }
 
 func createTable(tableName string, structure interface{}, overwrite bool) bool {
