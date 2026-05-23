@@ -47,7 +47,8 @@ var (
 )
 
 func init() {
-	os.MkdirAll(UserDataBackupPath, 0755)
+	err := os.MkdirAll(UserDataBackupPath, 0755)
+	utils.CheckErr(err)
 	Conf = Load("./data/config.json")
 	loc, err := time.LoadLocation(*Conf.TimeZone)
 	utils.CheckErr(err)
