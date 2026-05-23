@@ -1,6 +1,7 @@
 package user_lesson
 
 import (
+	"math"
 	"reflect"
 	"sort"
 
@@ -81,6 +82,8 @@ func ExecuteLesson(session *userdata.Session, req request.ExecuteLessonRequest) 
 
 		key := req.ExecuteLessonIds.Slice[0]*100 + req.ExecuteLessonIds.Slice[1]*10 + req.ExecuteLessonIds.Slice[2]
 
+		dropCount := session.Gamedata.Lesson.ItemAmount[enum.NormalDropType].GetRandomItem()
+
 		// Calculate Item Drops
 		for lesson := int32(1); lesson <= 3; lesson++ {
 			lessonMenu := session.Gamedata.LessonMenu[req.ExecuteLessonIds.Slice[lesson-1]]
@@ -92,13 +95,18 @@ func ExecuteLesson(session *userdata.Session, req request.ExecuteLessonRequest) 
 				}
 			}
 
-			dropCount := session.Gamedata.Lesson.ItemAmount[enum.NormalDropType].GetRandomItem()
-
 			dropRarityList := resp.LessonDropRarityList.GetOnly(lesson)
 			var gainedItems []client.LessonDropItem
 
 			// Calculate Normal Item Drops
-			for i := int32(0); i < dropCount; i++ {
+			var lessonDropCount int32
+			if lesson == 3 {
+				lessonDropCount = dropCount - int32(math.Round(float64(dropCount)/3.0))*2
+			} else {
+				lessonDropCount = int32(math.Round(float64(dropCount) / 3.0))
+			}
+
+			for i := int32(0); i < lessonDropCount; i++ {
 				dropItem := dropList.GetRandomItem()
 				gainedItems = append(gainedItems, dropItem)
 			}
@@ -124,7 +132,7 @@ func ExecuteLesson(session *userdata.Session, req request.ExecuteLessonRequest) 
 					ContentAmount: content.ContentAmount,
 				})
 				result.DropItemList.Append(content)
-				dropRarityList.Append(content.DropRarity)
+				dropRarityList.Append(min(2, content.DropRarity))
 			}
 
 			// If subscription, double items
@@ -138,7 +146,7 @@ func ExecuteLesson(session *userdata.Session, req request.ExecuteLessonRequest) 
 						ContentAmount: content.ContentAmount,
 					})
 					result.DropItemList.Append(content)
-					dropRarityList.Append(content.DropRarity)
+					dropRarityList.Append(min(2, content.DropRarity))
 				}
 			}
 		}

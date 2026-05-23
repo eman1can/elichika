@@ -104,8 +104,7 @@ func (lm *Lesson) populate(gamedata *Gamedata) {
 				lm.DefaultSkillDrop[key].AddItem(0, rarityWeights[0])
 
 				// Add each dropped skill to the drop list with the appropriate weight
-				for _, skillMasterId := range skills {
-					rarity := skills[skillMasterId]
+				for skillMasterId, rarity := range skills {
 					weight := rarityWeights[rarity] / rarities[rarity]
 					lm.DefaultSkillDrop[key].AddItem(skillMasterId, weight)
 				}
@@ -125,6 +124,7 @@ func (lm *Lesson) populate(gamedata *Gamedata) {
 	})
 	utils.CheckErr(err)
 
+	lm.SkillPosition = &drop.WeightedDropList[int32]{}
 	for _, skillMemberChance := range skillMemberChance {
 		lm.SkillPosition.AddItem(skillMemberChance.PositionId, skillMemberChance.Weight)
 	}
