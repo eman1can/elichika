@@ -1,6 +1,7 @@
 package clientdb
 
 import (
+	"elichika/internal/generic"
 	"log"
 
 	"elichika/internal/config"
@@ -13,25 +14,44 @@ import (
 	"xorm.io/xorm"
 )
 
+type Migration struct {
+	Name     string
+	Path     string
+	Database string
+}
+
+func discoverMigrations(path string, migrations *generic.List[Migration]) {
+	files, err := os.ReadDir(path)
+	utils.CheckErr(err)
+	for _, file := range files {
+		name := file.Name()
+		migrations.Append(Migration{
+			Name:     name,
+			Path:     path + name,
+			Database: name[4 : len(name)-4],
+		})
+	}
+}
+
 // note that this is subject to change, do not depend on it too much
 func initLocale(locale string) {
-
-	sqlDir := fmt.Sprint(config.AssetPath, "sql/", locale, "/")
 	dbDir := fmt.Sprint("db/", locale, "/")
-	files, err := os.ReadDir(sqlDir)
-	if err != nil {
-		return
-	}
-	// file name has the format <order>.filename.sql
-	// order must be exactly 3 digits (technically it can be any 3 characters)
-	// for each file, if it has not changed then apply the update
-	// if an error is encountered, no change would be made to any of the file
+
+	var migrations generic.List[Migration]
+	var err error
+
+	// Get locale specific migrations in the format sql/db/<locale>/<order>.filename.sql
+	discoverMigrations(fmt.Sprint(config.AssetPath, "sql/", locale, "/"), &migrations)
+
+	// Get locale agnostic migrations in the format sql/db/<order>.filename.sql
+	discoverMigrations(fmt.Sprint(config.AssetPath, "sql/"), &migrations)
+
 	needUpdate := map[string]bool{}
 	engines := map[string]*xorm.Engine{}
 	sessions := map[string]*xorm.Session{}
 
-	for _, file := range files {
-		dbName := file.Name()[4 : len(file.Name())-4]
+	for _, migration := range migrations.Slice {
+		dbName := migration.Database
 		need, exists := needUpdate[dbName]
 		if !exists {
 			needUpdate[dbName] = isNotChanged(dbDir + dbName)
@@ -50,9 +70,9 @@ func initLocale(locale string) {
 			session = sessions[dbName]
 			session.Begin()
 		}
-		log.Println("Running SQL file: ", file.Name())
+		log.Println("Running SQL migration: ", migration.Name)
 
-		f, err := os.Open(sqlDir + file.Name())
+		f, err := os.Open(migration.Path)
 		utils.CheckErr(err)
 		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
@@ -62,6 +82,8 @@ func initLocale(locale string) {
 		}
 		utils.CheckErr(scanner.Err())
 	}
+
+	// Close all database sessions
 	for _, session := range sessions {
 		err := session.Commit()
 		utils.CheckErr(err)
@@ -69,7 +91,6 @@ func initLocale(locale string) {
 	}
 }
 
-// initialise the database inside of the db repository, if necessary
 func databaseInit() {
 	initLocale("gl")
 	initLocale("jp")
