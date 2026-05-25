@@ -91,6 +91,7 @@ func CreateNewAccount(ctx *gin.Context, userId int32, passWord string) int32 {
 		if (err != nil) && (isRandomId) { // reroll once for random userId
 			userId = int32(rand.Intn(1000000000))
 			wrapper.UserId = userId
+
 			_, err = db.Table("u_status").AllCols().Insert(&status)
 		}
 		utils.CheckErr(err)

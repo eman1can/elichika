@@ -34,11 +34,18 @@ func birthdayLoginBonusHandler(mode string, session *userdata.Session, loginBonu
 	userLoginBonus.LastReceivedAt = session.Time.Unix()
 
 	for _, member := range list {
-		// the present is as follow:
-		// - 50 gems
-		// - 2 memento
-		// - 50 memorial
-		// - additional 25 memorial for channel member
+		memorialCount := int32(50)
+		if session.UserStatus.MemberGuildMemberMasterId.HasValue &&
+			session.UserStatus.MemberGuildMemberMasterId.Value == member.Id {
+			memorialCount += 25
+		}
+
+		loginRewards := []client.Content{
+			item.MementoPiece(member.Id).Amount(2),
+			item.MemorialPiece(member.Id).Amount(memorialCount),
+			item.StarGem.Amount(50),
+		}
+
 		naviLoginBonus := loginBonus.NaviLoginBonus()
 		naviLoginBonus.LoginBonusRewards.Append(
 			client.LoginBonusRewards{
@@ -46,44 +53,30 @@ func birthdayLoginBonusHandler(mode string, session *userdata.Session, loginBonu
 				Status:       enum.LoginBonusReceiveStatusReceiving,
 				ContentGrade: generic.NewNullable(enum.LoginBonusContentGradeRare),
 				LoginBonusContents: generic.Array[client.Content]{
-					Slice: []client.Content{
-						client.Content{
-							ContentType:   enum.ContentTypeTrainingMaterial,
-							ContentId:     int32(18000 + member.Id),
-							ContentAmount: 2,
-						},
-						client.Content{
-							ContentType:   enum.ContentTypeTrainingMaterial,
-							ContentId:     int32(8000 + member.Id),
-							ContentAmount: 50,
-						},
-						item.StarGem.Amount(50),
-					},
+					Slice: loginRewards,
 				},
 			},
 		)
-		if session.UserStatus.MemberGuildMemberMasterId.HasValue &&
-			session.UserStatus.MemberGuildMemberMasterId.Value == member.Id {
-			naviLoginBonus.LoginBonusRewards.Slice[0].LoginBonusContents.Slice[1].ContentAmount += 25
-		}
 
-		for _, content := range naviLoginBonus.LoginBonusRewards.Slice[0].LoginBonusContents.Slice {
+		for _, content := range loginRewards {
 			user_present.AddPresent(session, client.PresentItem{
 				Content:          content,
 				PresentRouteType: enum.PresentRouteTypeLoginBonus,
-				PresentRouteId:   generic.NewNullable(int32(1000003)),
+				PresentRouteId:   generic.NewNullable(loginBonus.LoginBonusId),
 				ParamServer: generic.NewNullable(client.LocalizedText{
 					DotUnderText: fmt.Sprintf("k.m_dic_member_name_%d birthday_login_bonus", member.Id),
 				}),
 			})
 		}
 
-		// choose the background and the costume
+		// Choose the appropriate background and costume for the member
 		memberLoginBonusBirthday := member.MemberLoginBonusBirthdays[0]
 		switch mode {
 		case "random":
 			memberLoginBonusBirthday = member.MemberLoginBonusBirthdays[rand.Intn(len(member.MemberLoginBonusBirthdays))]
+			break
 		case "latest":
+		case "equipped":
 		default:
 			log.Panic("not supported")
 		}

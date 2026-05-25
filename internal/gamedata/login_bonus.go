@@ -18,13 +18,14 @@ type LoginBonus struct {
 	EndAt                   int64                                  `xorm:"'end_at'"`
 	BackgroundId            int32                                  `xorm:"'background_id'"`
 	WhiteboardTextureAsset  client.TextureStruktur                 `xorm:"'whiteboard_texture_asset'"`
+	DotUnderText            string                                 `xorm:"'dot_under_text'"`
 	LoginBonusHandler       string                                 `xorm:"'login_bonus_handler'"`
 	LoginBonusHandlerConfig string                                 `xorm:"'login_bonus_handler_config'"`
 	LoginBonusRewards       generic.List[client.LoginBonusRewards] `xorm:"-"`
 }
 
 func (lb *LoginBonus) populate(gamedata *Gamedata) {
-	rewardDays := []serverdata.LoginBonusRewardDay{}
+	var rewardDays []serverdata.LoginBonusRewardDay
 	var err error
 	gamedata.ServerdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("s_login_bonus_reward_day").Where("login_bonus_id = ?", lb.LoginBonusId).OrderBy("day").Find(&rewardDays)

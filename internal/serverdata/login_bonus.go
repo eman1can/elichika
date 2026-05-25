@@ -41,11 +41,11 @@ func InitializeLoginBonus(session *xorm.Session) {
 	loginBonusRewardDays := []LoginBonusRewardDay{}
 	loginBonusRewardContents := []LoginBonusRewardContent{}
 
-	// beginner login bonus
+	// Fresh Start Login Bonus
 	loginBonuses = append(loginBonuses, LoginBonus{
 		LoginBonusId:   BeginnerLoginBonusId,
 		LoginBonusType: enum.LoginBonusTypeNormal,
-		BackgroundId:   100100700,
+		BackgroundId:   100100700, // This isn't a texture... A person, maybe?
 		WhiteboardTextureAsset: &client.TextureStruktur{
 			V: generic.NewNullable(":7S"),
 		},
