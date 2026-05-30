@@ -18,7 +18,7 @@ import (
 func getHostUrl(ctx *gin.Context) string {
 	host := *config.Conf.ServerCdn
 
-	if host == "elichika" || host == "elichika_tls" {
+	if host == "elichika" {
 		actualHost := ctx.Request.Host
 
 		actualProto := "http"
@@ -48,6 +48,7 @@ func getPackUrl(ctx *gin.Context) {
 	utils.CheckErr(err)
 
 	host := getHostUrl(ctx)
+	isElichika := *config.Conf.ServerCdn == "elichika"
 
 	resp := response.GetPackUrlResponse{}
 	for _, pack := range req.PackNames.Slice {
@@ -57,7 +58,7 @@ func getPackUrl(ctx *gin.Context) {
 			continue
 		}
 
-		if host == config.DefaultServerCdn {
+		if isElichika {
 			resp.UrlList.Append(fmt.Sprintf("%s/static/%s?start=%d&size=%d", host, downloadData.File, downloadData.Start, downloadData.Size))
 		} else {
 			resp.UrlList.Append(fmt.Sprintf("%s/%s", host, pack))

@@ -3,6 +3,7 @@ package asset
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ import (
 )
 
 func downloadFromProxy(path string, pack string) error {
-	resp, err := http.Get(fmt.Sprintf("%s/%s", config.DefaultProxyCdn, pack))
+	resp, err := http.Get(fmt.Sprintf("%s/static/%s", config.DefaultProxyCdn, pack))
 	if err != nil {
 		return err
 	}
@@ -49,6 +50,7 @@ func staticApi(ctx *gin.Context) {
 	}
 
 	if err != nil {
+		log.Println("Download", path, "from proxy", *config.Conf.StaticProxyCdn)
 		err = downloadFromProxy(path, ctx.Param("path"))
 	}
 

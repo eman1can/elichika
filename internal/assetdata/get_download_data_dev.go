@@ -33,13 +33,13 @@ func GetDownloadData(packname string) DownloadData {
 			File:         packname,
 			IsEntireFile: true,
 		}
-	} else {
-		return DownloadData{
-			Locale:       NameToLocale[pack.Metapack.MetapackName],
-			File:         pack.Metapack.MetapackName,
-			IsEntireFile: false,
-			Start:        pack.MetapackOffset,
-			Size:         pack.FileSize,
-		}
+	}
+
+	return DownloadData{
+		Locale:       NameToLocale[pack.Metapack.MetapackName],
+		File:         pack.Metapack.MetapackName,
+		IsEntireFile: false,
+		Start:        pack.MetapackOffset,
+		Size:         pack.FileSize,
 	}
 }

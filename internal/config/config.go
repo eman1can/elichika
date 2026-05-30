@@ -17,8 +17,7 @@ var (
 
 	DefaultSessionKey = "12345678123456781234567812345678"
 
-	DefaultServerCdn = "elichika"
-	DefaultProxyCdn  = "https://llsifas.imsofucking.gay/static/"
+	DefaultProxyCdn = "https://llsifas.imsofucking.gay"
 
 	AssetAWBKey = uint64(6498535309877346413)
 

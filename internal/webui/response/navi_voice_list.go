@@ -3,6 +3,7 @@ package response
 type WebUINaviVoiceEntry struct {
 	Id           int32  `json:"id"`
 	Name         string `json:"name"`
+	Description  string `json:"description"`
 	MemberId     int32  `json:"member_id"`
 	MemberName   string `json:"member_name"`
 	GroupId      int32  `json:"group_id"`

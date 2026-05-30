@@ -45,7 +45,7 @@ func defaultConfigs() *RuntimeConfig {
 	}
 	// TODO: Move TapBondGain/Multipliers other "soft" settings to table w/ WebUI interaction
 	*configs.ServerAddress = "0.0.0.0:8080"
-	*configs.ServerCdn = DefaultServerCdn
+	*configs.ServerCdn = "elichika"
 	*configs.StaticProxyCdn = DefaultProxyCdn
 	*configs.AdminPassword = ""
 	*configs.TapBondGain = 20

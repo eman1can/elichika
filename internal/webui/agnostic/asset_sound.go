@@ -12,16 +12,6 @@ import (
 	"github.com/eman1can/sound_decrypt/wav"
 )
 
-// TODO: Sound Mapping will be another field on m_navi_voice as sheet name
-// NaviVoiceSheetName returns the m_asset_sound sheet name for a navi voice entry.
-// Only route 4 (card voices) have standalone AWB sheets; others return "".
-func NaviVoiceSheetName(releaseRoute, releaseValue, voiceId int32) string {
-	if releaseRoute != 4 || releaseValue == 0 {
-		return ""
-	}
-	return fmt.Sprintf("vo_ca_%d%d", releaseValue, voiceId%10)
-}
-
 func loadPackBytes(packName string) ([]byte, error) {
 	downloadData := assetdata.GetDownloadData(packName)
 
@@ -40,7 +30,7 @@ func loadPackBytes(packName string) ([]byte, error) {
 // HCA, converts it to WAV via ffmpeg, and caches the result in static/sounds/.
 // Returns the WAV path, or an error when the sound is unavailable.
 func ConvertVoiceToWAV(sheetName string) (string, error) {
-	path := filepath.Join(config.StaticDataPath, "sounds", sheetName+".wav")
+	path := filepath.Join(config.StaticDataPath, "sounds", "wav", sheetName+".wav")
 	if _, err := os.Stat(path); err == nil {
 		return path, nil // already cached
 	}

@@ -1,15 +1,15 @@
 package gamedata
 
 import (
+	"log"
+	"strings"
+	"sync"
+
 	"elichika/internal/client"
 	_ "elichika/internal/clientdb"
 	"elichika/internal/generic"
 	"elichika/internal/serverdata"
 	"elichika/internal/utils"
-	"sync"
-
-	"log"
-	"strings"
 
 	"xorm.io/xorm"
 )
@@ -70,17 +70,17 @@ func DictionaryByLanguage(language string) *Dictionary {
 	return GamedataByLocale[language].Dictionary
 }
 
-func (dictionary *Dictionary) Resolve(id string) string {
+func lookup(dictionary *Dictionary, id string) (string, bool) {
 	dictionary.clientMu.RLock()
 	result, exist := dictionary.ClientDictionary[id]
 	dictionary.clientMu.RUnlock()
 	if exist {
-		return result
+		return result, exist
 	}
 
 	keys := strings.Split(id, ".")
 	if dictionary.Dictionaries[keys[0]] == nil {
-		return id
+		return id, false
 	}
 
 	result = ""
@@ -91,18 +91,28 @@ func (dictionary *Dictionary) Resolve(id string) string {
 		Get(&result)
 	utils.CheckErr(err)
 	if !exist {
-		log.Printf("Warning: client dictionary key doesn't exist: %s\n", id)
+		return id, false
 	}
 
 	dictionary.clientMu.Lock()
 	if cached, ok := dictionary.ClientDictionary[id]; ok {
 		dictionary.clientMu.Unlock()
-		return cached
+		return cached, true
 	}
 	dictionary.ClientDictionary[id] = result
 	dictionary.clientMu.Unlock()
 
-	return result
+	return result, true
+}
+
+func (dictionary *Dictionary) Has(id string) bool {
+	_, exist := lookup(dictionary, id)
+	return exist
+}
+
+func (dictionary *Dictionary) Resolve(id string) string {
+	value, _ := lookup(dictionary, id)
+	return value
 }
 
 func (dictionary *Dictionary) ServerResolve(id string) string {

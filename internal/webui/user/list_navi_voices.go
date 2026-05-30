@@ -45,6 +45,7 @@ func naviVoiceList(ctx *gin.Context) {
 		entry := response.WebUINaviVoiceEntry{
 			Id:           id,
 			Name:         dictionary.Resolve(voice.Name),
+			Description:  dictionary.Resolve(voice.Description),
 			MemberId:     voice.MemberMId,
 			MemberName:   dictionary.Resolve(member.Name),
 			GroupId:      member.MemberGroupId,

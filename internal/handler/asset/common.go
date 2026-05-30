@@ -3,7 +3,6 @@ package asset
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
@@ -24,20 +23,23 @@ func sendRange(ctx *gin.Context, path string, start, size int) {
 	ctx.Header("Content-Length", fmt.Sprint(size))
 	ctx.Header("Content-Type", "application/octet-stream")
 
-	buffer := make([]byte, 1024)
 	f, err := os.Open(path)
 	utils.CheckErr(err)
 	defer f.Close()
 	_, err = f.Seek(int64(start), io.SeekStart)
 	utils.CheckErr(err)
-	for ; size > 0; size -= 1024 {
-		count, err := f.Read(buffer)
-		utils.CheckErr(err)
-		if count > size {
-			count = size
-		} else if (count < 1024) && (count < size) {
-			log.Panic("wrong requested range")
+
+	buffer := make([]byte, 64*1024)
+	remaining := size
+	for remaining > 0 {
+		toRead := remaining
+		if toRead > len(buffer) {
+			toRead = len(buffer)
 		}
+		count, err := f.Read(buffer[:toRead])
+		utils.CheckErr(err)
 		ctx.Writer.Write(buffer[:count])
+		remaining -= count
 	}
+	ctx.Status(http.StatusPartialContent)
 }

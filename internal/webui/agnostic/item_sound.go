@@ -2,7 +2,12 @@ package agnostic
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 
+	"elichika/internal/config"
+	"elichika/internal/gamedata"
+	"elichika/internal/utils"
 	"elichika/internal/webui/request"
 
 	"elichika/internal/server"
@@ -10,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getVoiceSound handles GET /webui/item/sound?id=N&route=N&value=N
+// getVoiceSound handles GET /webui/item/sound?id=N
 // It converts on first request then streams from cache.
 func getVoiceSound(ctx *gin.Context) {
 	req := request.WebUIItemSoundRequest{}
@@ -19,23 +24,23 @@ func getVoiceSound(ctx *gin.Context) {
 		return
 	}
 
-	sheetName := NaviVoiceSheetName(req.ReleaseRoute, req.ReleaseValue, req.VoiceId)
-	if sheetName == "" {
+	if voice, ok := gamedata.Instance.NaviVoice[req.VoiceId]; ok {
+		wavPath, err := ConvertVoiceToWAV(voice.SheetName)
+		if err != nil {
+			ctx.Status(http.StatusNoContent)
+			ctx.Error(err)
+			return
+		}
+
+		ctx.Header("Content-Type", "audio/wav")
+		ctx.File(wavPath)
+	} else {
 		ctx.Status(http.StatusNotFound)
-		return
 	}
-
-	wavPath, err := ConvertVoiceToWAV(sheetName)
-	if err != nil {
-		ctx.Status(http.StatusNoContent)
-		ctx.Error(err)
-		return
-	}
-
-	ctx.Header("Content-Type", "audio/wav")
-	ctx.File(wavPath)
 }
 
 func init() {
 	server.AddHandler("/webui", "GET", "/item/sound", getVoiceSound)
+	err := os.MkdirAll(filepath.Join(config.StaticDataPath, "sounds", "wav"), os.ModePerm)
+	utils.CheckErr(err)
 }
