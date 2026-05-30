@@ -17,6 +17,11 @@ var (
 
 	DefaultSessionKey = "12345678123456781234567812345678"
 
+	DefaultServerCdn = "http://localhost:8080"
+	DefaultProxyCdn  = "https://llsifas.imsofucking.gay/static/"
+
+	AssetAWBKey = uint64(6498535309877346413)
+
 	AssetPath = RootPath + "assets/"
 
 	GlMasterdataPath = AssetPath + "db/gl/"
@@ -40,7 +45,7 @@ var (
 	GlLanguages = []string{"en", "ko", "zh"}
 	JpLanguages = []string{"ja"}
 
-	ServerInitJsons = RootPath + "assets/serverdata/"
+	ServerInitJsons = RootPath + "assets/server/"
 	Conf            = &RuntimeConfig{}
 
 	GenerateStageFromScratch = false

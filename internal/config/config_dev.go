@@ -13,5 +13,5 @@ const (
 	DeveloperModeEventMarathonDev = 1
 	DeveloperModeEventMiningDev   = 2
 
-	DeveloperMode = DeveloperModeEventMiningDev
+	DeveloperMode = DeveloperModeEventMarathonDev
 )

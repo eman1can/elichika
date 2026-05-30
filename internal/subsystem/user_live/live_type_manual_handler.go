@@ -336,7 +336,7 @@ func liveTypeManualHandler(session *userdata.Session, req request.FinishLiveRequ
 		for i := int32(1); i <= 9; i++ {
 			cardMasterId := reflect.ValueOf(userLiveDeck).Field(1 + int(i)).Interface().(generic.Nullable[int32]).Value
 			member := gamedata.Card[cardMasterId].Member
-			groups[member.MemberGroup] = true
+			groups[member.MemberGroupId] = true
 			units[member.MemberUnit] = true
 			members[member.Id] = true
 			if i <= 3 {

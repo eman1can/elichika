@@ -15,7 +15,7 @@ type MemberGroup struct {
 }
 
 func (mg *MemberGroup) populate(gamedata *Gamedata) {
-	mg.GroupName = gamedata.Dictionary.Resolve(mg.GroupName)
+	//mg.GroupName = gamedata.Dictionary.Resolve(mg.GroupName)
 }
 
 func loadMemberGroup(gamedata *Gamedata) {

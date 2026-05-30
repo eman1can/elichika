@@ -26,7 +26,7 @@ func nextLoginBonusTime(timePoint time.Time) time.Time {
 	return latestLoginBonusTime(timePoint).AddDate(0, 0, 1)
 }
 
-func incrementLoginBonus(session *userdata.Session, loginBonus *gamedata.LoginBonus, userLoginBonus database.UserLoginBonus, allowRestart bool) bool {
+func incrementLoginBonus(session *userdata.Session, loginBonus *gamedata.LoginBonus, userLoginBonus *database.UserLoginBonus, allowRestart bool) bool {
 	lastUnlocked := latestLoginBonusTime(session.Time)
 	if userLoginBonus.LastReceivedAt >= lastUnlocked.Unix() {
 		return true
@@ -46,7 +46,7 @@ func incrementLoginBonus(session *userdata.Session, loginBonus *gamedata.LoginBo
 	return false
 }
 
-func awardLoginBonusItems(session *userdata.Session, loginBonus *gamedata.LoginBonus, userLoginBonus database.UserLoginBonus, target *client.BootstrapLoginBonus) {
+func awardLoginBonusItems(session *userdata.Session, loginBonus *gamedata.LoginBonus, userLoginBonus *database.UserLoginBonus, target *client.BootstrapLoginBonus) {
 	naviLoginBonus := loginBonus.NaviLoginBonus()
 	for i := range naviLoginBonus.LoginBonusRewards.Slice {
 		if i < userLoginBonus.LastReceivedReward {
@@ -69,5 +69,4 @@ func awardLoginBonusItems(session *userdata.Session, loginBonus *gamedata.LoginB
 			ParamClient: generic.NewNullable(fmt.Sprint(userLoginBonus.LastReceivedReward + 1)),
 		})
 	}
-	updateUserLoginBonus(session, userLoginBonus)
 }

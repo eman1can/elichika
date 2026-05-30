@@ -13,9 +13,10 @@ import (
 
 type Member struct {
 	// from m_member
-	Id          int32 `xorm:"'id' pk"`                           // member master id
-	MemberGroup int32 `xorm:"'member_group'" enum:"MemberGroup"` // muse aqour niji
-	SchoolGrade int32 `xorm:"school_grade"`
+	Id            int32        `xorm:"'id' pk"`                           // member master id
+	MemberGroupId int32        `xorm:"'member_group'" enum:"MemberGroup"` // muse aqour niji
+	MemberGroup   *MemberGroup `xorm:"-"`
+	SchoolGrade   int32        `xorm:"school_grade"`
 
 	// colors use rgba, 8 bits each
 	// ThemeColor int `xorm:"'theme_color'"`
@@ -126,7 +127,8 @@ func (member *Member) populate(gamedata *Gamedata) {
 		utils.CheckErrMustExist(err, exist)
 	}
 
-	member.Name = gamedata.Dictionary.Resolve(member.Name)
+	member.MemberGroup = gamedata.MemberGroup[member.MemberGroupId]
+	//member.Name = gamedata.Dictionary.Resolve(member.Name)
 	// member.NameHiragana = gamedata.Dictionary.Resolve(member.NameHiragana)
 	// member.NameRomaji = gamedata.Dictionary.Resolve(member.NameRomaji)
 	// log.Println(member.Id, "\t", member.Name, "\t", member.NameHiragana, "\t", member.NameRomaji, "\t",

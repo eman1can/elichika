@@ -6,6 +6,7 @@ import (
 	"elichika/internal/generic"
 	"elichika/internal/serverdata"
 	"elichika/internal/utils"
+	"sync"
 
 	"log"
 	"strings"
@@ -16,8 +17,10 @@ import (
 type Dictionary struct {
 	Language         string
 	Dictionaries     map[string]*xorm.Engine
-	ClientDictionary map[string]string // there is no need to load the whole client dictionary, but we might use some keys a lot
+	ClientDictionary map[string]string
 	ServerDictionary map[string]string
+
+	clientMu sync.RWMutex
 }
 
 func (dictionary *Dictionary) Init(path string, language string) {
@@ -47,9 +50,10 @@ func (dictionary *Dictionary) Init(path string, language string) {
 		Message string `xorm:"'message'"`
 	}
 
-	dictionary.ServerDictionary = map[string]string{}
 	dictionary.ClientDictionary = map[string]string{}
-	pairs := []Pair{}
+
+	dictionary.ServerDictionary = map[string]string{}
+	var pairs []Pair
 	serverdata.Database.Do(func(session *xorm.Session) {
 		err = session.Table("s_dictionary_" + language).Find(&pairs)
 	})
@@ -59,22 +63,45 @@ func (dictionary *Dictionary) Init(path string, language string) {
 	}
 }
 
+func DictionaryByLanguage(language string) *Dictionary {
+	if language == "" {
+		language = "en"
+	}
+	return GamedataByLocale[language].Dictionary
+}
+
 func (dictionary *Dictionary) Resolve(id string) string {
+	dictionary.clientMu.RLock()
 	result, exist := dictionary.ClientDictionary[id]
+	dictionary.clientMu.RUnlock()
 	if exist {
 		return result
 	}
+
 	keys := strings.Split(id, ".")
 	if dictionary.Dictionaries[keys[0]] == nil {
 		return id
 	}
+
 	result = ""
-	exist, err := dictionary.Dictionaries[keys[0]].Table("m_dictionary").Where("id = ?", keys[1]).Cols("message").Get(&result)
+	exist, err := dictionary.Dictionaries[keys[0]].
+		Table("m_dictionary").
+		Where("id = ?", keys[1]).
+		Cols("message").
+		Get(&result)
 	utils.CheckErr(err)
 	if !exist {
 		log.Printf("Warning: client dictionary key doesn't exist: %s\n", id)
 	}
+
+	dictionary.clientMu.Lock()
+	if cached, ok := dictionary.ClientDictionary[id]; ok {
+		dictionary.clientMu.Unlock()
+		return cached
+	}
 	dictionary.ClientDictionary[id] = result
+	dictionary.clientMu.Unlock()
+
 	return result
 }
 

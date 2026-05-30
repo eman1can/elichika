@@ -69,6 +69,7 @@ func fixCard(session *xorm.Session, cells []FixUserCardTrainingTreeCell) {
 	}
 }
 
+// TODO: Figure out what this does, and implement it as a tool
 func FixUsersTrainingTrees() {
 	session := userdata.Engine.NewSession()
 	if session == nil {

@@ -19,10 +19,11 @@ type Card struct {
 	MemberMasterId *int32  `xorm:"'member_m_id'"`
 	Member         *Member `xorm:"-"`
 	// SchoolIdolNo int `xorm:"'school_idol_no'"`
-	CardRarityType int32       `xorm:"'card_rarity_type'" enum:"CardRarityType"`
-	Rarity         *CardRarity `xorm:"-"`
-	Role           int32       `xorm:"'role'"`
-	// MemberCardThumbnailAssetPath string
+	CardRarityType               int32       `xorm:"'card_rarity_type'" enum:"CardRarityType"`
+	Rarity                       *CardRarity `xorm:"-"`
+	Role                         int32       `xorm:"'role'"`
+	MemberCardThumbnailAssetPath string      `xorm:"'member_card_thumbnail_asset_path'"`
+
 	// AtGacha bool
 	// AtEvent bool
 	TrainingTreeMasterId *int32        `xorm:"'training_tree_m_id'"` // must be equal to Id
@@ -37,6 +38,11 @@ type Card struct {
 	// from m_card_grade_up_item
 	// map content_id to client.Content
 	CardGradeUpItem map[int32](map[int32]client.Content) `xorm:"-"`
+
+	// from m_card_appearance
+	// map card_m_id to Id
+	Appearance     *CardAppearance `xorm:"-"`
+	IdolAppearance *CardAppearance `xorm:"-"`
 }
 
 type CardGradeUpItem struct {
@@ -50,6 +56,9 @@ func (card *Card) populate(gamedata *Gamedata) {
 	card.TrainingTree = gamedata.TrainingTree[*card.TrainingTreeMasterId]
 	card.TrainingTreeMasterId = &card.TrainingTree.Id
 	card.Rarity = gamedata.CardRarity[card.CardRarityType]
+	card.Appearance = gamedata.CardAppearance[card.Id]
+	card.IdolAppearance = gamedata.CardIdolAppearance[card.Id]
+
 	{
 		card.CardGradeUpItem = make(map[int32](map[int32]client.Content))
 		gradeUps := []CardGradeUpItem{}
@@ -90,4 +99,5 @@ func init() {
 	addPrequisite(loadCard, loadCardRarity)
 	addPrequisite(loadCard, loadMember)
 	addPrequisite(loadCard, loadTrainingTree)
+	addPrequisite(loadCard, loadCardAppearance)
 }

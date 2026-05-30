@@ -4,6 +4,7 @@ package event
 
 import (
 	"elichika/internal/client"
+	"elichika/internal/config"
 	"elichika/internal/enum"
 	"elichika/internal/generic"
 	"elichika/internal/userdata"

@@ -41,7 +41,6 @@ type DatabaseSync struct {
 var databases = map[string]*DatabaseSync{}
 
 func NewDatabase(path string) (d *DatabaseSync, err error) {
-
 	var exists bool
 	d, exists = databases[path]
 	if exists {
@@ -60,6 +59,7 @@ func NewDatabase(path string) (d *DatabaseSync, err error) {
 		d.session.Close()
 		return
 	}
+	databases[path] = d
 	d.requestChannel = make(chan func(session *xorm.Session))
 	d.syncChannel = make(chan struct{})
 	go d.serve()

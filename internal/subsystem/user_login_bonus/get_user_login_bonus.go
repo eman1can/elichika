@@ -6,7 +6,7 @@ import (
 	"elichika/internal/utils"
 )
 
-func getUserLoginBonus(session *userdata.Session, loginBonusId int32) database.UserLoginBonus {
+func getUserLoginBonus(session *userdata.Session, loginBonusId int32) *database.UserLoginBonus {
 	userLoginBonus := database.UserLoginBonus{}
 	exists, err := session.Db.Table("u_login_bonus").
 		Where("user_id = ? AND login_bonus_id = ?", session.UserId, loginBonusId).Get(&userLoginBonus)
@@ -18,5 +18,5 @@ func getUserLoginBonus(session *userdata.Session, loginBonusId int32) database.U
 			LastReceivedAt:     0,
 		}
 	}
-	return userLoginBonus
+	return &userLoginBonus
 }

@@ -1,13 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"log"
+	"reflect"
 
 	"elichika/internal/enum"
 	"elichika/internal/utils"
-
-	"encoding/json"
-	"reflect"
 )
 
 type RuntimeConfig struct {
@@ -44,9 +43,10 @@ func defaultConfigs() *RuntimeConfig {
 		EventAutoSchedulerPeriod: new(string),
 		MaintenanceUrl:           new(string),
 	}
+	// TODO: Move TapBondGain/Multipliers other "soft" settings to table w/ WebUI interaction
 	*configs.ServerAddress = "0.0.0.0:8080"
-	*configs.ServerCdn = "http://localhost:8080"
-	*configs.StaticProxyCdn = "https://llsifas.imsofucking.gay/static/"
+	*configs.ServerCdn = DefaultServerCdn
+	*configs.StaticProxyCdn = DefaultProxyCdn
 	*configs.AdminPassword = ""
 	*configs.TapBondGain = 20
 	*configs.AutoJudgeType = enum.JudgeTypeGreat
@@ -94,7 +94,7 @@ var confs = []*RuntimeConfig{}
 
 func UpdateConfig(newConfig *RuntimeConfig) {
 	confs = append(confs, Conf)
-	newConfig.Save("./config.json") // this has lock so the file can't be corrupted
+	newConfig.Save("./data/config.json") // this has lock so the file can't be corrupted
 	// this should be safe because we overwrite the pointer, not the object
 	// if someone had an old version of confs then they would just have an access to the old config until they discard it
 	// this also assume the pointer size is less than machine word, which it should be

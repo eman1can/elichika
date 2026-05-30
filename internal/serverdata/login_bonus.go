@@ -2,10 +2,11 @@ package serverdata
 
 import (
 	"elichika/internal/client"
-	"elichika/internal/enum"
+	"elichika/internal/config"
 	"elichika/internal/generic"
-	"elichika/internal/item"
+	"elichika/internal/parser"
 	"elichika/internal/utils"
+	"os"
 
 	"xorm.io/xorm"
 )
@@ -17,6 +18,7 @@ type LoginBonus struct {
 	EndAt                   int64
 	BackgroundId            int32
 	WhiteboardTextureAsset  *client.TextureStruktur `xorm:"varchar(3)"`
+	DotUnderText            string
 	LoginBonusHandler       string
 	LoginBonusHandlerConfig string
 }
@@ -33,151 +35,93 @@ type LoginBonusRewardContent struct {
 	Content      client.Content `xorm:"extends"`
 }
 
+type LoginBonusRewardContentJson struct {
+	Day           int32 `xorm:"pk"`
+	Grade         int32 `enum:"LoginBonusContentGrade"`
+	ContentType   int32 `xorm:"'content_type'" json:"content_type" enum:"ContentType"`
+	ContentId     int32 `xorm:"'content_id'" json:"content_id"`
+	ContentAmount int32 `xorm:"'content_amount'" json:"content_amount"`
+}
+
+type LoginBonusJson struct {
+	Id                      int32 `xorm:"pk"`
+	LoginBonusType          int32 `xorm:"pk"`
+	StartAt                 int64
+	EndAt                   int64
+	BackgroundId            int32
+	WhiteboardTextureAsset  *client.TextureStruktur `xorm:"varchar(3)"`
+	DotUnderText            string
+	LoginBonusHandler       string
+	LoginBonusHandlerConfig string
+	Rewards                 []LoginBonusRewardContentJson `xorm:"extends"`
+}
+
+func LoadLoginBonus(path string, loginBonus *LoginBonus, loginBonusRewardDay *generic.List[LoginBonusRewardDay], loginBonusRewardContent *generic.List[LoginBonusRewardContent]) {
+
+}
+
+func InsertLoginBonus(session *xorm.Session, path string) {
+	var loginBonus = new(LoginBonus)
+
+	var loginBonusJson = new(LoginBonusJson)
+	parser.ParseJson(path, loginBonusJson)
+
+	loginBonus.LoginBonusId = loginBonusJson.Id
+	loginBonus.LoginBonusType = loginBonusJson.LoginBonusType
+	loginBonus.BackgroundId = loginBonusJson.BackgroundId
+	loginBonus.WhiteboardTextureAsset = loginBonusJson.WhiteboardTextureAsset
+	loginBonus.DotUnderText = loginBonusJson.DotUnderText
+	loginBonus.LoginBonusHandler = loginBonusJson.LoginBonusHandler
+	loginBonus.LoginBonusHandlerConfig = loginBonusJson.LoginBonusHandlerConfig
+
+	if loginBonusJson.StartAt != 0 && loginBonusJson.EndAt != 0 {
+		loginBonus.StartAt = loginBonusJson.StartAt
+		loginBonus.EndAt = loginBonusJson.EndAt
+	} else {
+		// Assume that login bonus is always valid
+		loginBonus.StartAt = 0
+		loginBonus.EndAt = 1<<31 - 1
+	}
+
+	_, err := session.Table("s_login_bonus").Insert(loginBonus)
+	utils.CheckErr(err)
+
+	for _, reward := range loginBonusJson.Rewards {
+		var day = LoginBonusRewardDay{}
+		day.LoginBonusId = loginBonus.LoginBonusId
+		day.Day = reward.Day
+		day.ContentGrade = reward.Grade
+
+		_, err = session.Table("s_login_bonus_reward_day").Insert(day)
+		utils.CheckErr(err)
+
+		var content = LoginBonusRewardContent{}
+		content.LoginBonusId = loginBonus.LoginBonusId
+		content.Day = reward.Day
+		content.Content = client.Content{
+			ContentType:   reward.ContentType,
+			ContentId:     reward.ContentId,
+			ContentAmount: reward.ContentAmount,
+		}
+
+		_, err = session.Table("s_login_bonus_reward_content").Insert(content)
+		utils.CheckErr(err)
+	}
+}
+
 func InitializeLoginBonus(session *xorm.Session) {
-	const BeginnerLoginBonusId = 1000001
-	const NormalLoginBonusId = 1000002
-	const BirthDayLoginBonusId = 1000003
-	loginBonuses := []LoginBonus{}
-	loginBonusRewardDays := []LoginBonusRewardDay{}
-	loginBonusRewardContents := []LoginBonusRewardContent{}
+	path := config.ServerInitJsons + "login_bonus"
 
-	// Fresh Start Login Bonus
-	loginBonuses = append(loginBonuses, LoginBonus{
-		LoginBonusId:   BeginnerLoginBonusId,
-		LoginBonusType: enum.LoginBonusTypeNormal,
-		BackgroundId:   100100700, // This isn't a texture... A person, maybe?
-		WhiteboardTextureAsset: &client.TextureStruktur{
-			V: generic.NewNullable(":7S"),
-		},
-		StartAt:                 0,
-		EndAt:                   1<<31 - 1,
-		LoginBonusHandler:       "beginner_login_bonus",
-		LoginBonusHandlerConfig: "",
-	})
-	for day := 1; day <= 7; day++ {
-		loginBonusRewardDays = append(loginBonusRewardDays, LoginBonusRewardDay{
-			LoginBonusId: BeginnerLoginBonusId,
-			Day:          int32(day),
-			ContentGrade: enum.LoginBonusContentGradeNormal,
-		})
+	files, err := os.ReadDir(path)
+	utils.CheckErr(err)
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		InsertLoginBonus(session, path+file.Name())
 	}
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          1,
-		Content:      item.Gold.Amount(300000),
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          2,
-		Content:      item.SRScoutingTicket,
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          3,
-		Content:      item.EXP.Amount(300000),
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          4,
-		Content:      item.ShowCandy100,
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          5,
-		Content:      item.StarGem.Amount(50),
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          6,
-		Content:      item.MemoryKey.Amount(7),
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: BeginnerLoginBonusId,
-		Day:          7,
-		Content:      item.URScoutingTicket,
-	})
-
-	// normal login bonus
-	loginBonuses = append(loginBonuses, LoginBonus{
-		LoginBonusId:   NormalLoginBonusId,
-		LoginBonusType: enum.LoginBonusTypeNormal,
-		BackgroundId:   100100700,
-		WhiteboardTextureAsset: &client.TextureStruktur{
-			V: generic.NewNullable("/4n"),
-		},
-		StartAt:                 0,
-		EndAt:                   1<<31 - 1,
-		LoginBonusHandler:       "normal_login_bonus",
-		LoginBonusHandlerConfig: "",
-	})
-	for day := 1; day <= 7; day++ {
-		loginBonusRewardDays = append(loginBonusRewardDays, LoginBonusRewardDay{
-			LoginBonusId: NormalLoginBonusId,
-			Day:          int32(day),
-			ContentGrade: enum.LoginBonusContentGradeNormal,
-		})
-	}
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          1,
-		Content:      item.ShowCandy50,
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          2,
-		Content:      item.StarGem.Amount(10),
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          3,
-		Content:      item.TrainingTicket,
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          4,
-		Content:      item.StarGem.Amount(20),
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          5,
-		Content:      item.ShowCandy50,
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          6,
-		Content:      item.MemoryKey,
-	})
-	loginBonusRewardContents = append(loginBonusRewardContents, LoginBonusRewardContent{
-		LoginBonusId: NormalLoginBonusId,
-		Day:          7,
-		Content:      item.StarGem.Amount(30),
-	})
-
-	// birthday login bonus
-	loginBonuses = append(loginBonuses, LoginBonus{
-		LoginBonusId:            BirthDayLoginBonusId,
-		LoginBonusType:          enum.LoginBonusTypeBirthday,
-		StartAt:                 0,
-		EndAt:                   1<<31 - 1,
-		LoginBonusHandler:       "birthday_login_bonus",
-		LoginBonusHandlerConfig: "random", // can be set to latest to use the latest pair
-	})
-
-	for _, loginBonus := range loginBonuses {
-		_, err := session.Table("s_login_bonus").Insert(loginBonus)
-		utils.CheckErr(err)
-	}
-
-	for _, day := range loginBonusRewardDays {
-		_, err := session.Table("s_login_bonus_reward_day").Insert(day)
-		utils.CheckErr(err)
-	}
-
-	for _, content := range loginBonusRewardContents {
-		_, err := session.Table("s_login_bonus_reward_content").Insert(content)
-		utils.CheckErr(err)
-	}
-
 }
 
 func init() {

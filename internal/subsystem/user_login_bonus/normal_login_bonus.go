@@ -21,4 +21,5 @@ func normalLoginBonusHandler(_ string, session *userdata.Session, loginBonus *ga
 
 	// TODO: Customize rewards for normal login after it expires, instead of just basic resetting
 	awardLoginBonusItems(session, loginBonus, userLoginBonus, target)
+	updateUserLoginBonus(session, userLoginBonus)
 }

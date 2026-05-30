@@ -166,7 +166,7 @@ func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Sessio
 	}
 	s.fetchAuthenticationData()
 	s.UserStatus = &s.UserModel.UserStatus
-	s.UserContentDiffs = make(map[int32](map[int32]client.Content))
+	s.UserContentDiffs = make(map[int32]map[int32]client.Content)
 	s.MemberLovePanelDiffs = make(map[int32]client.MemberLovePanel)
 	return &s
 }

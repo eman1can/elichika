@@ -143,10 +143,12 @@ type Gamedata struct {
 	TrainingTreeMapping     map[int32]*TrainingTreeMapping
 	TrainingTree            map[int32]*TrainingTree
 
-	Card           map[int32]*Card
-	CardLevel      map[int32]*CardLevel
-	CardRarity     map[int32]*CardRarity
-	CardByMemberId map[int32][]*Card
+	Card               map[int32]*Card
+	CardLevel          map[int32]*CardLevel
+	CardRarity         map[int32]*CardRarity
+	CardByMemberId     map[int32][]*Card
+	CardAppearance     map[int32]*CardAppearance
+	CardIdolAppearance map[int32]*CardAppearance
 
 	ContentRarity         *ContentRarity
 	ContentType           map[int32]*ContentType

@@ -9,13 +9,13 @@ import (
 )
 
 type Emblem struct {
-	Id int32 `xorm:"pk 'id'"`
-	// Name string `xorm:"'name'"`
+	Id   int32  `xorm:"pk 'id'"`
+	Name string `xorm:"'name'"`
 	// Description string `xorm:"'description'"`
 	// EmblemType int32 `xorm:"'emblem_type'"`
-	Grade int32 `xorm:"'grade'"`
-	// EmblemAssetPath string `xorm:"'emblem_asset_path'"`
-	// EmblemSubAssetPath string `xorm:"'emblem_sub_asset_path'"`
+	Grade              int32  `xorm:"'grade'"`
+	EmblemAssetPath    string `xorm:"'emblem_asset_path'"`
+	EmblemSubAssetPath string `xorm:"'emblem_sub_asset_path'"`
 	// EmblemClearConditionType int32 `xorm:"'emblem_clear_condition_type'"`
 	// EmblemClearConditionParam int32 `xorm:"'emblem_clear_condition_param'"`
 	// IsEmblemSecretCondition int32 `xorm:"'is_emblem_secret_condition'"`

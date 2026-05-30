@@ -18,4 +18,5 @@ func limitedLoginBonusHandler(_ string, session *userdata.Session, loginBonus *g
 		return
 	}
 	awardLoginBonusItems(session, loginBonus, userLoginBonus, target)
+	updateUserLoginBonus(session, userLoginBonus)
 }

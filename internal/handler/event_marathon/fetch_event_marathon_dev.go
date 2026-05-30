@@ -5,6 +5,7 @@ package event_marathon
 import (
 	"elichika/internal/client/request"
 	"elichika/internal/client/response"
+	"elichika/internal/config"
 	"elichika/internal/handler/common"
 	"elichika/internal/server"
 	"elichika/internal/subsystem/event"

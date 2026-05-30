@@ -10,8 +10,10 @@ import (
 
 type CustomBackground struct {
 	// from m_custom_background
-	Id int32 `xorm:"pk 'id'"`
-	// ...
+	Id                 int32  `xorm:"pk 'id'"`
+	Name               string `xorm:"'name'"`
+	ThumbnailAssetPath string `xorm:"'thumbnail_asset_path'"`
+	DisplayOrder       int32  `xorm:"'display_order'"`
 }
 
 func loadCustomBackground(gamedata *Gamedata) {

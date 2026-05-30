@@ -1,40 +1,70 @@
 package asset
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
+	"elichika/internal/config"
 	"elichika/internal/server"
 	"elichika/internal/utils"
-
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
+func downloadFromProxy(path string, pack string) error {
+	resp, err := http.Get(fmt.Sprintf("%s/%s", config.DefaultProxyCdn, pack))
+	if err != nil {
+		return err
+	}
+
+	out, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type StaticFileRequest struct {
+	Start *int `form:"start"`
+	Size  *int `form:"size"`
+}
+
 func staticApi(ctx *gin.Context) {
-	file := ctx.Param("path")
-	path := "static" + file
+	path := filepath.Join(config.StaticDataPath, ctx.Param("path"))
 
 	info, err := os.Stat(path)
 	if err != nil {
-		ctx.Status(http.StatusNotFound)
-		return
+		path = filepath.Join(config.StaticDataPath, "packs", ctx.Param("path"))
 	}
 
-	startString, startStringExist := ctx.GetQuery("start")
-	sizeString, sizeStringExist := ctx.GetQuery("size")
-
-	if startStringExist && sizeStringExist {
-		start, err := strconv.Atoi(startString)
-		utils.CheckErr(err)
-		size, err := strconv.Atoi(sizeString)
-		utils.CheckErr(err)
-
-		sendRange(ctx, path, start, size)
-	} else {
-		sendFile(ctx, path, info.Size())
+	info, err = os.Stat(path)
+	if err != nil {
+		err = downloadFromProxy(path, ctx.Param("path"))
 	}
+
+	if err == nil {
+		req := StaticFileRequest{}
+		err := ctx.ShouldBindQuery(&req)
+		utils.CheckErr(err)
+
+		if req.Start != nil && req.Size != nil {
+			sendRange(ctx, path, *req.Start, *req.Size)
+		} else {
+			sendFile(ctx, path, info.Size())
+		}
+	}
+
+	ctx.Status(http.StatusNotFound)
 }
 
 func init() {

@@ -3,9 +3,8 @@
 package assetdata
 
 import (
-	"log"
-
 	"fmt"
+	"log"
 )
 
 type DownloadData struct {
