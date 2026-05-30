@@ -48,7 +48,7 @@ func main() {
 	router.SetFuncMap(funcs)
 	router.LoadHTMLFiles("./internal/webui/admin/logged_in_admin.html")
 
-	admin := router.Group("/internal/webui/admin", adminInitial)
+	admin := router.Group("/webui/admin", adminInitial)
 	admin.GET("/", Index)
 	admin.StaticFile("/login", "./internal/webui/admin/login.html")
 	admin.POST("/login", login)

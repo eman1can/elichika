@@ -87,7 +87,6 @@ func Router(r *gin.Engine) {
 		return template.HTML(s)
 	}
 	r.SetFuncMap(funcs)
-	r.LoadHTMLFiles(templates...)
 
 	for groupPath, groupInfo := range groups {
 		groupApi := r.Group(groupPath, groupInfo.InitialHandlers...)

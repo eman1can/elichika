@@ -4,7 +4,7 @@ import (
 	"elichika/internal/config"
 	"elichika/internal/server"
 	"elichika/internal/utils"
-	"elichika/internal/webui/webui_utils"
+	"elichika/internal/webui_old/webui_utils"
 
 	"crypto/subtle"
 	"encoding/base64"

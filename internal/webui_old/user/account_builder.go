@@ -273,7 +273,7 @@ func init() {
 		{
 			group := [4]int32{}
 			for _, member := range members {
-				group[member.MemberGroup] |= memberIdToBitIndex(member.Id)
+				group[member.MemberGroupId] |= memberIdToBitIndex(member.Id)
 			}
 			for i := int32(1); i <= 3; i++ {
 				memberOptions += fmt.Sprintf(memberPattern, group[i], gd.MemberGroup[i].GroupName)

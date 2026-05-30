@@ -37,7 +37,7 @@ var (
 func init() {
 	// texture.db is a database containing the textures of the game
 	// if you are interested in playing around with this, contact the relevant people in discord
-	engine, err := xorm.NewEngine("sqlite", "texture.db")
+	engine, err := xorm.NewEngine("sqlite", "data/texture.db")
 	utils.CheckErr(err)
 	languages := []string{"en", "ja", "ko", "zh", "th"}
 	for _, language := range languages {
@@ -59,7 +59,7 @@ func getBase64ImageData(data []byte) string {
 }
 
 func init() {
-	missingAssetFile := "webui/form/image_form/missing_asset.png"
+	missingAssetFile := "internal/webui/form/image_form/missing_asset.png"
 	stat, err := os.Stat(missingAssetFile)
 	utils.CheckErr(err)
 	data := make([]byte, stat.Size())
@@ -69,7 +69,7 @@ func init() {
 	MissingAssetImage = getBase64ImageData(data)
 }
 func init() {
-	unknownAssetFile := "webui/form/image_form/unknown_asset.png"
+	unknownAssetFile := "internal/webui/form/image_form/unknown_asset.png"
 	stat, err := os.Stat(unknownAssetFile)
 	utils.CheckErr(err)
 	data := make([]byte, stat.Size())
@@ -87,7 +87,7 @@ func (t Texture) LoadUnencrypted() (output []byte) {
 		// }
 	}()
 	data := assetdata.GetDownloadData(t.PackName)
-	actualFile := fmt.Sprintf("static/%s", data.File)
+	actualFile := fmt.Sprintf("static/packs/%s", data.File)
 	if _, err := os.Stat(actualFile); errors.Is(err, os.ErrNotExist) {
 		return
 	}
