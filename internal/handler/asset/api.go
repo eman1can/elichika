@@ -40,14 +40,14 @@ type StaticFileRequest struct {
 }
 
 func staticApi(ctx *gin.Context) {
-	path := filepath.Join(config.StaticDataPath, ctx.Param("path"))
+	path := filepath.Join(config.StaticDataPath, "packs", ctx.Param("path"))
 
 	info, err := os.Stat(path)
 	if err != nil {
-		path = filepath.Join(config.StaticDataPath, "packs", ctx.Param("path"))
+		path = filepath.Join(config.StaticDataPath, ctx.Param("path"))
+		info, err = os.Stat(path)
 	}
 
-	info, err = os.Stat(path)
 	if err != nil {
 		err = downloadFromProxy(path, ctx.Param("path"))
 	}

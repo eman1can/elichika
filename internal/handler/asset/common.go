@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 
 	"elichika/internal/utils"
@@ -15,6 +16,7 @@ func sendFile(ctx *gin.Context, path string, size int64) {
 	ctx.Header("Content-Length", fmt.Sprint(size))
 	ctx.Header("Content-Type", "application/octet-stream")
 
+	ctx.Status(http.StatusOK)
 	ctx.File(path)
 }
 

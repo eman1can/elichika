@@ -15,12 +15,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getHostUrl(ctx *gin.Context) string {
+	host := *config.Conf.ServerCdn
+
+	if host == "elichika" || host == "elichika_tls" {
+		actualHost := ctx.Request.Host
+
+		actualProto := "http"
+		if ctx.Request.TLS != nil {
+			actualProto = "https"
+		}
+
+		// if the connection is forwarded, we need to return the forwarded host instead
+		forwardedHost, hostExists := ctx.Request.Header["X-Forwarded-Host"]
+		forwardedProto, protoExists := ctx.Request.Header["X-Forwarded-Proto"]
+		if hostExists && len(forwardedHost) > 0 {
+			actualHost = forwardedHost[0]
+		}
+		if protoExists && len(forwardedProto) > 0 {
+			actualProto = forwardedProto[0]
+		}
+
+		return actualProto + "://" + actualHost
+	}
+
+	return host
+}
+
 func getPackUrl(ctx *gin.Context) {
 	req := request.GetPackUrlRequest{}
 	err := json.Unmarshal(*ctx.MustGet("reqBody").(*json.RawMessage), &req)
 	utils.CheckErr(err)
 
-	host := *config.Conf.ServerCdn
+	host := getHostUrl(ctx)
 
 	resp := response.GetPackUrlResponse{}
 	for _, pack := range req.PackNames.Slice {
