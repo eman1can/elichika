@@ -2,13 +2,14 @@ package user
 
 import (
 	"bytes"
+	"encoding/base64"
+	"log"
+	"strconv"
+
 	"elichika/internal/locale"
 	"elichika/internal/server"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-	"encoding/base64"
-	"log"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +33,6 @@ func userInitial(ctx *gin.Context) {
 	var session *userdata.Session
 	defer func() { session.Close() }()
 
-	log.Println("Accepting: ", ctx.Request.URL.String())
 	userId, exist := ctx.GetQuery("u")
 	if exist {
 		userId, err := strconv.Atoi(userId)

@@ -1,15 +1,15 @@
 package agnostic
 
 import (
+	"encoding/json"
+	"log"
+	"net/http"
+
 	"elichika/internal/enum"
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/utils"
-	"elichika/internal/webui/request"
 	"elichika/internal/webui/response"
-	"encoding/json"
-	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"xorm.io/xorm"
@@ -89,8 +89,13 @@ func loadItemFromUITextureTable(contentType int32, textureKey int32) {
 	}}
 }
 
+type WebUIItemListRequest struct {
+	ContentType int32  `form:"type"`
+	Language    string `form:"l"`
+}
+
 func listItems(ctx *gin.Context) {
-	req := request.WebUIItemListRequest{}
+	req := WebUIItemListRequest{}
 	err := ctx.ShouldBindQuery(&req)
 	utils.CheckErr(err)
 
@@ -212,7 +217,6 @@ func init() {
 			}
 			ItemsByItemId[contentType] = assets
 		case enum.ContentTypeCard:
-			// TODO: Layer Frames on Cards
 			assets := map[int32]Item{}
 			for cardMasterId, card := range gamedata.Instance.Card {
 				assets[cardMasterId] = Item{
@@ -223,7 +227,6 @@ func init() {
 			}
 			ItemsByItemId[contentType] = assets
 		case enum.ContentTypeEmblem:
-			// TODO: Layer Assets
 			assets := map[int32]Item{}
 			for emblemMasterId, emblem := range gamedata.Instance.Emblem {
 				assets[emblemMasterId] = Item{

@@ -25,17 +25,18 @@ func cardList(ctx *gin.Context) {
 	session := ctx.MustGet("session").(*userdata.Session)
 	dictionary := gamedata.DictionaryByLanguage(req.Language)
 
-	for id, card := range gamedata.Instance.Card {
-		userCard := user_card.GetUserCard(session, id)
+	for id, masterCard := range gamedata.Instance.Card {
+		card := user_card.GetUserCard(session, id)
 		entry := response.WebUICardEntry{
-			Id:         id,
-			Name:       dictionary.Resolve(card.Appearance.CardName),
-			MemberId:   *card.MemberMasterId,
-			MemberName: dictionary.Resolve(card.Member.Name),
-			GroupId:    card.Member.MemberGroupId,
-			GroupName:  dictionary.Resolve(card.Member.MemberGroup.GroupName),
-			Rarity:     card.Rarity.CardRarityType,
-			Grade:      userCard.Grade,
+			Id:                     id,
+			Name:                   dictionary.Resolve(masterCard.Appearance.CardName),
+			MemberId:               *masterCard.MemberMasterId,
+			MemberName:             dictionary.Resolve(masterCard.Member.Name),
+			GroupId:                masterCard.Member.MemberGroupId,
+			GroupName:              dictionary.Resolve(masterCard.Member.MemberGroup.GroupName),
+			Rarity:                 masterCard.Rarity.CardRarityType,
+			Grade:                  card.Grade,
+			IsAllTrainingActivated: card.IsAllTrainingActivated,
 		}
 		resp = append(resp, entry)
 	}

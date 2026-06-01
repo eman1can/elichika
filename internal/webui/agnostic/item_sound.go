@@ -7,18 +7,21 @@ import (
 
 	"elichika/internal/config"
 	"elichika/internal/gamedata"
-	"elichika/internal/utils"
-	"elichika/internal/webui/request"
-
 	"elichika/internal/server"
+	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
+type WebUIItemSoundRequest struct {
+	VoiceId  int32  `form:"id"`
+	Language string `form:"l"`
+}
+
 // getVoiceSound handles GET /webui/item/sound?id=N
 // It converts on first request then streams from cache.
 func getVoiceSound(ctx *gin.Context) {
-	req := request.WebUIItemSoundRequest{}
+	req := WebUIItemSoundRequest{}
 	if err := ctx.ShouldBindQuery(&req); err != nil || req.VoiceId == 0 {
 		ctx.Status(http.StatusBadRequest)
 		return

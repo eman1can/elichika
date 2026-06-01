@@ -2,17 +2,22 @@ package agnostic
 
 import (
 	"crypto/md5"
-	"elichika/internal/server"
-	"elichika/internal/utils"
-	"elichika/internal/webui/request"
 	"fmt"
 	"net/http"
+
+	"elichika/internal/server"
+	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
+type WebUIItemImageRequest struct {
+	ContentType int32 `form:"type"`
+	ContentId   int32 `form:"id"`
+}
+
 func getItemImage(ctx *gin.Context) {
-	req := request.WebUIItemImageRequest{}
+	req := WebUIItemImageRequest{}
 	err := ctx.ShouldBindQuery(&req)
 	utils.CheckErr(err)
 

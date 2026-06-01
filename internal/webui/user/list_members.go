@@ -8,16 +8,30 @@ import (
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_member"
+	"elichika/internal/subsystem/user_story_member"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
 	"elichika/internal/webui/request"
-	"elichika/internal/webui/response"
 
 	"github.com/gin-gonic/gin"
 )
 
+type WebUIMemberEntry struct {
+	Id                   int32  `json:"member_id"`
+	Name                 string `json:"member_name"`
+	GroupId              int32  `json:"group_id"`
+	GroupName            string `json:"group_name"`
+	RepresentativeCardId int32  `json:"card_id"`
+	LoveLevel            int32  `json:"love_level"`
+	IsLoveLevelMaxed     bool   `json:"is_love_level_maxed"`
+	IsLovePanelMaxed     bool   `json:"is_love_panel_maxed"`
+	IsAllStoryUnlocked   bool   `json:"is_all_story_unlocked"`
+}
+
+type WebUIMemberListResponse []WebUIMemberEntry
+
 func memberList(ctx *gin.Context) {
-	resp := response.WebUIMemberListResponse{}
+	resp := WebUIMemberListResponse{}
 	req := request.WebUILanguageRequest{}
 	err := ctx.ShouldBindQuery(&req)
 	utils.CheckErr(err)
@@ -27,12 +41,15 @@ func memberList(ctx *gin.Context) {
 
 	for id, member := range gamedata.Instance.Member {
 		userMember := user_member.GetMember(session, id)
-		entry := response.WebUIMemberEntry{
-			Id:        id,
-			Name:      dictionary.Resolve(member.Name),
-			GroupId:   member.MemberGroupId,
-			GroupName: dictionary.Resolve(member.MemberGroup.GroupName),
-			LoveLevel: userMember.LoveLevel,
+		entry := WebUIMemberEntry{
+			Id:                 id,
+			Name:               dictionary.Resolve(member.Name),
+			GroupId:            member.MemberGroupId,
+			GroupName:          dictionary.Resolve(member.MemberGroup.GroupName),
+			LoveLevel:          userMember.LoveLevel,
+			IsLoveLevelMaxed:   userMember.LoveLevel >= session.Gamedata.MemberLoveLevelMax || userMember.LovePoint >= userMember.LovePointLimit,
+			IsLovePanelMaxed:   userMember.IsCurrentLovePanelMaxed || userMember.IsAllLovePanelMaxed,
+			IsAllStoryUnlocked: user_story_member.AllStoryMembersUnlocked(session, id),
 		}
 		if cards, ok := gamedata.Instance.CardByMemberId[id]; ok && len(cards) > 0 {
 			entry.RepresentativeCardId = cards[0].Id
