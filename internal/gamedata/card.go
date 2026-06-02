@@ -2,6 +2,7 @@ package gamedata
 
 import (
 	"log"
+	"sort"
 
 	"elichika/internal/client"
 	"elichika/internal/utils"
@@ -60,7 +61,7 @@ func (card *Card) populate(gamedata *Gamedata) {
 	card.IdolAppearance = gamedata.CardIdolAppearance[card.Id]
 
 	{
-		card.CardGradeUpItem = make(map[int32](map[int32]client.Content))
+		card.CardGradeUpItem = make(map[int32]map[int32]client.Content)
 		gradeUps := []CardGradeUpItem{}
 		var err error
 		gamedata.MasterdataDb.Do(func(session *xorm.Session) {
@@ -91,6 +92,14 @@ func loadCard(gamedata *Gamedata) {
 
 	for _, card := range gamedata.Card {
 		card.populate(gamedata)
+	}
+
+	for memberId := range gamedata.Member {
+		list := gamedata.CardByMemberId[memberId]
+		sort.Slice(list, func(a, b int) bool {
+			return list[a].Id < list[b].Id
+		})
+		gamedata.CardByMemberId[memberId] = list
 	}
 }
 

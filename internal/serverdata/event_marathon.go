@@ -1,17 +1,16 @@
 package serverdata
 
 import (
+	// "encoding/json"
+	"fmt"
+	"log"
+	"os"
+
 	"elichika/internal/client"
 	"elichika/internal/config"
 	"elichika/internal/utils"
 
-	"log"
-
 	"elichika/internal/parser"
-
-	// "encoding/json"
-	"fmt"
-	"os"
 
 	// "path/filepath"
 	// "strings"
@@ -22,19 +21,16 @@ import (
 // this is the storage of event in the database, while gamedata.EventMarathon is the processing structure
 // TODO(tech): note that due to xorm limitation, TextureStruktur and SoundStruktur can't be used right now.
 type EventMarathon struct {
-	EventId                       int32             `xorm:"pk 'event_id'" json:"event_id"`
-	EventName                     map[string]string `xorm:"-" json:"event_name"`
-	BoosterItemId                 int32             `xorm:"'booster_item_id'" json:"booster_item_id"`
-	TitleImagePath                *string           `xorm:"'title_image_path'" json:"title_image_path"`
-	BackgroundImagePath           *string           `xorm:"'background_image_path'" json:"background_image_path"`
-	BoardBaseImagePath            *string           `xorm:"'board_base_image_path'" json:"board_base_image_path"`
-	BoardDecoImagePath            *string           `xorm:"'board_deco_image_path'" json:"board_deco_image_path"`
-	BgmAssetPath                  *string           `xorm:"'bgm_asset_path'" json:"bgm_asset_path"`
-	GachaMasterId                 int32             `xorm:"'gacha_master_id'" json:"gacha_master_id"`
-	RuleDescriptionPagesAssetPath []string          `xorm:"-" json:"rule_description_pages_asset_path"`
+	EventId                       int32    `xorm:"pk 'event_id'" json:"event_id"`
+	TitleImagePath                *string  `xorm:"'title_image_path'" json:"title_image_path"`
+	BackgroundImagePath           *string  `xorm:"'background_image_path'" json:"background_image_path"`
+	BoardBaseImagePath            *string  `xorm:"'board_base_image_path'" json:"board_base_image_path"`
+	BoardDecoImagePath            *string  `xorm:"'board_deco_image_path'" json:"board_deco_image_path"`
+	BgmAssetPath                  *string  `xorm:"'bgm_asset_path'" json:"bgm_asset_path"`
+	RuleDescriptionPagesAssetPath []string `xorm:"-" json:"rule_description_pages_asset_path"`
 }
 
-type EventMarathonBoardThing struct {
+type EventMarathonBoardItem struct {
 	EventId                        int32  `xorm:"'event_id'"`
 	EventMarathonBoardPositionType int32  `xorm:"'event_marathon_board_position_type'"`
 	Position                       int32  `xorm:"'position'"` // physical position on the board
@@ -90,7 +86,7 @@ type EventMarathonBonusPopupOrderCardMater struct {
 
 func init() {
 	addTable("s_event_marathon", EventMarathon{}, initEventMarathon)
-	addTable("s_event_marathon_board_thing", EventMarathonBoardThing{}, nil)
+	addTable("s_event_marathon_board_thing", EventMarathonBoardItem{}, nil)
 	addTable("s_event_marathon_total_topic_reward", EventTopicReward{}, nil)
 	addTable("s_event_marathon_ranking_topic_reward", EventTopicReward{}, nil)
 	addTable("s_event_marathon_point_reward", EventMarathonPointReward{}, nil)
@@ -128,7 +124,7 @@ func initEventMarathon(session *xorm.Session) {
 			utils.CheckErr(err)
 		}
 
-		boardThings := []EventMarathonBoardThing{}
+		boardThings := []EventMarathonBoardItem{}
 		parser.ParseCsv(path+"board.csv", &boardThings, &parser.CsvContext{
 			StartField: 1,
 			HasHeader:  true,

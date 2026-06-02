@@ -11,5 +11,5 @@ func TimingAdjusterEnd(session *userdata.Session) {
 	if session.UserStatus.TutorialPhase != enum.TutorialPhaseTimingAdjuster {
 		log.Panic("Unexpected tutorial phase")
 	}
-	session.UserStatus.TutorialPhase = enum.TutorialPhaseFavoriateMember
+	session.UserStatus.TutorialPhase = enum.TutorialPhaseFavoriteMember
 }

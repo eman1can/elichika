@@ -8,22 +8,22 @@ import (
 )
 
 func FetchEventMining(session *userdata.Session, eventId int32) (*response.FetchEventMiningResponse, *response.RecoverableExceptionResponse) {
-	event := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-	if (event == nil) || (event.EventId != eventId) {
+	active := session.Gamedata.EventActive
+	if (active == nil) || (active.EventId != eventId) {
 		return nil, &response.RecoverableExceptionResponse{
 			RecoverableExceptionType: enum.RecoverableExceptionTypeEventMiningOutOfDate,
 		}
 	}
 
-	eventMining := session.Gamedata.EventActive.GetEventMining()
+	event := session.Gamedata.EventMining[active.EventId]
 	resp := &response.FetchEventMiningResponse{
-		EventMiningTopStatus: eventMining.TopStatus,
+		EventMiningTopStatus: event.TopStatus,
 		UserModelDiff:        &session.UserModel,
 	}
-	resp.EventMiningTopStatus.StartAt = event.StartAt
-	resp.EventMiningTopStatus.EndAt = event.EndAt
-	resp.EventMiningTopStatus.ResultAt = event.ResultAt
-	resp.EventMiningTopStatus.ExpiredAt = event.ExpiredAt
+	resp.EventMiningTopStatus.StartAt = active.StartAt
+	resp.EventMiningTopStatus.EndAt = active.EndAt
+	resp.EventMiningTopStatus.ResultAt = active.ResultAt
+	resp.EventMiningTopStatus.ExpiredAt = active.ExpiredAt
 	userEventStatus := GetUserEventStatus(session, eventId)
 	if userEventStatus.IsNew {
 		resp.EventMiningTopStatus.IsAddNewPanel = true
@@ -39,13 +39,13 @@ func FetchEventMining(session *userdata.Session, eventId int32) (*response.Fetch
 	// - the animation is unlocked after all story are cleared and is always reserved for the event character
 	// - one animation has highest priority, another animation has the lowest priority (after the end)
 	// - we have to dynamically set these values pretty much
-	if eventMining.HasAnimation() {
-		gachaCharacterAnimation := eventMining.RandomGachaCharacterAnimation()
+	if event.HasAnimation() {
+		gachaCharacterAnimation := event.RandomGachaCharacterAnimation()
 		if userEventMining.ReadStoryNumber < 7 {
 			gachaCharacterAnimation.Priority = 160
 			resp.EventMiningTopStatus.EventMiningTopAnimationCellMasterRows.Append(gachaCharacterAnimation)
 		} else {
-			eventCharacterAnimation := eventMining.EventCharacterAnimation()
+			eventCharacterAnimation := event.EventCharacterAnimation()
 			gachaCharacterAnimation.Priority = 260
 			eventCharacterAnimation.Priority = 210
 			resp.EventMiningTopStatus.EventMiningTopAnimationCellMasterRows.Append(eventCharacterAnimation)

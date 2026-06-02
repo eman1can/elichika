@@ -30,12 +30,12 @@ func ExecuteTrade(session *userdata.Session, productId, tradeCount int32) bool {
 		sourceContentId = trade.SourceContentId
 	} else {
 		// special trade, this should mean event trade
-		event := session.Gamedata.EventActive.GetEventValue()
-		if event == nil {
+		active := session.Gamedata.EventActive
+		if active == nil {
 			log.Panic("Invalid trade: trade doesn't exist and there's no event")
 		}
-		switch event.EventType {
-		case enum.EventType1Mining:
+		switch active.EventType {
+		case enum.EventTypeMining:
 			trade := session.Gamedata.EventMining[product.TradeId].Trade
 			sourceContentType = trade.SourceContentType
 			sourceContentId = trade.SourceContentId

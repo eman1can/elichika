@@ -2,14 +2,13 @@ package userdata
 
 import (
 	"log"
+	"time"
 
 	"elichika/internal/client"
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/userdata/database"
 	"elichika/internal/utils"
-
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"xorm.io/xorm"
@@ -33,10 +32,12 @@ type Session struct {
 	UserId     int32
 	Gamedata   *gamedata.Gamedata
 	UserStatus *client.UserStatus // link to UserModel.UserStatus
-	// TODO(extra): change the map to index map?
-	MemberLovePanelDiffs map[int32]client.MemberLovePanel
-	MemberLovePanels     []client.MemberLovePanel
-	UserContentDiffs     map[int32](map[int32]client.Content) // content_type then content_id
+
+	MemberLovePanelList  []client.MemberLovePanelList // A list of all member love panels
+	MemberLovePanels     map[int32]map[int32]client.MemberLovePanel
+	MemberLovePanelDiffs map[int32]map[int32]client.MemberLovePanel
+
+	UserContentDiffs map[int32]map[int32]client.Content // content_type then content_id
 
 	UnreceivedContent []client.Content
 
@@ -167,7 +168,12 @@ func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Sessio
 	s.fetchAuthenticationData()
 	s.UserStatus = &s.UserModel.UserStatus
 	s.UserContentDiffs = make(map[int32]map[int32]client.Content)
-	s.MemberLovePanelDiffs = make(map[int32]client.MemberLovePanel)
+	s.MemberLovePanels = make(map[int32]map[int32]client.MemberLovePanel)
+	s.MemberLovePanelDiffs = make(map[int32]map[int32]client.MemberLovePanel)
+	for memberId := range s.Gamedata.Member {
+		s.MemberLovePanels[memberId] = make(map[int32]client.MemberLovePanel)
+		s.MemberLovePanelDiffs[memberId] = make(map[int32]client.MemberLovePanel)
+	}
 	return &s
 }
 
@@ -181,7 +187,12 @@ func GetBasicSession(userdata_db *xorm.Session, timePoint time.Time, userId int3
 	s.Gamedata = gamedata.Instance
 	s.IsBasic = true
 	s.UserStatus = nil
-	s.UserContentDiffs = make(map[int32](map[int32]client.Content))
-	s.MemberLovePanelDiffs = make(map[int32]client.MemberLovePanel)
+	s.UserContentDiffs = make(map[int32]map[int32]client.Content)
+	s.MemberLovePanels = make(map[int32]map[int32]client.MemberLovePanel)
+	s.MemberLovePanelDiffs = make(map[int32]map[int32]client.MemberLovePanel)
+	for memberId := range s.Gamedata.Member {
+		s.MemberLovePanels[memberId] = make(map[int32]client.MemberLovePanel)
+		s.MemberLovePanelDiffs[memberId] = make(map[int32]client.MemberLovePanel)
+	}
 	return &s
 }

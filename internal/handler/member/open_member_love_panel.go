@@ -24,8 +24,8 @@ func openMemberLovePanel(ctx *gin.Context) {
 	resp := response.OpenMemberLovePanelResponse{
 		UserModel: &session.UserModel,
 	}
-	resp.MemberLovePanels.Append(user_member.UnlockMemberLovePanel(
-		session, req.MemberId, req.MemberLovePanelId, req.MemberLovePanelCellIds.Slice))
+
+	resp.MemberLovePanels.Append(user_member.UnlockMemberLovePanelCells(session, req.MemberId, req.MemberLovePanelId, req.MemberLovePanelCellIds.Slice))
 
 	common.JsonResponse(ctx, &resp)
 }

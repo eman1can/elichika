@@ -51,6 +51,6 @@ func GetOtherUserCard(session *userdata.Session, otherUserId, cardMasterId int32
 		otherUserCard.AdditionalPassiveSkillIds.Append(userCard.AdditionalPassiveSkill4Id)
 	}
 	memberId := session.Gamedata.Card[cardMasterId].Member.Id
-	otherUserCard.MemberLovePanels.Append(user_member.GetOtherUserMemberLovePanel(session, otherUserId, memberId))
+	otherUserCard.MemberLovePanels.Append(user_member.GetOtherUserLovePanelMemberList(session, otherUserId, memberId))
 	return otherUserCard
 }

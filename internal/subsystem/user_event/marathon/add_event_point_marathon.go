@@ -11,7 +11,7 @@ import (
 
 // result is already partially filled
 func AddEventPoint(session *userdata.Session, gainedPoint int32, result *client.LiveResultActiveEvent) {
-	event := session.Gamedata.EventActive.GetEventMarathon()
+	event := session.Gamedata.EventMarathon[session.Gamedata.EventActive.EventId]
 	userEventMarathon := GetUserEventMarathon(session)
 
 	ranking := GetRanking(session.Db, event.EventId)

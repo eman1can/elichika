@@ -15,7 +15,7 @@ func loadMemberLoveLevel(gamedata *Gamedata) {
 		err = session.Table("m_member_love_level").OrderBy("love_level").Cols("love_point").Find(&gamedata.MemberLoveLevelLovePoint)
 	})
 	utils.CheckErr(err)
-	gamedata.MemberLoveLevelCount = int32(len(gamedata.MemberLoveLevelLovePoint))
+	gamedata.MemberLoveLevelMax = int32(len(gamedata.MemberLoveLevelLovePoint))
 	gamedata.MemberLoveLevelLovePoint = append([]int32{0}, gamedata.MemberLoveLevelLovePoint...)
 }
 
@@ -25,7 +25,7 @@ func init() {
 
 func (gamedata *Gamedata) LoveLevelFromLovePoint(lovePoint int32) int32 {
 	low := int32(1)
-	high := gamedata.MemberLoveLevelCount
+	high := gamedata.MemberLoveLevelMax
 	mid := int32(0)
 	res := int32(0)
 	for low <= high {

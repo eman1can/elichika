@@ -28,17 +28,17 @@ func recoverLp(ctx *gin.Context) {
 	// and SnsCoinForLpRecover is in m_constant
 	switch req.ContentId {
 	case item.ShowCandy50.ContentId:
-		user_status.AddUserLp(session, req.Count.Value*50)
+		user_status.AddUserLivePoints(session, req.Count.Value*50)
 		if config.Conf.ResourceConfig().ConsumeMiscItems {
 			user_content.RemoveContent(session, item.ShowCandy50.Amount(req.Count.Value))
 		}
 	case item.ShowCandy100.ContentId:
-		user_status.AddUserLp(session, req.Count.Value*100)
+		user_status.AddUserLivePoints(session, req.Count.Value*100)
 		if config.Conf.ResourceConfig().ConsumeMiscItems {
 			user_content.RemoveContent(session, item.ShowCandy100.Amount(req.Count.Value))
 		}
 	case item.StarGem.ContentId:
-		user_status.AddUserLp(session, req.Count.Value*100)
+		user_status.AddUserLivePoints(session, req.Count.Value*100)
 		if config.Conf.ResourceConfig().ConsumeMiscItems {
 			user_content.RemoveContent(session, item.StarGem.Amount(req.Count.Value*10))
 		}

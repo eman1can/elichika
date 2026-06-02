@@ -5,37 +5,20 @@ import (
 	"elichika/internal/userdata"
 )
 
-// lp can be negative
-func AddUserLp(session *userdata.Session, lp int32) {
-	// live_point_full_at and live_point_broken work like this:
-	// - live_point_full_at specify when the live_point will recover to full
-	// - if live_point_full_at is later than the current time, then live_point_broken is set to whatever it should be when it's full
-	// - if life_point_full_at is earlier or equal to the current time, then live_point_broken would be the amount that of LP the user have
-
+// AddUserLivePoints
+// If user has full or over full live points, then LivePointBroken holds the user's LP amount
+// Otherwise, LivePointBroken holds the max amount  of LP the user can hold
+func AddUserLivePoints(session *userdata.Session, lp int32) {
 	maxLp := session.Gamedata.UserRank[session.UserStatus.Rank].MaxLp
-	currentLp := session.UserStatus.LivePointBroken
-	// how many second it take to recover 1 lp
-	// is 240 with official servers but can be changed
-	livePointRecoverlyAt := session.Gamedata.ConstantInt[enum.ConstantIntLivePointRecoverlyAt]
-	if session.Time.Unix() < session.UserStatus.LivePointFullAt {
-		// LP isn't filled
-		timeLeft := int32(session.UserStatus.LivePointFullAt - session.Time.Unix())
-		toRecover := timeLeft / livePointRecoverlyAt
-		if timeLeft%livePointRecoverlyAt != 0 {
-			toRecover++
-		}
-		currentLp = session.UserStatus.LivePointBroken - toRecover
-	}
-	currentLp += lp
+	currentLp := getUserLivePoints(session)
+
+	currentLp = min(10000, currentLp+lp)
 	if currentLp >= maxLp {
 		session.UserStatus.LivePointBroken = currentLp
 		session.UserStatus.LivePointFullAt = session.Time.Unix()
 	} else {
+		livePointsRecoverAt := session.Gamedata.ConstantInt[enum.ConstantIntLivePointRecoverAt]
 		session.UserStatus.LivePointBroken = maxLp
-		if session.UserStatus.LivePointFullAt < session.Time.Unix() {
-			session.UserStatus.LivePointFullAt = session.Time.Unix() + int64((maxLp-currentLp)*livePointRecoverlyAt)
-		} else {
-			session.UserStatus.LivePointFullAt -= int64(lp * livePointRecoverlyAt)
-		}
+		session.UserStatus.LivePointFullAt = session.Time.Unix() + int64((maxLp-currentLp)*livePointsRecoverAt)
 	}
 }

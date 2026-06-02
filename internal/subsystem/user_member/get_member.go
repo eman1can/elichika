@@ -21,5 +21,9 @@ func GetMember(session *userdata.Session, memberMasterId int32) client.UserMembe
 		// always inserted at login if not exist
 		log.Panic("member not found")
 	}
+
+	panel := GetCurrentMemberLovePanel(session, memberMasterId, member.LoveLevel)
+	member.IsCurrentLovePanelMaxed = panel.AllUnlocked()
+	member.IsAllLovePanelMaxed = panel.AllUnlocked() && panel.IsLastPanel
 	return member
 }

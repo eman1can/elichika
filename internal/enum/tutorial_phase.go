@@ -6,7 +6,7 @@ const (
 	TutorialPhaseStory2               int32 = 0x00000003
 	TutorialPhaseStory3               int32 = 0x00000004
 	TutorialPhaseStory4               int32 = 0x00000005
-	TutorialPhaseFavoriateMember      int32 = 0x00000006
+	TutorialPhaseFavoriteMember       int32 = 0x00000006
 	TutorialPhaseLovePointUp          int32 = 0x0000000b
 	TutorialPhaseTrainingLevelUp      int32 = 0x0000000c
 	TutorialPhaseTrainingActivateCell int32 = 0x0000000d

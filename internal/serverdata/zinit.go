@@ -2,13 +2,12 @@ package serverdata
 
 import (
 	"log"
+	"os"
 
 	"elichika/internal/config"
 	"elichika/internal/db"
 	"elichika/internal/serverstate"
 	"elichika/internal/utils"
-
-	"os"
 
 	"xorm.io/xorm"
 )
@@ -46,45 +45,43 @@ func migrateToServerstate(engine *xorm.Engine) {
 	}
 	log.Println("Migrating data from serverdata into serverstate")
 	// only when all 3 tables exist will we perform migration
-	ea := []serverstate.EventActive{}
-	es := []serverstate.EventScheduled{}
-	st := []serverstate.ScheduledTask{}
-	err = engine.Table("s_event_active").Find(&ea)
-	utils.CheckErr(err)
-	err = engine.Table("s_event_scheduled").Find(&es)
-	utils.CheckErr(err)
+	// var es []serverstate.EventSchedule
+	// err = engine.Table("s_event_schedule").Find(&es)
+	// utils.CheckErr(err)
+
+	var st []serverstate.ScheduledTask
 	err = engine.Table("s_scheduled_task").Find(&st)
 	utils.CheckErr(err)
-	if len(ea)+len(es)+len(st) > 0 {
-		// only when there's an active event will we migrate
-		serverstate.Database.Do(func(session *xorm.Session) {
-			// drop all scheduled tasks related to events
-			good := true
-			_, err := session.Table("s_scheduled_task").Where("task_name LIKE \"event_%%\"").Delete()
-			utils.CheckErr(err)
-			good = good && (err == nil)
-			// then insert all the items
-			if len(ea) > 0 {
-				count, err := session.Table("s_event_active").Insert(ea)
-				good = good && (err == nil) && (count == int64(len(ea)))
-			}
-			if len(es) > 0 {
-				count, err := session.Table("s_event_scheduled").Insert(es)
-				good = good && (err == nil) && (count == int64(len(es)))
-			}
-			if len(st) > 0 {
-				count, err := session.Table("s_scheduled_task").Insert(st)
-				good = good && (err == nil) && (count == int64(len(st)))
-			}
-			if good {
-				session.Commit()
-				log.Println("Migrated")
-			} else {
-				log.Println("Error migrating event data, dropping it")
-				session.Rollback()
-			}
-		})
-	}
+	// if len(ea)+len(es)+len(st) > 0 {
+	// 	// only when there's an active event will we migrate
+	// 	serverstate.Database.Do(func(session *xorm.Session) {
+	// 		// drop all scheduled tasks related to events
+	// 		good := true
+	// 		_, err := session.Table("s_scheduled_task").Where("task_name LIKE \"event_%%\"").Delete()
+	// 		utils.CheckErr(err)
+	// 		good = good && (err == nil)
+	// 		// then insert all the items
+	// 		if len(ea) > 0 {
+	// 			count, err := session.Table("s_event_active").Insert(ea)
+	// 			good = good && (err == nil) && (count == int64(len(ea)))
+	// 		}
+	// 		if len(es) > 0 {
+	// 			count, err := session.Table("s_event_scheduled").Insert(es)
+	// 			good = good && (err == nil) && (count == int64(len(es)))
+	// 		}
+	// 		if len(st) > 0 {
+	// 			count, err := session.Table("s_scheduled_task").Insert(st)
+	// 			good = good && (err == nil) && (count == int64(len(st)))
+	// 		}
+	// 		if good {
+	// 			session.Commit()
+	// 			log.Println("Migrated")
+	// 		} else {
+	// 			log.Println("Error migrating event data, dropping it")
+	// 			session.Rollback()
+	// 		}
+	// 	})
+	// }
 	// drop all these tables no matter of it's good or not
 	err = engine.DropTables("s_event_active")
 	utils.CheckErr(err)

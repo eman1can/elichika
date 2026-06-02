@@ -10,8 +10,10 @@ import (
 
 type StoryEventHistory struct {
 	// from m_story_event_history_detail
-	StoryEventId int32 `xorm:"pk 'story_event_id'"`
-	// ...
+	StoryEventId        int32  `xorm:"pk 'story_event_id'"`
+	EventMasterId       int32  `xorm:"event_master_id"`
+	BannerThumbnailPath string `xorm:"banner_thumbnail_path"`
+	DetailThumbnailPath string `xorm:"detail_thumbnail_path"`
 }
 
 func loadStoryEventHistory(gamedata *Gamedata) {

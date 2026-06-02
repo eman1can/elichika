@@ -23,7 +23,7 @@ func fetchCommunicationMemberDetail(ctx *gin.Context) {
 	session := ctx.MustGet("session").(*userdata.Session)
 
 	resp := response.FetchCommunicationMemberDetailResponse{}
-	resp.MemberLovePanels.Append(user_member.GetMemberLovePanel(session, req.MemberId))
+	resp.MemberLovePanels.Append(user_member.GetLovePanelMemberList(session, req.MemberId))
 
 	resp.WeekdayState = time.GetWeekdayState(session)
 	common.JsonResponse(ctx, resp)

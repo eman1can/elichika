@@ -5,7 +5,7 @@ import (
 	"elichika/internal/userdata"
 )
 
-func hasStoryMainCell(session *userdata.Session, storyMainMasterId int32) bool {
+func IsStoryFinished(session *userdata.Session, storyMainMasterId int32) bool {
 	userStoryMain := client.UserStoryMain{
 		StoryMainMasterId: storyMainMasterId,
 	}

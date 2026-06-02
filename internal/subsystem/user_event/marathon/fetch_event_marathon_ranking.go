@@ -12,7 +12,7 @@ import (
 )
 
 func FetchEventMarathonRanking(session *userdata.Session, eventId int32) (*response.FetchEventMarathonRankingResponse, *response.RecoverableExceptionResponse) {
-	event := session.Gamedata.EventActive.GetActiveEvent(session.Time)
+	event := session.Gamedata.EventActive
 	if (event == nil) || (event.EventId != eventId) {
 		return nil, &response.RecoverableExceptionResponse{
 			RecoverableExceptionType: enum.RecoverableExceptionTypeEventMarathonOutOfDate,

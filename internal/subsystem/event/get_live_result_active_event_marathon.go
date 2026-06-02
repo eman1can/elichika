@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"log"
 
 	"elichika/internal/client"
@@ -9,8 +10,6 @@ import (
 	"elichika/internal/generic"
 	"elichika/internal/subsystem/user_event/marathon"
 	"elichika/internal/userdata"
-
-	"fmt"
 )
 
 func GetLiveResultActiveEventMarathon(session *userdata.Session, liveDifficulty *gamedata.LiveDifficulty, score, deckBonusFactor, loopCount int32, useBoosterItem bool) generic.Nullable[client.LiveResultActiveEvent] {
@@ -65,11 +64,11 @@ func GetLiveResultActiveEventMarathon(session *userdata.Session, liveDifficulty 
 	deckBonusPointTotal := (deckBonusFactor * epPerClear / 10000) * loopCount
 
 	// this should be fine because this code will only run when event isn't nil
-	event := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-	marathonEvent := session.Gamedata.EventMarathon[event.EventId]
+	active := session.Gamedata.EventActive
+	marathonEvent := session.Gamedata.EventMarathon[active.EventId]
 	result := client.LiveResultActiveEvent{
-		EventId:            event.EventId,
-		EventType:          enum.EventType1Marathon,
+		EventId:            active.EventId,
+		EventType:          enum.EventTypeMarathon,
 		EventLogoAssetPath: marathonEvent.TopStatus.TitleImagePath,
 		ReceivePoint: client.LiveResultActiveEventPoint{ // raw point rewards, plus the ticket(?)
 			Point:      basePointTotal,

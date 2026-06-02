@@ -20,7 +20,7 @@ func AddUserExp(session *userdata.Session, exp int32) {
 		if session.UserStatus.Exp >= nextRank.Exp {
 			isRankedUp = true
 			session.UserStatus.Rank++
-			AddUserLp(session, nextRank.MaxLp)
+			AddUserLivePoints(session, nextRank.MaxLp)
 			AddUserAccessoryLimit(session, nextRank.AdditionalAccessoryLimit)
 		} else {
 			break

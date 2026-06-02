@@ -6,8 +6,8 @@ func IncreaseMemberLoveLevelLimit(session *userdata.Session, memberMasterId, inc
 	member := GetMember(session, memberMasterId)
 	beforeLoveLevelLimit := session.Gamedata.LoveLevelFromLovePoint(member.LovePointLimit)
 	afterLoveLevelLimit := beforeLoveLevelLimit + increasedLoveLevel
-	if afterLoveLevelLimit > session.Gamedata.MemberLoveLevelCount {
-		afterLoveLevelLimit = session.Gamedata.MemberLoveLevelCount
+	if afterLoveLevelLimit > session.Gamedata.MemberLoveLevelMax {
+		afterLoveLevelLimit = session.Gamedata.MemberLoveLevelMax
 	}
 	member.LovePointLimit = session.Gamedata.MemberLoveLevelLovePoint[afterLoveLevelLimit]
 	UpdateMember(session, member)

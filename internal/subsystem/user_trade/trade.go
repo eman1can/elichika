@@ -57,23 +57,22 @@ func GetTrades(session *userdata.Session, tradeType int32) generic.Array[client.
 		}
 		trades.Append(trade)
 	}
-	event := session.Gamedata.EventActive.GetEventValue()
-	if (event != nil) && (event.EventType == enum.EventType1Mining) {
-		// add mining event
-		tradePtr := session.Gamedata.EventActive.GetEventMining().Trade
-		trade := *tradePtr // client.Trade
-		for i, product := range trade.Products.Slice {
+	active := session.Gamedata.EventActive
+	if (active != nil) && (active.EventType == enum.EventTypeMining) {
+		event := session.Gamedata.EventMining[active.EventId]
+
+		for i, product := range event.Trade.Products.Slice {
 			product.TradedCount = mining.GetUserEventMiningTradeProduct(session, product.ProductId)
-			trade.Products.Slice[i] = product
+			event.Trade.Products.Slice[i] = product
 		}
-		trade.StartAt = event.StartAt
+		event.Trade.StartAt = active.StartAt
 		// TODO(extra): in original server, the trade would stay around for 6 days after the event has ended
 		// here we couple them and make the trade go away when the event go away:
 		// - with a more dynamic trade system, we can decouple the event itself from the event trade, and just spawn in trade whenever necessary
 		// - but that require big modification to the trade system, so it's not worth it for now
 		// - as a tradeoff, existing currency are not removed whenever an event come back
-		trade.EndAt = generic.NewNullable(event.EndAt)
-		trades.Append(trade)
+		event.Trade.EndAt = generic.NewNullable(active.EndAt)
+		trades.Append(*event.Trade)
 	}
 	return trades
 }

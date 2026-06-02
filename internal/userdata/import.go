@@ -1,16 +1,17 @@
 package userdata
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"reflect"
+	"slices"
 
+	"elichika/internal/client"
 	"elichika/internal/client/response"
 	"elichika/internal/config"
 	"elichika/internal/userdata/database"
 	"elichika/internal/utils"
-
-	"fmt"
-	"os"
-	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"xorm.io/xorm"
@@ -23,7 +24,28 @@ func (session *Session) ImportLoginData(ctx *gin.Context, loginData *response.Lo
 	}
 	session.UserModel = *loginData.UserModel
 	session.UserStatus = &session.UserModel.UserStatus
-	session.MemberLovePanels = loginData.MemberLovePanels.Slice
+
+	for _, memberLovePanels := range loginData.MemberLovePanels.Slice {
+		memberId := memberLovePanels.MemberId
+		for _, masterPanel := range session.Gamedata.MemberLovePanel {
+			if *masterPanel.MemberMasterId != memberId {
+				continue
+			}
+
+			panel := client.MemberLovePanel{
+				MemberId:    memberId,
+				PanelId:     masterPanel.Id,
+				Status:      0,
+				IsLastPanel: masterPanel.NextPanel == nil,
+			}
+			for ix, cellId := range masterPanel.CellIds {
+				if slices.Contains(memberLovePanels.MemberLovePanelCellIds.Slice, cellId) {
+					panel.Status |= 1 << ix
+				}
+			}
+			session.MemberLovePanelDiffs[memberId][masterPanel.Id] = panel
+		}
+	}
 }
 
 func (session *Session) ImportDatabaseData(ctx *gin.Context, bytes []byte) (*string, *string) {

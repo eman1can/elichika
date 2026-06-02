@@ -135,7 +135,7 @@ const (
 	ConstantIntLivegameSquadEffectActiveSkillRateLowerLimit          = 0x00000084
 	ConstantIntLoginBonusComebackSecs                                = 0x00000085
 	ConstantIntFopenRetryDelay                                       = 0x00000086
-	ConstantIntLivePointRecoverlyAt                                  = 0x00000087
+	ConstantIntLivePointRecoverAt                                    = 0x00000087 // The number of seconds to recover 1 LP point. Default 240 seconds.
 	ConstantIntLivegamePassiveSkillRateUpperLimit                    = 0x00000088
 	ConstantIntMirrativBroadcastNoticeId                             = 0x00000089
 	ConstantIntEventCoopStartGameGraceSecs                           = 0x0000008a

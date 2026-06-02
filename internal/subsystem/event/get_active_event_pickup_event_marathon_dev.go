@@ -19,7 +19,7 @@ func GetActiveEventPickup(session *userdata.Session) generic.Nullable[client.Boo
 			StartAt:   event_marathon_dev.TopStatus.StartAt,
 			ClosedAt:  event_marathon_dev.TopStatus.ExpiredAt,
 			EndAt:     event_marathon_dev.TopStatus.EndAt,
-			EventType: enum.EventType1Marathon,
+			EventType: enum.EventTypeMarathon,
 		})
 		if event_marathon_dev.BoosterItemId != 0 {
 			result.Value.BoosterItemId = generic.NewNullable(event_marathon_dev.BoosterItemId)
@@ -32,7 +32,7 @@ func GetActiveEventPickup(session *userdata.Session) generic.Nullable[client.Boo
 			StartAt:   event_marathon_dev.TopStatus.StartAt,
 			ClosedAt:  event_marathon_dev.TopStatus.ExpiredAt,
 			EndAt:     event_marathon_dev.TopStatus.EndAt,
-			EventType: enum.EventType1Mining,
+			EventType: enum.EventTypeMining,
 		})
 		return result
 	}
@@ -48,7 +48,7 @@ func GetActiveEventPickup(session *userdata.Session) generic.Nullable[client.Boo
 		EventType: event.EventType,
 	})
 	if session.Time.Unix() < event.ExpiredAt {
-		if event.EventType == enum.EventType1Marathon {
+		if event.EventType == enum.EventTypeMarathon {
 			result.Value.BoosterItemId = generic.NewNullable(session.Gamedata.EventActive.GetEventMarathon().BoosterItemId)
 		}
 	}

@@ -1,7 +1,10 @@
 package mining
 
 import (
+	"fmt"
 	"log"
+	"strconv"
+	"time"
 
 	"elichika/internal/client"
 	"elichika/internal/enum"
@@ -12,32 +15,28 @@ import (
 	"elichika/internal/subsystem/user_present"
 	"elichika/internal/userdata"
 
-	"fmt"
-	"strconv"
-	"time"
-
 	"xorm.io/xorm"
 )
 
 // finish the event and pay out the reward for everyone who participated
 func resultEventScheduledHandler(userdata_db *xorm.Session, task server.ScheduledTask) {
-	activeEvent := gamedata.Instance.EventActive.GetActiveEventUnix(task.Time)
+	active := gamedata.Instance.EventActive
 	eventIdInt, _ := strconv.Atoi(task.Params)
-	eventId := int32(eventIdInt)
-	if (activeEvent == nil) || (activeEvent.EventId != eventId) ||
-		(activeEvent.EventType != enum.EventType1Mining) || (activeEvent.ResultAt != task.Time) {
+	if (active == nil) || (active.EventId != int32(eventIdInt)) ||
+		(active.EventType != enum.EventTypeMining) || (active.ResultAt != task.Time) {
 		log.Println("Warning: Failed to result event: ", task)
 		return
 	}
 	user_info_trigger.CleanUpTriggerBasicByType(userdata_db, enum.InfoTriggerTypeEventMiningShowResult)
-	eventMining := gamedata.Instance.EventActive.GetEventMining()
-	eventName := fmt.Sprintf("m.event_mining_title_%d", eventId)
+	eventMining := gamedata.Instance.EventMining[active.EventId]
+	eventName := fmt.Sprintf("m.event_mining_title_%d", active.EventId)
+
 	timePoint := time.Unix(task.Time, 0)
 	// point ranking is awarded first, then voltage ranking
 	// we will iterate over the point ranking, and get the voltage ranking that way
 	pointRank := int32(0)
-	pointRankingResults := GetPointRanking(userdata_db, eventId).GetRange(1, 1<<31-1)
-	voltageRanking := GetVoltageRanking(userdata_db, eventId)
+	pointRankingResults := GetPointRanking(userdata_db, active.EventId).GetRange(1, 1<<31-1)
+	voltageRanking := GetVoltageRanking(userdata_db, active.EventId)
 	for i, result := range pointRankingResults {
 		if (i == 0) || (result.Score != pointRankingResults[i-1].Score) {
 			pointRank = int32(i + 1)
@@ -48,10 +47,10 @@ func resultEventScheduledHandler(userdata_db *xorm.Session, task server.Schedule
 			user_present.AddPresent(session, client.PresentItem{
 				Content:          *content,
 				PresentRouteType: enum.PresentRouteTypeEventMiningPointRankingReward,
-				PresentRouteId:   generic.NewNullable(eventMining.EventId),
+				PresentRouteId:   generic.NewNullable(active.EventId),
 				ParamClient:      generic.NewNullable(strconv.Itoa(int(pointRank))),
 				ParamServer: generic.NewNullable(client.LocalizedText{
-					DotUnderText: eventName, // this is resolved everytime user fetch present
+					DotUnderText: eventName,
 				}),
 			})
 		}
@@ -62,7 +61,7 @@ func resultEventScheduledHandler(userdata_db *xorm.Session, task server.Schedule
 				user_present.AddPresent(session, client.PresentItem{
 					Content:          *content,
 					PresentRouteType: enum.PresentRouteTypeEventMiningVoltageRankingReward,
-					PresentRouteId:   generic.NewNullable(eventMining.EventId),
+					PresentRouteId:   generic.NewNullable(active.EventId),
 					ParamClient:      generic.NewNullable(strconv.Itoa(int(pointRank))),
 					ParamServer: generic.NewNullable(client.LocalizedText{
 						DotUnderText: eventName, // this is resolved everytime user fetch present
@@ -72,14 +71,14 @@ func resultEventScheduledHandler(userdata_db *xorm.Session, task server.Schedule
 		}
 		user_info_trigger.AddTriggerBasic(session, client.UserInfoTriggerBasic{
 			InfoTriggerType: enum.InfoTriggerTypeEventMiningShowResult,
-			ParamInt:        generic.NewNullable(eventId),
+			ParamInt:        generic.NewNullable(active.EventId),
 		})
 		session.Finalize()
 	}
 
 	// schedule the event actual end
 	server.AddScheduledTask(server.ScheduledTask{
-		Time:     activeEvent.EndAt,
+		Time:     active.EndAt,
 		TaskName: "event_mining_end",
 		Params:   task.Params,
 	})

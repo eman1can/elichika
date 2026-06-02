@@ -1,16 +1,14 @@
 package data_link
 
 import (
-	"elichika/internal/locale"
-	"elichika/internal/server"
-	"elichika/internal/utils"
-	// "elichika/internal/client"
 	"elichika/internal/client/request"
 	"elichika/internal/client/response"
 	"elichika/internal/handler/common"
+	"elichika/internal/locale"
+	"elichika/internal/server"
+	"elichika/internal/utils"
 
 	"encoding/json"
-	//
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +19,6 @@ func fetchGameServiceDataBeforeLogin(ctx *gin.Context) {
 	req := request.FetchGameServiceDataBeforeLoginRequest{}
 	err := json.Unmarshal(*ctx.MustGet("reqBody").(*json.RawMessage), &req)
 	utils.CheckErr(err)
-	// log.Println(req)
 	resp := response.FetchGameServiceDataBeforeLoginResponse{}
 
 	// TODO(authentication): probably want to check against service id

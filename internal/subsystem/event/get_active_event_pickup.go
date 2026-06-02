@@ -10,20 +10,21 @@ import (
 )
 
 func GetActiveEventPickup(session *userdata.Session) generic.Nullable[client.BootstrapPickupEventInfo] {
-	event := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-	if event == nil {
+	active := session.Gamedata.EventActive
+	if active == nil {
 		return generic.Nullable[client.BootstrapPickupEventInfo]{}
 	}
 	result := generic.NewNullable(client.BootstrapPickupEventInfo{
-		EventId:   event.EventId,
-		StartAt:   event.StartAt,
-		ClosedAt:  event.ExpiredAt,
-		EndAt:     event.EndAt,
-		EventType: event.EventType,
+		EventId:   active.EventId,
+		StartAt:   active.StartAt,
+		ClosedAt:  active.ExpiredAt,
+		EndAt:     active.EndAt,
+		EventType: active.EventType,
 	})
-	if session.Time.Unix() < event.ExpiredAt {
-		if event.EventType == enum.EventType1Marathon {
-			result.Value.BoosterItemId = generic.NewNullable(session.Gamedata.EventActive.GetEventMarathon().BoosterItemId)
+	if session.Time.Unix() < active.ExpiredAt {
+		if active.EventType == enum.EventTypeMarathon {
+			event := session.Gamedata.EventMarathon[active.EventId]
+			result.Value.BoosterItemId = generic.NewNullable(event.BoosterItemId)
 		}
 	}
 	return result

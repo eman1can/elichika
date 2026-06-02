@@ -1,7 +1,7 @@
 package user_member
 
 import (
-	"sort"
+	"slices"
 
 	"elichika/internal/client"
 	"elichika/internal/config"
@@ -12,34 +12,31 @@ import (
 	"elichika/internal/userdata"
 )
 
-func UnlockMemberLovePanel(session *userdata.Session, memberId, memberLovePanelId int32, lovePanelCellIds []int32) client.MemberLovePanel {
-	panel := GetMemberLovePanel(session, memberId)
-	for _, cellId := range lovePanelCellIds {
-		panel.MemberLovePanelCellIds.Append(cellId)
-	}
-	sort.Slice(panel.MemberLovePanelCellIds.Slice, func(i, j int) bool {
-		return panel.MemberLovePanelCellIds.Slice[i] < panel.MemberLovePanelCellIds.Slice[j]
-	})
-	// remove resource
-	for _, cellId := range lovePanelCellIds {
-		for _, resource := range session.Gamedata.MemberLovePanelCell[cellId].Resources {
-			if config.Conf.ResourceConfig().ConsumePracticeItems {
-				user_content.RemoveContent(session, resource)
+func UnlockMemberLovePanelCells(session *userdata.Session, memberId int32, panelId int32, lovePanelCellIds []int32) client.MemberLovePanelList {
+	masterLovePanel := session.Gamedata.MemberLovePanel[panelId]
+	panel := GetMemberLovePanel(session, memberId, panelId)
+
+	for ix, cellId := range masterLovePanel.CellIds {
+		if slices.Contains(lovePanelCellIds, cellId) {
+			panel.Status |= 1 << ix
+
+			for _, resource := range session.Gamedata.MemberLovePanelCell[cellId].Resources {
+				if config.Conf.ResourceConfig().ConsumePracticeItems {
+					user_content.RemoveContent(session, resource)
+				}
 			}
 		}
 	}
 
-	// if is full panel, then we have to send a basic info trigger to actually open up the next panel
-	unlockCount := panel.MemberLovePanelCellIds.Size()
-	if unlockCount%5 == 0 {
+	if panel.AllUnlocked() {
 		member := GetMember(session, panel.MemberId)
-		masterLovePanel := session.Gamedata.MemberLovePanel[memberLovePanelId]
-		if (masterLovePanel.NextPanel != nil) && (masterLovePanel.NextPanel.LoveLevelMasterLoveLevel <= member.LoveLevel) {
+		if (masterLovePanel.NextPanel != nil) && (masterLovePanel.NextPanel.LoveLevel <= member.LoveLevel) {
 			user_info_trigger.AddTriggerBasic(session, client.UserInfoTriggerBasic{
 				InfoTriggerType: enum.InfoTriggerTypeMemberLovePanelNew,
 				ParamInt:        generic.NewNullable(masterLovePanel.NextPanel.Id)})
 		}
 	}
+
 	UpdateMemberLovePanel(session, panel)
-	return panel
+	return GetLovePanelMemberList(session, memberId)
 }

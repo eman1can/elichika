@@ -12,8 +12,8 @@ import (
 )
 
 func FetchEventMiningRanking(session *userdata.Session, eventId int32) (*response.FetchEventMiningRankingResponse, *response.RecoverableExceptionResponse) {
-	event := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-	if (event == nil) || (event.EventId != eventId) {
+	active := session.Gamedata.EventActive
+	if (active == nil) || (active.EventId != eventId) {
 		return nil, &response.RecoverableExceptionResponse{
 			RecoverableExceptionType: enum.RecoverableExceptionTypeEventMiningOutOfDate,
 		}
@@ -154,7 +154,7 @@ func FetchEventMiningRanking(session *userdata.Session, eventId int32) (*respons
 	}
 
 	{ // voltages
-		ranking := GetVoltageRanking(session.Db, event.EventId)
+		ranking := GetVoltageRanking(session.Db, active.EventId)
 		{
 			records := ranking.GetRange(1, 100) // confirmed from network record
 			for i, record := range records {

@@ -21,7 +21,7 @@ func TutorialSkip(session *userdata.Session, cardWithSuitDict generic.Dictionary
 		user_training_tree.LevelUpCard(session, session.UserStatus.RecommendCardMasterId, 1)
 		fallthrough
 	case enum.TutorialPhaseTrainingActivateCell:
-		cells := []int32{}
+		var cells []int32
 		for id := int32(1); id <= 17; id++ {
 			cells = append(cells, id)
 		}

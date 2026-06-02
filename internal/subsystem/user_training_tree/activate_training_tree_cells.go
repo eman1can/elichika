@@ -17,7 +17,6 @@ import (
 
 // return the training tree for a card
 func ActivateTrainingTreeCells(session *userdata.Session, cardMasterId int32, cellIds []int32) {
-
 	if session.UserStatus.TutorialPhase == enum.TutorialPhaseTrainingActivateCell {
 		session.UserStatus.TutorialPhase = enum.TutorialPhaseDeckEdit
 	}

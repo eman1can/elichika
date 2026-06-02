@@ -12,10 +12,12 @@ import (
 	"elichika/internal/userdata"
 )
 
-// this function add a copy of a card to the user, it return a Nullable[Content] of the extra reward
-// if that card is already maxed.
-// Note that this assume the card is added, so it's not used for present box and for gacha retry
-// the maxed limit break reward is also added directly to the user, the return value is only to help client display them
+// AddUserCardByCardMasterId
+// Adds a copy of a card to the user
+//   - returns a Nullable[Content] of the extra reward if that card is already maxed.
+//
+// Note that this assumes the card is added, so it's not used for present box and for gacha retry
+// the maxed limit break reward is also added directly to the user, the return value is only to help the client display them
 func AddUserCardByCardMasterId(session *userdata.Session, cardMasterId int32) client.AddedCardResult {
 	// mission tracking
 	user_mission.UpdateProgress(session, enum.MissionClearConditionTypeCountCard, nil, nil,

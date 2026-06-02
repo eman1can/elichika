@@ -1,11 +1,10 @@
 package server
 
 import (
+	"html/template"
 	"log"
 
 	"elichika/internal/config"
-
-	"html/template"
 
 	"github.com/gin-gonic/gin"
 )

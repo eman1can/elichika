@@ -48,6 +48,6 @@ func (session *Session) Login() response.LoginResponse {
 		populator(session)
 	}
 	// only this part is necessary
-	login.MemberLovePanels.Slice = session.MemberLovePanels
+	login.MemberLovePanels.Slice = session.MemberLovePanelList
 	return login
 }

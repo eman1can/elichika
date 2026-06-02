@@ -19,7 +19,7 @@ var eventMiningPointRanking *PointRankingType = nil
 // to make it convinience to use, if eventId is passed as a negative value, get from the active event
 func GetPointRanking(userdata_db *xorm.Session, eventId int32) *PointRankingType {
 	if eventId < 0 {
-		eventId = gamedata.Instance.EventActive.GetEventMining().EventId
+		eventId = gamedata.Instance.EventActive.EventId
 	}
 	if eventMiningPointRanking != nil {
 		return eventMiningPointRanking
@@ -29,7 +29,7 @@ func GetPointRanking(userdata_db *xorm.Session, eventId int32) *PointRankingType
 		UserId     int32 `xorm:"'user_id'"`
 		EventPoint int32 `xorm:"'event_point'"`
 	}
-	records := []UserIdEventPoint{}
+	var records []UserIdEventPoint
 
 	err := userdata_db.Table("u_event_mining").Where("event_master_id = ? AND event_point > 0", eventId).Find(&records)
 	utils.CheckErr(err)

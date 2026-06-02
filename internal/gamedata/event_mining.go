@@ -1,7 +1,10 @@
 package gamedata
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
+	"sort"
 
 	"elichika/internal/client"
 	"elichika/internal/enum"
@@ -9,31 +12,28 @@ import (
 	"elichika/internal/serverdata"
 	"elichika/internal/utils"
 
-	"fmt"
-	"math/rand"
-	"sort"
-
 	"xorm.io/xorm"
 )
 
 type EventMining struct {
-	Gamedata *Gamedata
+	EventId int32  `xorm:"pk 'id'"`
+	Name    string `xorm:"title"`
 
-	EventId int32
-	Name    string // name is not stored as it is actually in dictionary db for mining event, but it's here too for easy access
+	BannerNoticeLarge string `xorm:"banner_notice_l"`
+	BannerNoticeSmall string `xorm:"banner_notice_s"`
 
 	// this is the top status template, COPY before use
-	TopStatus       client.EventMiningTopStatus
-	EventAnimation  *client.EventMiningTopAnimationCellMasterRow
-	GachaAnimations []client.EventMiningTopAnimationCellMasterRow
+	TopStatus       client.EventMiningTopStatus                   `xorm:"-"`
+	EventAnimation  *client.EventMiningTopAnimationCellMasterRow  `xorm:"-"`
+	GachaAnimations []client.EventMiningTopAnimationCellMasterRow `xorm:"-"`
 
 	// bonus mapping
-	CardBonus map[int32][]int32
+	CardBonus map[int32][]int32 `xorm:"-"`
 
 	// event music for bootstrap
 	// note that .EndAt is not filled in, boot strap will fill it
-	EventMusics generic.Array[client.LiveEventMiningVoltageMusicBadge]
-	Trade       *client.Trade
+	EventMusics generic.Array[client.LiveEventMiningVoltageMusicBadge] `xorm:"-"`
+	Trade       *client.Trade                                          `xorm:"-"`
 }
 
 func (em *EventMining) GetPointRankingReward(rank int32) int32 {
@@ -79,9 +79,8 @@ func loadEventMining(gamedata *Gamedata) {
 	utils.CheckErr(err)
 	for _, event := range events {
 		eventMining := EventMining{
-			Gamedata: gamedata,
-			EventId:  event.EventId,
-			Name:     gamedata.Dictionary.Resolve(fmt.Sprintf("m.event_mining_title_%d", event.EventId)),
+			EventId: event.EventId,
+			Name:    fmt.Sprintf("m.event_mining_title_%d", event.EventId),
 			TopStatus: client.EventMiningTopStatus{
 				EventId: event.EventId,
 				TitleImagePath: client.TextureStruktur{

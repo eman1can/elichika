@@ -11,7 +11,7 @@ func missionClearConditionTypeClearedStoryMainChapterInitializer(session *userda
 	mission := session.Gamedata.Mission[userMission.MissionMId]
 	chapterId := mission.MissionClearConditionCount
 	requiredCell := session.Gamedata.StoryMainChapter[chapterId].LastCellId
-	if hasStoryMainCell(session, requiredCell) {
+	if IsStoryFinished(session, requiredCell) {
 		userMission.MissionCount = chapterId
 		userMission.IsCleared = true
 	} else {

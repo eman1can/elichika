@@ -2,19 +2,18 @@ package event
 
 import (
 	"log"
+	"strings"
 
 	"elichika/internal/server"
 	"elichika/internal/serverstate"
 	"elichika/internal/utils"
-
-	"strings"
 
 	"xorm.io/xorm"
 )
 
 func ScheduleEvent(eventId int32) {
 	var err error
-	var affected int64
+	// var affected int64
 	defer func() {
 		{
 			err := recover()
@@ -31,21 +30,21 @@ func ScheduleEvent(eventId int32) {
 		})
 		utils.CheckErr(err)
 	}()
-	event := serverstate.EventScheduled{
-		EventId: eventId,
-	}
-	serverstate.Database.Do(func(session *xorm.Session) {
-		affected, err = session.Table("s_event_scheduled").Update(&event)
-	})
-	utils.CheckErr(err)
-	if affected == 0 {
-		serverstate.Database.Do(func(session *xorm.Session) {
-			_, err = session.Table("s_event_scheduled").Insert(&event)
-		})
-		utils.CheckErr(err)
-	}
+	// event := serverstate.EventScheduled{
+	// 	EventId: eventId,
+	// }
+	// serverstate.Database.Do(func(session *xorm.Session) {
+	// 	affected, err = session.Table("s_event_scheduled").Update(&event)
+	// })
+	// utils.CheckErr(err)
+	// if affected == 0 {
+	// 	serverstate.Database.Do(func(session *xorm.Session) {
+	// 		_, err = session.Table("s_event_scheduled").Insert(&event)
+	// 	})
+	// 	utils.CheckErr(err)
+	// }
 
-	tasks := []serverstate.ScheduledTask{}
+	var tasks []serverstate.ScheduledTask
 	serverstate.Database.Do(func(session *xorm.Session) {
 		err = session.Table("s_scheduled_task").Find(&tasks)
 	})

@@ -8,7 +8,7 @@ import (
 )
 
 func TrackClearVoltage(session *userdata.Session, liveDifficulty *gamedata.LiveDifficulty, voltage int32) {
-	eventMining := session.Gamedata.EventActive.GetEventMining()
+	eventMining := session.Gamedata.EventMining[session.Gamedata.EventActive.EventId]
 	good := false
 	for _, live := range eventMining.TopStatus.EventMiningCompetitionMasterRows.Slice {
 		if live.LiveId == *liveDifficulty.LiveId {

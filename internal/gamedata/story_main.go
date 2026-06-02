@@ -10,18 +10,18 @@ import (
 
 type StoryMainChapter struct {
 	// from m_story_main_chapter
-	Id int32 `xorm:"pk 'id'"`
+	Id int32 `xorm:"pk 'id'" json:"id"`
 	// StoryMainPartMasterId int32 `xorm:"'story_main_part_master_id'"`
-	// Title string `xorm:"'title'"`
+	Title string `xorm:"title" json:"title"`
 	// Description string `xorm:"'description'"`
-	// ThumbnailAssetPath string `xorm:"'thumbnail_asset_path'"`
+	ThumbnailAssetPath string `xorm:"thumbnail_asset_path" json:"-"`
 	// BackgroundAssetPath string `xorm:"'background_asset_path'"`
 	// HardBackgroundAssetPath string `xorm:"'hard_background_asset_path'"`
 	// BgmAssetPath string `xorm:"'bgm_asset_path'"`
 
 	// from m_story_main_cell
-	Cells      []int32 `xorm:"-"`
-	LastCellId int32   `xorm:"-"`
+	Cells      []int32 `xorm:"-" json:"-"`
+	LastCellId int32   `xorm:"-" json:"-"`
 }
 
 func (smc *StoryMainChapter) populate(gamedata *Gamedata) {

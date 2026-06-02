@@ -1,22 +1,27 @@
 package gamedata
 
 import (
-	"log"
+	"elichika/internal/utils"
 
-	"elichika/internal/enum"
-
-	"fmt"
+	"xorm.io/xorm"
 )
 
-func (gamedata *Gamedata) GetEventType(eventId int32) int32 {
-	_, isEventMarathon := gamedata.EventMarathon[eventId]
-	_, isEventMining := gamedata.EventMining[eventId]
-	if isEventMarathon {
-		return enum.EventType1Marathon
-	} else if isEventMining {
-		return enum.EventType1Mining
-	} else {
-		log.Panic(fmt.Sprint("Unsupported event: ", eventId))
-		return 0
-	}
+type Event struct {
+	EventId      int32 `xorm:"id"`
+	EventType    int32 `xorm:"event_type"`
+	ReleaseOrder int32 `xorm:"release_order"`
+	Available    bool  `xorm:"available"`
+}
+
+func loadEvent(gamedata *Gamedata) {
+	gamedata.Event = make(map[int32]*Event)
+	var err error
+	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
+		err = session.Table("m_event").Find(&gamedata.Event)
+	})
+	utils.CheckErr(err)
+}
+
+func init() {
+	addLoadFunc(loadEvent)
 }

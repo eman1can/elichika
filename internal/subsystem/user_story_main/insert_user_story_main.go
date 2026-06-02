@@ -13,6 +13,6 @@ func InsertUserStoryMain(session *userdata.Session, storyMainMasterId int32) boo
 		return false
 	}
 	session.UserModel.UserStoryMainByStoryMainId.Set(storyMainMasterId, userStoryMain)
-	// main story also used to unlock scenes (feature), but they are unlocked by default now
+	// Before EOS, main story would also unlock scenes, but that part of the tutorial has been removed from the client
 	return true
 }

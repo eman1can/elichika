@@ -49,12 +49,15 @@ func GetBeginnerChallengeCells(session *userdata.Session) map[int32]*client.Chal
 			utils.CheckErr(err)
 			result[cell.Id].Progress = int32(count)
 		case enum.MissionClearConditionTypeMemberLovePanelCell:
-			loveMemberPanels := []client.MemberLovePanel{}
+			var loveMemberPanels []client.MemberLovePanel
 			err := session.Db.Table("u_member_love_panel").Where("user_id = ?", session.UserId).Find(&loveMemberPanels)
 			utils.CheckErr(err)
 			count := 0
 			for _, panel := range loveMemberPanels {
-				count += panel.MemberLovePanelCellIds.Size()
+				count += int(panel.Status & 0b0001)
+				count += int((panel.Status & 0b0010) >> 1)
+				count += int((panel.Status & 0b0100) >> 2)
+				count += int((panel.Status & 0b1000) >> 3)
 			}
 			result[cell.Id].Progress = int32(count)
 		case enum.MissionClearConditionTypeClearedStorySide:

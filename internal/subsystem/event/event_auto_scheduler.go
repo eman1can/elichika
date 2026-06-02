@@ -2,18 +2,12 @@ package event
 
 import (
 	"log"
+	"time"
 
 	"elichika/internal/config"
-	"elichika/internal/enum"
-	"elichika/internal/gamedata"
 	"elichika/internal/server"
-	"elichika/internal/serverstate"
-	"elichika/internal/utils"
 
 	"xorm.io/xorm"
-
-	"fmt"
-	"time"
 )
 
 // The auto scheduler works as follow:
@@ -94,86 +88,86 @@ func eventAutoScheduler(userdata_db *xorm.Session, task server.ScheduledTask) {
 		startTime -= DayDuration
 	}
 
-	lastEvent := gamedata.Instance.EventActive.GetEventValue()
+	// lastEvent := gamedata.Instance.EventActive.GetEventValue()
+	//
+	// if !isDirectEventChanging {
+	// 	// normal operation, allow for a gap period between the events
+	// 	lastEndedAt := int64(0)
+	// 	if lastEvent != nil {
+	// 		if lastEvent.EndAt >= task.Time {
+	// 			log.Println("Warning: active event hasn't ended, event auto scheduler ignored")
+	// 			return
+	// 		}
+	// 		lastEndedAt = lastEvent.EndAt
+	// 	}
+	//
+	// 	for startTime < lastEndedAt+int64(configObj.RestDuration) {
+	// 		startTime += DayDuration
+	// 	}
+	// }
 
-	if !isDirectEventChanging {
-		// normal operation, allow for a gap period between the events
-		lastEndedAt := int64(0)
-		if lastEvent != nil {
-			if lastEvent.EndAt >= task.Time {
-				log.Println("Warning: active event hasn't ended, event auto scheduler ignored")
-				return
-			}
-			lastEndedAt = lastEvent.EndAt
-		}
-
-		for startTime < lastEndedAt+int64(configObj.RestDuration) {
-			startTime += DayDuration
-		}
-	}
-
-	var eventId int32
-	if isDirectEventChanging {
-		eventId = targetedEventId
-	} else {
-		eventId = gamedata.Instance.EventAvailable.GetNextEvent(lastEvent)
-		// see if there's a specially scheduled event in s_event_scheduled
-		var scheduledEvent serverstate.EventScheduled
-		var exist bool
-		var err error
-		serverstate.Database.Do(func(session *xorm.Session) {
-			exist, err = session.Table("s_event_scheduled").Get(&scheduledEvent)
-		})
-		utils.CheckErr(err)
-		if exist {
-			eventId = scheduledEvent.EventId
-		}
-	}
-	var err error
+	// var eventId int32
+	// if isDirectEventChanging {
+	// 	eventId = targetedEventId
+	// } else {
+	// 	eventId = gamedata.Instance.EventAvailable.GetNextEvent(lastEvent)
+	// 	// see if there's a specially scheduled event in s_event_scheduled
+	// 	var scheduledEvent serverstate.EventScheduled
+	// 	var exist bool
+	// 	var err error
+	// 	serverstate.Database.Do(func(session *xorm.Session) {
+	// 		exist, err = session.Table("s_event_scheduled").Get(&scheduledEvent)
+	// 	})
+	// 	utils.CheckErr(err)
+	// 	if exist {
+	// 		eventId = scheduledEvent.EventId
+	// 	}
+	// }
+	// var err error
 	// no matter what, we clean up the scheduled event
-	serverstate.Database.Do(func(session *xorm.Session) {
-		_, err = session.Table("s_event_scheduled").Where("true").Delete(&serverstate.EventScheduled{})
-	})
-	utils.CheckErr(err)
+	// serverstate.Database.Do(func(session *xorm.Session) {
+	// 	_, err = session.Table("s_event_scheduled").Where("true").Delete(&serverstate.EventScheduled{})
+	// })
+	// utils.CheckErr(err)
 
-	eventType := gamedata.Instance.GetEventType(eventId)
+	// eventType := gamedata.Instance.GetEventType(eventId)
 
 	// need to fill the delete condition with some stuff because of xorm
-	serverstate.Database.Do(func(session *xorm.Session) {
-		_, err = session.Table("s_event_active").Where("event_id >= 0").Delete(&serverstate.EventActive{})
-		if err != nil {
-			return
-		}
-		_, err = session.Table("s_event_active").Insert(serverstate.EventActive{
-			EventId:   eventId,
-			EventType: eventType,
-			StartAt:   startTime,
-			ExpiredAt: startTime + int64(configObj.EventDuration),
-			ResultAt:  startTime + int64(configObj.EventDuration+configObj.TallyDuration),
-			EndAt:     startTime + int64(configObj.EventDuration+configObj.TallyDuration+configObj.ResultDuration),
-		})
-	})
-	utils.CheckErr(err)
-	gamedata.InvalidateActiveEvent()
+	// serverstate.Database.Do(func(session *xorm.Session) {
+	// 	_, err = session.Table("s_event_active").Where("event_id >= 0").Delete(&serverstate.EventActive{})
+	// 	if err != nil {
+	// 		return
+	// 	}
+	// 	_, err = session.Table("s_event_active").Insert(serverstate.EventActive{
+	// 		EventId:   eventId,
+	// 		EventType: eventType,
+	// 		StartAt:   startTime,
+	// 		ExpiredAt: startTime + int64(configObj.EventDuration),
+	// 		ResultAt:  startTime + int64(configObj.EventDuration+configObj.TallyDuration),
+	// 		EndAt:     startTime + int64(configObj.EventDuration+configObj.TallyDuration+configObj.ResultDuration),
+	// 	})
+	// })
+	// utils.CheckErr(err)
+	// gamedata.InvalidateActiveEvent()
 
 	// schedule the event start at start time to truly begin the event
-	if eventType == enum.EventType1Marathon {
-		server.AddScheduledTask(serverstate.ScheduledTask{
-			Time:     startTime,
-			TaskName: "event_marathon_start",
-			Priority: 0,
-			Params:   fmt.Sprint(eventId),
-		})
-	} else if eventType == enum.EventType1Mining {
-		server.AddScheduledTask(serverstate.ScheduledTask{
-			Time:     startTime,
-			TaskName: "event_mining_start",
-			Priority: 0,
-			Params:   fmt.Sprint(eventId),
-		})
-	} else {
-		log.Panic("unsupported event type")
-	}
+	// if eventType == enum.EventType1Marathon {
+	// 	server.AddScheduledTask(serverstate.ScheduledTask{
+	// 		Time:     startTime,
+	// 		TaskName: "event_marathon_start",
+	// 		Priority: 0,
+	// 		Params:   fmt.Sprint(eventId),
+	// 	})
+	// } else if eventType == enum.EventType1Mining {
+	// 	server.AddScheduledTask(serverstate.ScheduledTask{
+	// 		Time:     startTime,
+	// 		TaskName: "event_mining_start",
+	// 		Priority: 0,
+	// 		Params:   fmt.Sprint(eventId),
+	// 	})
+	// } else {
+	// 	log.Panic("unsupported event type")
+	// }
 }
 
 func init() {

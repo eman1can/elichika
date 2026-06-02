@@ -29,6 +29,7 @@ import (
 	"elichika/internal/client"
 	"elichika/internal/db"
 	"elichika/internal/generic/drop"
+	"elichika/internal/serverstate"
 
 	"reflect"
 )
@@ -93,8 +94,10 @@ type Gamedata struct {
 
 	Emblem map[int32]*Emblem
 
-	EventActive         EventActive
-	EventAvailable      EventAvailable
+	Event         map[int32]*Event
+	EventActive   *EventActive
+	EventSchedule []*serverstate.EventSchedule
+
 	EventMarathon       map[int32]*EventMarathon
 	EventMarathonReward map[int32][]*client.Content
 	EventMining         map[int32]*EventMining
@@ -104,11 +107,12 @@ type Gamedata struct {
 	Member                          map[int32]*Member
 	MemberGroup                     map[int32]*MemberGroup
 	MemberLoveLevelLovePoint        []int32
-	MemberLoveLevelCount            int32
+	MemberLoveLevelMax              int32
 	MemberLovePanel                 map[int32]*MemberLovePanel
 	MemberLovePanelCell             map[int32]*MemberLovePanelCell
+	MemberFirstLovePanel            map[int32]*MemberLovePanel
 	MemberLovePanelLevelAtLoveLevel []int32
-	MemberByBirthday                map[int32]([]*Member)
+	MemberByBirthday                map[int32][]*Member
 
 	MemberGuildConstant             MemberGuildConstant
 	MemberGuildPeriod               MemberGuildPeriod

@@ -2,23 +2,21 @@ package mining
 
 import (
 	"log"
+	"strconv"
 
 	"elichika/internal/enum"
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
-
-	"strconv"
 
 	"xorm.io/xorm"
 )
 
 // finish the event and pay out the reward for everyone who participated
 func endEventScheduledHandler(userdata_db *xorm.Session, task server.ScheduledTask) {
-	activeEvent := gamedata.Instance.EventActive.GetActiveEventUnix(task.Time)
+	active := gamedata.Instance.EventActive
 	eventIdInt, _ := strconv.Atoi(task.Params)
 	eventId := int32(eventIdInt)
-	if (activeEvent == nil) || (activeEvent.EventId != eventId) ||
-		(activeEvent.EventType != enum.EventType1Mining) || (activeEvent.EndAt != task.Time) {
+	if (active == nil) || (active.EventId != eventId) || (active.EventType != enum.EventTypeMining) || (active.EndAt != task.Time) {
 		log.Println("Warning: Failed to end event: ", task)
 		return
 	}
@@ -28,7 +26,7 @@ func endEventScheduledHandler(userdata_db *xorm.Session, task server.ScheduledTa
 
 	// TODO(event): Add config for other options once we have more than 1 event
 	server.AddScheduledTask(server.ScheduledTask{
-		Time:     activeEvent.EndAt + 1,
+		Time:     active.EndAt + 1,
 		TaskName: "event_auto_scheduler",
 	})
 }

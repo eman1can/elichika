@@ -56,8 +56,8 @@ type Member struct {
 	// StandingThumbnailBackgroundBottomColor int
 
 	// from m_member_love_level_reward
-	LoveLevelRewardIds []int32              `xorm:"-"` // 2 indexed for love level
-	LoveLevelRewards   []([]client.Content) `xorm:"-"` // 2 indexed for love level
+	LoveLevelRewardIds []int32            `xorm:"-"` // 2 indexed for love level
+	LoveLevelRewards   [][]client.Content `xorm:"-"` // 2 indexed for love level
 
 	// from m_member_unit_detail
 	MemberUnit int32 `xorm:"-"` // subgroup
@@ -99,7 +99,7 @@ func (member *Member) populate(gamedata *Gamedata) {
 			err = session.Table("m_member_love_level_reward").Where("member_m_id = ?", member.Id).OrderBy("love_level").Find(&rewards)
 		})
 		utils.CheckErr(err)
-		for i := int32(0); i <= gamedata.MemberLoveLevelCount; i++ {
+		for i := int32(0); i <= gamedata.MemberLoveLevelMax; i++ {
 			member.LoveLevelRewards = append(member.LoveLevelRewards, []client.Content{})
 			member.LoveLevelRewardIds = append(member.LoveLevelRewardIds, 0)
 		}
@@ -128,7 +128,7 @@ func (member *Member) populate(gamedata *Gamedata) {
 	}
 
 	member.MemberGroup = gamedata.MemberGroup[member.MemberGroupId]
-	//member.Name = gamedata.Dictionary.Resolve(member.Name)
+	// member.Name = gamedata.Dictionary.Resolve(member.Name)
 	// member.NameHiragana = gamedata.Dictionary.Resolve(member.NameHiragana)
 	// member.NameRomaji = gamedata.Dictionary.Resolve(member.NameRomaji)
 	// log.Println(member.Id, "\t", member.Name, "\t", member.NameHiragana, "\t", member.NameRomaji, "\t",

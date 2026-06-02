@@ -1,15 +1,14 @@
 package marathon
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"elichika/internal/enum"
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/utils"
-
-	"fmt"
-	"strconv"
 
 	"xorm.io/xorm"
 )
@@ -35,22 +34,20 @@ func StartEventMarathon(userdata_db *xorm.Session, eventId int32) {
 }
 
 func startEventScheduledHandler(userdata_db *xorm.Session, task server.ScheduledTask) {
-	activeEvent := gamedata.Instance.EventActive.GetActiveEventUnix(task.Time)
+	active := gamedata.Instance.EventActive
 	eventIdInt, _ := strconv.Atoi(task.Params)
-	eventId := int32(eventIdInt)
-	if (activeEvent == nil) || (activeEvent.EventId != eventId) ||
-		(activeEvent.EventType != enum.EventType1Marathon) || (activeEvent.StartAt != task.Time) {
+
+	if (active == nil) || (active.EventId != int32(eventIdInt)) || (active.EventType != enum.EventTypeMarathon) || (active.StartAt > task.Time) {
 
 		log.Println("Warning: Failed to start event: ", task)
-		log.Println((activeEvent == nil), (activeEvent.EventId != eventId), (activeEvent.EventType != enum.EventType1Marathon), (activeEvent.StartAt != task.Time))
 		return
 	}
 	// this will be scheduled by an event scheduler, and called when the event is ready to start
-	StartEventMarathon(userdata_db, eventId)
+	StartEventMarathon(userdata_db, active.EventId)
 
 	// schedule the event payout and stuff
 	server.AddScheduledTask(server.ScheduledTask{
-		Time:     activeEvent.ResultAt,
+		Time:     active.ResultAt,
 		TaskName: "event_marathon_result",
 		Params:   task.Params,
 	})

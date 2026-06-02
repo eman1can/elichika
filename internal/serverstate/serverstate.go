@@ -63,7 +63,7 @@ func isTableEmpty(tableName string) bool {
 }
 
 func InitTables() {
-	initializers := []Initializer{}
+	var initializers []Initializer
 	for tableName := range serverstateTableNameToInterface {
 		newOrEmpty := createTable(tableName, serverstateTableNameToInterface[tableName], resetServer)
 		newOrEmpty = newOrEmpty || isTableEmpty(tableName)

@@ -30,8 +30,6 @@ func initial(ctx *gin.Context) {
 
 	defer ctx.Request.Body.Close()
 
-	log.Println("Accepting: ", ctx.Request.URL.String())
-
 	lang, _ := ctx.GetQuery("l")
 	if lang == "" {
 		lang = "ja"

@@ -9,17 +9,12 @@ import (
 )
 
 func UnlockNewLovePanel(session *userdata.Session, memberId, oldLoveLevel, newLoveLevel int32) {
-	currentLovePanel := GetMemberLovePanel(session, memberId)
-	unlockCount := currentLovePanel.MemberLovePanelCellIds.Size()
-	if (unlockCount > 0) && (unlockCount%5 == 0) {
-		// love panel is maxed out
-		lastCell := currentLovePanel.MemberLovePanelCellIds.Slice[unlockCount-1]
-		masterLovePanel := session.Gamedata.MemberLovePanelCell[lastCell].MemberLovePanel
+	currentLovePanel := GetCurrentMemberLovePanel(session, memberId, oldLoveLevel)
 
-		if (masterLovePanel.NextPanel != nil) &&
-			(masterLovePanel.NextPanel.LoveLevelMasterLoveLevel <= newLoveLevel) &&
-			(masterLovePanel.NextPanel.LoveLevelMasterLoveLevel > oldLoveLevel) {
-			nextPanel := masterLovePanel.NextPanel
+	if currentLovePanel.AllUnlocked() && !currentLovePanel.IsLastPanel {
+		nextPanel := session.Gamedata.MemberLovePanel[currentLovePanel.PanelId].NextPanel
+
+		if nextPanel.LoveLevel <= newLoveLevel && nextPanel.LoveLevel > oldLoveLevel {
 			user_info_trigger.AddTriggerBasic(session, client.UserInfoTriggerBasic{
 				InfoTriggerType: enum.InfoTriggerTypeMemberLovePanelNew,
 				ParamInt:        generic.NewNullable(nextPanel.Id)})

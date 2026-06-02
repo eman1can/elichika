@@ -36,7 +36,7 @@ func ExecuteLesson(session *userdata.Session, req request.ExecuteLessonRequest) 
 		repeatCount = 3
 	}
 	if config.Conf.ResourceConfig().ConsumeAp {
-		user_status.AddUserAp(session, -repeatCount)
+		user_status.AddUserActivityPoints(session, -repeatCount)
 	}
 	user_mission.UpdateProgress(session, enum.MissionClearConditionTypeCountLesson, nil, nil,
 		func(session *userdata.Session, missionList []any, _ ...any) {

@@ -25,6 +25,8 @@ type MemberLovePanelCell struct {
 func (cell *MemberLovePanelCell) populate(gamedata *Gamedata) {
 	cell.MemberLovePanel = gamedata.MemberLovePanel[*cell.MemberLovePanelMasterId]
 	cell.MemberLovePanelMasterId = &cell.MemberLovePanel.Id
+	cell.MemberLovePanel.CellIds = append(cell.MemberLovePanel.CellIds, cell.Id)
+
 	var err error
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
 		err = session.Table("m_member_love_panel_cell_source_content").Where("member_love_panel_cell_master_id = ?", cell.Id).Find(&cell.Resources)

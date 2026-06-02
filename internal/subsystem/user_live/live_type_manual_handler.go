@@ -2,6 +2,7 @@ package user_live
 
 import (
 	"log"
+	"reflect"
 
 	"elichika/internal/client"
 	"elichika/internal/client/request"
@@ -24,8 +25,6 @@ import (
 	"elichika/internal/subsystem/user_story_main"
 	"elichika/internal/subsystem/voltage_ranking"
 	"elichika/internal/userdata"
-
-	"reflect"
 )
 
 func liveTypeManualHandler(session *userdata.Session, req request.FinishLiveRequest, live client.Live, startReq request.StartLiveRequest) response.FinishLiveResponse {
@@ -33,7 +32,7 @@ func liveTypeManualHandler(session *userdata.Session, req request.FinishLiveRequ
 	liveDifficulty := gamedata.LiveDifficulty[session.UserStatus.LastLiveDifficultyId]
 
 	if config.Conf.ResourceConfig().ConsumeLp {
-		user_status.AddUserLp(session, -liveDifficulty.ConsumedLP)
+		user_status.AddUserLivePoints(session, -liveDifficulty.ConsumedLP)
 	}
 
 	userLiveDifficulty := user_live_difficulty.GetUserLiveDifficulty(session, session.UserStatus.LastLiveDifficultyId)
@@ -422,11 +421,11 @@ func liveTypeManualHandler(session *userdata.Session, req request.FinishLiveRequ
 		}
 
 		// events
-		activeEvent := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-		if (activeEvent != nil) && (activeEvent.ExpiredAt > session.Time.Unix()) {
-			if activeEvent.EventType == enum.EventType1Marathon {
+		active := session.Gamedata.EventActive
+		if (active != nil) && (active.ExpiredAt > session.Time.Unix()) {
+			if active.EventType == enum.EventTypeMarathon {
 				totalDeckBonus := int32(0)
-				marathonEvent := session.Gamedata.EventMarathon[activeEvent.EventId]
+				marathonEvent := session.Gamedata.EventMarathon[active.EventId]
 				for _, i := range req.LiveScore.CardStatDict.OrderedKey {
 					cardMasterId := req.LiveScore.CardStatDict.Map[i].CardMasterId
 					userCard := user_card.GetUserCard(session, cardMasterId)
@@ -439,9 +438,9 @@ func liveTypeManualHandler(session *userdata.Session, req request.FinishLiveRequ
 				}
 				resp.LiveResult.ActiveEventResult = event.GetLiveResultActiveEventMarathon(session,
 					liveDifficulty, req.LiveScore.CurrentScore, totalDeckBonus, 1, startReq.LiveEventMarathonStatus.Value.IsUseEventMarathonBooster)
-			} else if activeEvent.EventType == enum.EventType1Mining {
+			} else if active.EventType == enum.EventTypeMining {
 				totalDeckBonus := int32(0)
-				miningEvent := session.Gamedata.EventMining[activeEvent.EventId]
+				miningEvent := session.Gamedata.EventMining[active.EventId]
 				for _, i := range req.LiveScore.CardStatDict.OrderedKey {
 					cardMasterId := req.LiveScore.CardStatDict.Map[i].CardMasterId
 					userCard := user_card.GetUserCard(session, cardMasterId)

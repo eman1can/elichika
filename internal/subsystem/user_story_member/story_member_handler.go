@@ -8,7 +8,8 @@ import (
 )
 
 func storyMemberHandler(session *userdata.Session, content *client.Content) any {
-	InsertMemberStory(session, content.ContentId)
+	storyMember := GetStoryMember(session, content.ContentId)
+	UpdateStoryMember(session, storyMember)
 	content.ContentAmount = 0
 	return nil
 }

@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"log"
 
 	"elichika/internal/client"
@@ -10,8 +11,6 @@ import (
 	"elichika/internal/subsystem/user_content"
 	"elichika/internal/subsystem/user_event/mining"
 	"elichika/internal/userdata"
-
-	"fmt"
 )
 
 // Handle a live result and return the relevant data
@@ -97,11 +96,11 @@ func HandleLiveResultActiveEventMining(session *userdata.Session, liveDifficulty
 	epPointTotal := getBaseEventPointMining() * loopCount
 
 	// this should be fine because this code will only run when event isn't nil
-	event := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-	eventMining := session.Gamedata.EventMining[event.EventId]
+	active := session.Gamedata.EventActive
+	eventMining := session.Gamedata.EventMining[active.EventId]
 	result := client.LiveResultActiveEvent{
-		EventId:            event.EventId,
-		EventType:          enum.EventType1Mining,
+		EventId:            active.EventId,
+		EventType:          enum.EventTypeMining,
 		EventLogoAssetPath: eventMining.TopStatus.TitleImagePath,
 		ReceivePoint: client.LiveResultActiveEventPoint{
 			Point:      epPointTotal,

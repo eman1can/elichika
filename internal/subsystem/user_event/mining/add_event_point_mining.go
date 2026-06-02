@@ -9,7 +9,7 @@ import (
 
 // result is already partially filled
 func AddEventPoint(session *userdata.Session, gainedPoint int32, result *client.LiveResultActiveEvent) {
-	event := session.Gamedata.EventActive.GetEventMining()
+	event := session.Gamedata.EventMining[session.Gamedata.EventActive.EventId]
 	userEventMining := GetUserEventMining(session)
 
 	ranking := GetPointRanking(session.Db, event.EventId)

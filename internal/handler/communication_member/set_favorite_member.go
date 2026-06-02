@@ -23,7 +23,7 @@ func setFavoriteMember(ctx *gin.Context) {
 	session := ctx.MustGet("session").(*userdata.Session)
 
 	session.UserStatus.FavoriteMemberId = int32(req.MemberMasterId)
-	if session.UserStatus.TutorialPhase == enum.TutorialPhaseFavoriateMember {
+	if session.UserStatus.TutorialPhase == enum.TutorialPhaseFavoriteMember {
 		session.UserStatus.TutorialPhase = enum.TutorialPhaseLovePointUp
 		// award the initial SR
 		// TODO(magic_id)

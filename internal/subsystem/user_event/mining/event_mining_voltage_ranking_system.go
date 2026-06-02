@@ -31,7 +31,7 @@ type UserVoltageRankingSummary struct {
 
 func NewUserVoltageRankingSummary(eventId int32) UserVoltageRankingSummary {
 	if eventId < 0 {
-		eventId = gamedata.Instance.EventActive.GetEventMining().EventId
+		eventId = gamedata.Instance.EventActive.EventId
 	}
 	eventMining := gamedata.Instance.EventMining[eventId]
 	if voltageSelectionAmount != eventMining.TopStatus.SelectionAmount {
@@ -123,7 +123,7 @@ var eventMiningVoltageRanking *VoltageRankingType = nil
 
 func GetVoltageRanking(userdata_db *xorm.Session, eventId int32) *VoltageRankingType {
 	if eventId < 0 {
-		eventId = gamedata.Instance.EventActive.GetEventMining().EventId
+		eventId = gamedata.Instance.EventActive.EventId
 	}
 	if eventMiningVoltageRanking != nil {
 		return eventMiningVoltageRanking

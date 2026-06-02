@@ -9,4 +9,7 @@ type UserMember struct {
 	LoveLevel                int32 `json:"love_level"`
 	ViewStatus               int32 `json:"view_status"`
 	IsNew                    bool  `json:"is_new"`
+
+	IsCurrentLovePanelMaxed bool `xorm:"-"` // Is the highest available Love Panel fully unlocked
+	IsAllLovePanelMaxed     bool `xorm:"-"` // Are ALL love panels fully unlocked
 }

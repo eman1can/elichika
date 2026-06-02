@@ -6,5 +6,5 @@ import (
 )
 
 func UpdateMemberLovePanel(session *userdata.Session, panel client.MemberLovePanel) {
-	session.MemberLovePanelDiffs[panel.MemberId] = panel
+	session.MemberLovePanelDiffs[panel.MemberId][panel.PanelId] = panel
 }

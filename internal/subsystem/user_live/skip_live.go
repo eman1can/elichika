@@ -2,6 +2,7 @@ package user_live
 
 import (
 	"log"
+	"reflect"
 
 	"elichika/internal/client"
 	"elichika/internal/client/request"
@@ -19,8 +20,6 @@ import (
 	"elichika/internal/subsystem/user_mission"
 	"elichika/internal/subsystem/user_status"
 	"elichika/internal/userdata"
-
-	"reflect"
 )
 
 func SkipLive(session *userdata.Session, req request.SkipLiveRequest) response.SkipLiveResponse {
@@ -34,7 +33,7 @@ func SkipLive(session *userdata.Session, req request.SkipLiveRequest) response.S
 	liveDifficulty := gamedata.LiveDifficulty[req.LiveDifficultyMasterId]
 
 	if config.Conf.ResourceConfig().ConsumeLp {
-		user_status.AddUserLp(session, -liveDifficulty.ConsumedLP*req.TicketUseCount)
+		user_status.AddUserLivePoints(session, -liveDifficulty.ConsumedLP*req.TicketUseCount)
 	}
 
 	// daily limit
@@ -135,13 +134,12 @@ func SkipLive(session *userdata.Session, req request.SkipLiveRequest) response.S
 		}
 	}
 
-	// events
-	activeEvent := session.Gamedata.EventActive.GetActiveEvent(session.Time)
-	if (activeEvent != nil) && (activeEvent.ExpiredAt > session.Time.Unix()) {
-		if activeEvent.EventType == enum.EventType1Marathon {
+	active := gamedata.EventActive
+	if active != nil && session.Time.Unix() < active.ExpiredAt {
+		if active.EventType == enum.EventTypeMarathon {
 			if req.LiveEventMarathonStatus.HasValue {
 				totalDeckBonus := int32(0)
-				marathonEvent := session.Gamedata.EventMarathon[activeEvent.EventId]
+				marathonEvent := session.Gamedata.EventMarathon[active.EventId]
 				for _, cardMasterId := range cardMasterIds {
 					userCard := user_card.GetUserCard(session, cardMasterId)
 					memberId := session.Gamedata.Card[cardMasterId].Member.Id
@@ -154,9 +152,9 @@ func SkipLive(session *userdata.Session, req request.SkipLiveRequest) response.S
 				resp.SkipLiveResult.ActiveEventResult = event.GetLiveResultActiveEventMarathon(session,
 					liveDifficulty, liveDifficulty.EvaluationSScore, totalDeckBonus, req.TicketUseCount, req.LiveEventMarathonStatus.Value.IsUseEventMarathonBooster)
 			}
-		} else if activeEvent.EventType == enum.EventType1Mining {
+		} else if active.EventType == enum.EventTypeMining {
 			totalDeckBonus := int32(0)
-			miningEvent := session.Gamedata.EventMining[activeEvent.EventId]
+			miningEvent := session.Gamedata.EventMining[active.EventId]
 			for _, cardMasterId := range cardMasterIds {
 				userCard := user_card.GetUserCard(session, cardMasterId)
 				bonusArray, exist := miningEvent.CardBonus[cardMasterId]

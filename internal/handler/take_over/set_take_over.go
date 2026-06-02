@@ -1,7 +1,10 @@
 package take_over
 
 import (
+	"encoding/json"
 	"log"
+	"net/http"
+	"strconv"
 
 	"elichika/internal/client"
 	"elichika/internal/client/request"
@@ -13,10 +16,6 @@ import (
 	"elichika/internal/subsystem/user_authentication"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-
-	"encoding/json"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )

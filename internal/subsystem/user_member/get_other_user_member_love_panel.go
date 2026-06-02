@@ -6,17 +6,25 @@ import (
 	"elichika/internal/utils"
 )
 
-func GetOtherUserMemberLovePanel(session *userdata.Session, userId, memberId int32) client.MemberLovePanel {
-	result := client.MemberLovePanel{}
+func GetOtherUserMemberLovePanel(session *userdata.Session, userId, memberId int32, panelId int32) client.MemberLovePanel {
+	isLastPanel := session.Gamedata.MemberLovePanel[panelId].NextPanel == nil
+
+	result := client.MemberLovePanel{
+		IsLastPanel: isLastPanel,
+	}
 	exist, err := session.Db.Table("u_member_love_panel").
-		Where("user_id = ? AND member_id = ?", session.UserId, memberId).
+		Where("user_id = ? AND member_id = ? AND panel_id = ?", userId, memberId, panelId).
 		Get(&result)
 	utils.CheckErr(err)
+
 	if !exist {
 		return client.MemberLovePanel{
-			MemberId: memberId,
+			MemberId:    memberId,
+			PanelId:     panelId,
+			Status:      0,
+			IsLastPanel: isLastPanel,
 		}
-	} else {
-		return result
 	}
+
+	return result
 }

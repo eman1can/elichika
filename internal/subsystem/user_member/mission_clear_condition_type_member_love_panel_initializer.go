@@ -9,18 +9,20 @@ import (
 
 func missionClearConditionTypeMemberLovePanelInitializer(session *userdata.Session, userMission client.UserMission) client.UserMission {
 	mission := session.Gamedata.Mission[userMission.MissionMId]
-	if mission.MissionClearConditionParam1 == nil {
-		userMission.MissionCount = 0
-		for memberId := range session.Gamedata.Member {
-			lovePanel := GetMemberLovePanel(session, memberId)
-			cellCount := lovePanel.MemberLovePanelCellIds.Size()
-			userMission.MissionCount += int32(cellCount / 5)
+	userMission.MissionCount = 0
+
+	for _, masterPanel := range session.Gamedata.MemberLovePanel {
+		// Skip other members panels if the mission is only for a specific member
+		if mission.MissionClearConditionParam1 != nil && *mission.MissionClearConditionParam1 == *masterPanel.MemberMasterId {
+			continue
 		}
-	} else {
-		lovePanel := GetMemberLovePanel(session, *mission.MissionClearConditionParam1)
-		cellCount := lovePanel.MemberLovePanelCellIds.Size()
-		userMission.MissionCount = int32(cellCount / 5)
+
+		panel := GetMemberLovePanel(session, *masterPanel.MemberMasterId, masterPanel.Id)
+		if panel.AllUnlocked() {
+			userMission.MissionCount++
+		}
 	}
+
 	userMission.IsCleared = userMission.MissionCount >= mission.MissionClearConditionCount
 	return userMission
 }
