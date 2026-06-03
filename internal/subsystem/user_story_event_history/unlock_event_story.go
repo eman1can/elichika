@@ -5,12 +5,13 @@ import (
 	"elichika/internal/userdata"
 )
 
-func UnlockEventStory(session *userdata.Session, eventStoryMasterId int32) {
+func UnlockEventStory(session *userdata.Session, storyEventId int32) {
 	userStoryEventHistory := client.UserStoryEventHistory{
-		StoryEventId: eventStoryMasterId,
+		StoryEventId: storyEventId,
+		IsNew:        false,
 	}
 	if userdata.GenericDatabaseExist(session, "u_story_event_history", userStoryEventHistory) {
 		return
 	}
-	session.UserModel.UserStoryEventHistoryById.Set(eventStoryMasterId, userStoryEventHistory)
+	session.UserModel.UserStoryEventHistoryById.Set(storyEventId, userStoryEventHistory)
 }

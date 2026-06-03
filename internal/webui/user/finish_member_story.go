@@ -16,7 +16,7 @@ type WebUIFinishMemberStoryRequest struct {
 }
 
 func finishMemberStory(ctx *gin.Context) {
-	req := WebUIFinishMemberStoryRequest{}
+	var req WebUIFinishMemberStoryRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

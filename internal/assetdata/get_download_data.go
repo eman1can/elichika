@@ -10,7 +10,6 @@ import (
 type DownloadData struct {
 	Locale       string
 	File         string
-	Package      string
 	IsEntireFile bool // if this is set, the following fields are 0
 	Start        int
 	Size         int
@@ -22,7 +21,6 @@ func GetDownloadData(packname string) DownloadData {
 		return DownloadData{
 			Locale:       NameToLocale[packname],
 			File:         packname,
-			Package:      fmt.Sprintf("meta%c", packname[0]),
 			IsEntireFile: true,
 		}
 	}
@@ -34,7 +32,6 @@ func GetDownloadData(packname string) DownloadData {
 		return DownloadData{
 			Locale:       NameToLocale[packname],
 			File:         packname,
-			Package:      fmt.Sprintf("pkg%c", packname[0]),
 			IsEntireFile: true,
 		}
 	}
@@ -42,7 +39,6 @@ func GetDownloadData(packname string) DownloadData {
 	return DownloadData{
 		Locale:       NameToLocale[pack.Metapack.MetapackName],
 		File:         pack.Metapack.MetapackName,
-		Package:      fmt.Sprintf("meta%c", pack.Metapack.MetapackName[0]),
 		IsEntireFile: false,
 		Start:        pack.MetapackOffset,
 		Size:         pack.FileSize,

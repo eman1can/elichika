@@ -15,7 +15,7 @@ type WebUIAddSuitRequest struct {
 }
 
 func addSuit(ctx *gin.Context) {
-	req := WebUIAddSuitRequest{}
+	var req WebUIAddSuitRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

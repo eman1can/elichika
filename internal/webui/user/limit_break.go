@@ -19,7 +19,7 @@ type WebUILimitBreakRequest struct {
 }
 
 func limitBreak(ctx *gin.Context) {
-	req := WebUILimitBreakRequest{}
+	var req WebUILimitBreakRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

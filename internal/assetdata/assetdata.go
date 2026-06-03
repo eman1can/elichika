@@ -74,4 +74,5 @@ func Init(locale string, assetdata *xorm.Engine) {
 	loadMetapack(locale, session)
 	loadPack(locale, session)
 	loadSound(session)
+	loadTexture(session)
 }

@@ -4,18 +4,18 @@ import (
 	"net/http"
 
 	"elichika/internal/server"
-	"elichika/internal/subsystem/user_story_main"
+	"elichika/internal/subsystem/user_story_event_history"
 	"elichika/internal/userdata"
 
 	"github.com/gin-gonic/gin"
 )
 
 type WebUIFinishEventStoryRequest struct {
-	EventMasterIds []int32 `form:"event_master_ids" json:"event_master_ids"`
+	MasterIds []int32 `form:"master_ids" json:"master_ids"`
 }
 
 func finishEventStory(ctx *gin.Context) {
-	req := WebUIFinishEventStoryRequest{}
+	var req WebUIFinishEventStoryRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -23,10 +23,8 @@ func finishEventStory(ctx *gin.Context) {
 
 	session := ctx.MustGet("session").(*userdata.Session)
 
-	for _, story := range session.Gamedata.StoryMainChapter {
-		for _, cell := range story.Cells {
-			user_story_main.InsertUserStoryMain(session, cell)
-		}
+	for _, masterId := range req.MasterIds {
+		user_story_event_history.UnlockEventStory(session, masterId)
 	}
 
 	session.Finalize()

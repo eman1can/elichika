@@ -1,8 +1,6 @@
 package serverdata
 
 import (
-	// "encoding/json"
-	"fmt"
 	"log"
 	"os"
 
@@ -19,14 +17,16 @@ import (
 )
 
 // this is the storage of event in the database, while gamedata.EventMarathon is the processing structure
-// TODO(tech): note that due to xorm limitation, TextureStruktur and SoundStruktur can't be used right now.
 type EventMarathon struct {
-	EventId                       int32    `xorm:"pk 'event_id'" json:"event_id"`
-	TitleImagePath                *string  `xorm:"'title_image_path'" json:"title_image_path"`
-	BackgroundImagePath           *string  `xorm:"'background_image_path'" json:"background_image_path"`
-	BoardBaseImagePath            *string  `xorm:"'board_base_image_path'" json:"board_base_image_path"`
-	BoardDecoImagePath            *string  `xorm:"'board_deco_image_path'" json:"board_deco_image_path"`
-	BgmAssetPath                  *string  `xorm:"'bgm_asset_path'" json:"bgm_asset_path"`
+	EventId       int32 `xorm:"pk 'event_id'" json:"event_id"`
+	BoosterItemId int32 `xorm:"'booster_item_id'" json:"booster_item_id"`
+
+	TitleImagePath      *string `xorm:"'title_image_path'" json:"title_image_path"`
+	BackgroundImagePath *string `xorm:"'background_image_path'" json:"background_image_path"`
+	BoardBaseImagePath  *string `xorm:"'board_base_image_path'" json:"board_base_image_path"`
+	BoardDecoImagePath  *string `xorm:"'board_deco_image_path'" json:"board_deco_image_path"`
+	BgmAssetPath        *string `xorm:"'bgm_asset_path'" json:"bgm_asset_path"`
+
 	RuleDescriptionPagesAssetPath []string `xorm:"-" json:"rule_description_pages_asset_path"`
 }
 
@@ -116,13 +116,13 @@ func initEventMarathon(session *xorm.Session) {
 		_, err = session.Table("s_event_marathon").Insert(eventMarathon)
 		utils.CheckErr(err)
 		log.Println(eventMarathon)
-		for language, name := range eventMarathon.EventName {
-			_, err = session.Table("s_dictionary_" + language).Insert(DictionaryItem{
-				Id:      fmt.Sprintf("event_name_%d", eventMarathon.EventId),
-				Message: name,
-			})
-			utils.CheckErr(err)
-		}
+		// for language, name := range eventMarathon.EventName {
+		// 	_, err = session.Table("s_dictionary_" + language).Insert(DictionaryItem{
+		// 		Id:      fmt.Sprintf("event_name_%d", eventMarathon.EventId),
+		// 		Message: name,
+		// 	})
+		// 	utils.CheckErr(err)
+		// }
 
 		boardThings := []EventMarathonBoardItem{}
 		parser.ParseCsv(path+"board.csv", &boardThings, &parser.CsvContext{

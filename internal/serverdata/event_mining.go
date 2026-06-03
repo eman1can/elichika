@@ -1,16 +1,15 @@
 package serverdata
 
 import (
+	"fmt"
+	"log"
+	"os"
+
 	"elichika/internal/client"
 	"elichika/internal/config"
 	"elichika/internal/utils"
 
-	"log"
-
 	"elichika/internal/parser"
-
-	"fmt"
-	"os"
 
 	"xorm.io/xorm"
 )
@@ -20,7 +19,7 @@ type EventMining struct {
 	TitleImagePath      string `xorm:"'title_image_path'" json:"title_image_path"`
 	BackgroundImagePath string `xorm:"'background_image_path'" json:"background_image_path"`
 	BgmAssetPath        string `xorm:"'bgm_asset_path'" json:"bgm_asset_path"`
-	GachaMasterId       int32  `xorm:"'gacha_master_id'" json:"gacha_master_id"`
+
 	// Equal EventId - 11000
 	// EventPointMasterId            int32             `xorm:"'event_point_master_id'" json:"event_point_master_id"`
 	EventCompetitionLiveIds []int32 `xorm:"'event_competition_live_ids'" json:"event_competition_live_ids"`

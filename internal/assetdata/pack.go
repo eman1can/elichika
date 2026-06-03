@@ -1,23 +1,22 @@
 package assetdata
 
 import (
+	"fmt"
 	"log"
 
 	"elichika/internal/utils"
-
-	"fmt"
 
 	"xorm.io/xorm"
 )
 
 type PackType struct {
-	PackageKey     string        `xorm:"'package_key'"`
-	PackName       string        `xorm:"'pack_name'"`
-	FileSize       int           `xorm:"'file_size'"`
-	MetapackName   *string       `xorm:"'metapack_name'"`
+	PackageKey     string        `xorm:"package_key"`
+	PackName       string        `xorm:"pack_name"`
+	FileSize       int           `xorm:"file_size"`
+	MetapackName   *string       `xorm:"metapack_name"`
 	Metapack       *MetapackType `xorm:"-"`
-	MetapackOffset int           `xorm:"'metapack_offset'"`
-	Category       int           `xorm:"'category'"`
+	MetapackOffset int           `xorm:"metapack_offset"`
+	Category       int           `xorm:"category"`
 }
 
 func loadPack(locale string, session *xorm.Session) {

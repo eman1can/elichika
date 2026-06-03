@@ -29,6 +29,7 @@ import (
 	"elichika/internal/client"
 	"elichika/internal/db"
 	"elichika/internal/generic/drop"
+	"elichika/internal/serverdata"
 	"elichika/internal/serverstate"
 
 	"reflect"
@@ -94,15 +95,16 @@ type Gamedata struct {
 
 	Emblem map[int32]*Emblem
 
-	Event         map[int32]*Event
+	Event         map[int32]*serverdata.Event
 	EventActive   *EventActive
 	EventSchedule []*serverstate.EventSchedule
+	EventStory    map[int32]*EventStory
 
 	EventMarathon       map[int32]*EventMarathon
 	EventMarathonReward map[int32][]*client.Content
-	EventMining         map[int32]*EventMining
-	EventMiningReward   map[int32][]*client.Content
-	EventStory          map[int32]*EventStory
+
+	EventMining       map[int32]*EventMining
+	EventMiningReward map[int32][]*client.Content
 
 	Member                          map[int32]*Member
 	MemberGroup                     map[int32]*MemberGroup

@@ -9,7 +9,6 @@ import (
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/utils"
-	"elichika/internal/webui/response"
 
 	"github.com/gin-gonic/gin"
 	"xorm.io/xorm"
@@ -24,6 +23,12 @@ type Item struct {
 var (
 	ItemsByItemId = map[int32]map[int32]Item{}
 )
+
+type WebUIItem struct {
+	Name        string `json:"name"`
+	ContentType int32  `json:"content_type"`
+	ContentId   int32  `json:"content_id"`
+}
 
 func loadItemsFromTableWithName(contentType int32, tableName string) {
 	log.Println("Trying to load items from table", tableName)
@@ -95,19 +100,18 @@ type WebUIItemListRequest struct {
 }
 
 func listItems(ctx *gin.Context) {
-	req := WebUIItemListRequest{}
-	err := ctx.ShouldBindQuery(&req)
-	utils.CheckErr(err)
+	var req WebUIItemListRequest
+	var resp []WebUIItem
 
-	language := "en"
-	if req.Language != "" {
-		language = req.Language
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	dictionary := gamedata.GamedataByLocale[language].Dictionary
 
-	resp := response.WebUIItemListResponse{}
+	dictionary := gamedata.DictionaryByLanguage(req.Language)
+
 	for itemId, item := range ItemsByItemId[req.ContentType] {
-		resp.Items = append(resp.Items, response.WebUIItem{
+		resp = append(resp, WebUIItem{
 			ContentType: req.ContentType,
 			Name:        dictionary.Resolve(item.Name),
 			ContentId:   itemId,

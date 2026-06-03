@@ -1,13 +1,14 @@
 package agnostic
 
 import (
-	"elichika/internal/config"
-	"elichika/internal/utils"
 	"errors"
 	"os"
 
+	"elichika/internal/assetdata"
+	"elichika/internal/config"
+	"elichika/internal/utils"
+
 	hwdecrypt "github.com/arina999999997/gohwdecrypt"
-	"xorm.io/xorm"
 )
 
 type Texture struct {
@@ -29,54 +30,26 @@ type PackageMapping struct {
 }
 
 func loadAssetImage(assetPath string) ([]byte, error) {
-	// TODO: Load this data into gamedata
-	engine, err := xorm.NewEngine("sqlite", config.GlMasterdataPath+"asset_a_en.db")
-	if err != nil {
-		return nil, err
+	texture, exists := assetdata.TextureByAssetPath[assetPath]
+	if !exists {
+		return nil, errors.New("asset not found in database")
 	}
 
-	var textures []Texture
-	err = engine.Table("texture").Where("asset_path = ?", assetPath).Limit(1).Find(&textures)
-	if err != nil {
-		return nil, err
-	}
-	if len(textures) == 0 {
-		return nil, errors.New("no textures found")
-	}
-
-	var mappings []PackageMapping
-	err = engine.Table("m_asset_package_mapping").Where("pack_name = ?", textures[0].PackName).Limit(1).Find(&mappings)
-	if err != nil {
-		return nil, err
-	}
-	if len(mappings) == 0 {
-		return nil, errors.New("no packages found")
-	}
-
-	err = engine.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	path := config.StaticDataPath + "packs/" + textures[0].PackName
-	offset := textures[0].Head
-	if mappings[0].MetapackName != nil {
-		path = config.StaticDataPath + "packs/" + *mappings[0].MetapackName
-		offset += mappings[0].MetapackOffset
-	}
-
+	data := assetdata.GetDownloadData(texture.PackName)
+	path := config.StaticDataPath + "packs/" + data.File
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		return nil, err
 	}
+
+	output := make([]byte, texture.Size)
 	file, err := os.Open(path)
 	utils.CheckErr(err)
 	defer file.Close()
-	output := make([]byte, textures[0].Size)
-	_, err = file.ReadAt(output, int64(offset))
+	_, err = file.ReadAt(output, int64(data.Start+texture.Head))
 	utils.CheckErr(err)
 	hwdecrypt.DecryptBuffer(&hwdecrypt.HwdKeyset{
-		Key1: textures[0].Key1,
-		Key2: textures[0].Key2,
+		Key1: texture.Key1,
+		Key2: texture.Key2,
 		Key3: 12345,
 	}, output)
 

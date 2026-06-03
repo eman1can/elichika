@@ -15,7 +15,7 @@ type WebUIAddCardRequest struct {
 }
 
 func addCard(ctx *gin.Context) {
-	req := WebUIAddCardRequest{}
+	var req WebUIAddCardRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

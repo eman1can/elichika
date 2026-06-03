@@ -16,7 +16,7 @@ type WebUIAddBondRequest struct {
 }
 
 func addBond(ctx *gin.Context) {
-	req := WebUIAddBondRequest{}
+	var req WebUIAddBondRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

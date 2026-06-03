@@ -10,30 +10,47 @@ import (
 	"elichika/internal/subsystem/user_suit"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-	"elichika/internal/webui/request"
-	"elichika/internal/webui/response"
 
 	"github.com/gin-gonic/gin"
 )
 
+type WebUIListSuitsRequest struct {
+	Language string `form:"l" json:"l"`
+}
+
+type WebUISuitEntry struct {
+	Id             int32  `json:"suit_id"`
+	Name           string `json:"suit_name"`
+	ImageAssetPath string `json:"image_asset_path"`
+	MemberId       int32  `json:"member_id"`
+	MemberName     string `json:"member_name"`
+	GroupId        int32  `json:"group_id"`
+	GroupName      string `json:"group_name"`
+	Owned          bool   `json:"owned"`
+}
+
 func suitList(ctx *gin.Context) {
-	resp := response.WebUISuitListResponse{}
-	req := request.WebUILanguageRequest{}
-	err := ctx.ShouldBindQuery(&req)
-	utils.CheckErr(err)
+	var req WebUIListSuitsRequest
+	var resp []WebUISuitEntry
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	session := ctx.MustGet("session").(*userdata.Session)
 	dictionary := gamedata.DictionaryByLanguage(req.Language)
 
 	for id, suit := range gamedata.Instance.Suit {
-		entry := response.WebUISuitEntry{
-			Id:         id,
-			Name:       dictionary.Resolve(suit.Name),
-			MemberId:   *suit.MemberMId,
-			MemberName: dictionary.Resolve(suit.Member.Name),
-			GroupId:    suit.Member.MemberGroupId,
-			GroupName:  dictionary.Resolve(suit.Member.MemberGroup.GroupName),
-			Owned:      user_suit.HasSuit(session, id),
+		entry := WebUISuitEntry{
+			Id:             id,
+			Name:           dictionary.Resolve(suit.Name),
+			ImageAssetPath: suit.ThumbnailImageAssetPath,
+			MemberId:       *suit.MemberMId,
+			MemberName:     dictionary.Resolve(suit.Member.Name),
+			GroupId:        suit.Member.MemberGroupId,
+			GroupName:      dictionary.Resolve(suit.Member.MemberGroup.GroupName),
+			Owned:          user_suit.HasSuit(session, id),
 		}
 		resp = append(resp, entry)
 	}

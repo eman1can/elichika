@@ -10,28 +10,42 @@ import (
 	"elichika/internal/subsystem/user_custom_background"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-	"elichika/internal/webui/request"
-	"elichika/internal/webui/response"
 
 	"github.com/gin-gonic/gin"
 )
 
+type WebUIListBackgroundRequest struct {
+	Language string `form:"l" json:"l"`
+}
+
+type WebUIBackgroundEntry struct {
+	Id             int32  `json:"id"`
+	Name           string `json:"name"`
+	ImageAssetPath string `json:"image_asset_path"`
+	DisplayOrder   int32  `json:"display_order"`
+	Owned          bool   `json:"owned"`
+}
+
 func backgroundList(ctx *gin.Context) {
-	resp := response.WebUIBackgroundListResponse{}
-	req := request.WebUILanguageRequest{}
-	err := ctx.ShouldBindQuery(&req)
-	utils.CheckErr(err)
+	var req WebUIListBackgroundRequest
+	var resp []WebUIBackgroundEntry
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	dictionary := gamedata.DictionaryByLanguage(req.Language)
 	session := ctx.MustGet("session").(*userdata.Session)
 
 	for id, background := range gamedata.Instance.CustomBackground {
 		userBackground := user_custom_background.GetUserCustomBackground(session, id)
-		entry := response.WebUIBackgroundEntry{
-			Id:           id,
-			Name:         dictionary.Resolve(background.Name),
-			DisplayOrder: background.DisplayOrder,
-			Owned:        !userBackground.IsNew,
+		entry := WebUIBackgroundEntry{
+			Id:             id,
+			Name:           dictionary.Resolve(background.Name),
+			ImageAssetPath: background.ThumbnailAssetPath,
+			DisplayOrder:   background.DisplayOrder,
+			Owned:          !userBackground.IsNew,
 		}
 		resp = append(resp, entry)
 	}

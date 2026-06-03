@@ -11,7 +11,6 @@ import (
 	"elichika/internal/server"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-	"elichika/internal/webui/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,11 +21,29 @@ type WebUIListVoiceRequest struct {
 	ListType     *int32 `form:"list_type"`
 }
 
+type WebUINaviVoiceEntry struct {
+	Id             int32  `json:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	SoundAssetPath string `json:"sound_asset_path"`
+	MemberId       int32  `json:"member_id"`
+	MemberName     string `json:"member_name"`
+	GroupId        int32  `json:"group_id"`
+	GroupName      string `json:"group_name"`
+	DisplayOrder   int32  `json:"display_order"`
+	ReleaseRoute   int32  `json:"release_route"`
+	ReleaseValue   int32  `json:"release_value"`
+	Owned          bool   `json:"owned"`
+}
+
 func naviVoiceList(ctx *gin.Context) {
-	resp := response.WebUINaviVoiceListResponse{}
-	req := WebUIListVoiceRequest{}
-	err := ctx.ShouldBindQuery(&req)
-	utils.CheckErr(err)
+	var req WebUIListVoiceRequest
+	var resp []WebUINaviVoiceEntry
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	session := ctx.MustGet("session").(*userdata.Session)
 	dictionary := gamedata.DictionaryByLanguage(req.Language)
@@ -47,18 +64,19 @@ func naviVoiceList(ctx *gin.Context) {
 			continue
 		}
 
-		entry := response.WebUINaviVoiceEntry{
-			Id:           id,
-			Name:         dictionary.Resolve(voice.Name),
-			Description:  dictionary.Resolve(voice.Description),
-			MemberId:     voice.MemberMId,
-			MemberName:   dictionary.Resolve(member.Name),
-			GroupId:      member.MemberGroupId,
-			GroupName:    dictionary.Resolve(member.MemberGroup.GroupName),
-			DisplayOrder: voice.DisplayOrder,
-			ReleaseRoute: voice.NaviVoiceReleaseRoute,
-			ReleaseValue: voice.NaviVoiceReleaseValue,
-			Owned:        !userVoice.IsNew,
+		entry := WebUINaviVoiceEntry{
+			Id:             id,
+			Name:           dictionary.Resolve(voice.Name),
+			Description:    dictionary.Resolve(voice.Description),
+			SoundAssetPath: voice.SheetName,
+			MemberId:       voice.MemberMId,
+			MemberName:     dictionary.Resolve(member.Name),
+			GroupId:        member.MemberGroupId,
+			GroupName:      dictionary.Resolve(member.MemberGroup.GroupName),
+			DisplayOrder:   voice.DisplayOrder,
+			ReleaseRoute:   voice.NaviVoiceReleaseRoute,
+			ReleaseValue:   voice.NaviVoiceReleaseValue,
+			Owned:          !userVoice.IsNew,
 		}
 		resp = append(resp, entry)
 	}

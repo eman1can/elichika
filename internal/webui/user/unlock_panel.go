@@ -16,7 +16,7 @@ type WebUIUnlockLovePanelRequest struct {
 }
 
 func unlockLovePanel(ctx *gin.Context) {
-	req := WebUIUnlockLovePanelRequest{}
+	var req WebUIUnlockLovePanelRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

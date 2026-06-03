@@ -1,11 +1,11 @@
 package serverdata
 
 import (
-	"elichika/internal/config"
-	"elichika/internal/parser"
 	"log"
 
+	"elichika/internal/config"
 	"elichika/internal/db"
+	"elichika/internal/parser"
 	"elichika/internal/utils"
 
 	"xorm.io/xorm"

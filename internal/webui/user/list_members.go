@@ -11,30 +11,34 @@ import (
 	"elichika/internal/subsystem/user_story_member"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-	"elichika/internal/webui/request"
 
 	"github.com/gin-gonic/gin"
 )
 
-type WebUIMemberEntry struct {
-	Id                   int32  `json:"member_id"`
-	Name                 string `json:"member_name"`
-	GroupId              int32  `json:"group_id"`
-	GroupName            string `json:"group_name"`
-	RepresentativeCardId int32  `json:"card_id"`
-	LoveLevel            int32  `json:"love_level"`
-	IsLoveLevelMaxed     bool   `json:"is_love_level_maxed"`
-	IsLovePanelMaxed     bool   `json:"is_love_panel_maxed"`
-	IsAllStoryUnlocked   bool   `json:"is_all_story_unlocked"`
+type WebUIListMembersRequest struct {
+	Language string `form:"l" json:"l"`
 }
 
-type WebUIMemberListResponse []WebUIMemberEntry
+type WebUIMemberEntry struct {
+	Id                 int32  `json:"member_id"`
+	Name               string `json:"member_name"`
+	GroupId            int32  `json:"group_id"`
+	GroupName          string `json:"group_name"`
+	ImageAssetPath     string `json:"image_asset_path"`
+	LoveLevel          int32  `json:"love_level"`
+	IsLoveLevelMaxed   bool   `json:"is_love_level_maxed"`
+	IsLovePanelMaxed   bool   `json:"is_love_panel_maxed"`
+	IsAllStoryUnlocked bool   `json:"is_all_story_unlocked"`
+}
 
 func memberList(ctx *gin.Context) {
-	resp := WebUIMemberListResponse{}
-	req := request.WebUILanguageRequest{}
-	err := ctx.ShouldBindQuery(&req)
-	utils.CheckErr(err)
+	var req WebUIListMembersRequest
+	var resp []WebUIMemberEntry
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	session := ctx.MustGet("session").(*userdata.Session)
 	dictionary := gamedata.DictionaryByLanguage(req.Language)
@@ -51,8 +55,9 @@ func memberList(ctx *gin.Context) {
 			IsLovePanelMaxed:   userMember.IsCurrentLovePanelMaxed || userMember.IsAllLovePanelMaxed,
 			IsAllStoryUnlocked: user_story_member.AllStoryMembersUnlocked(session, id),
 		}
+
 		if cards, ok := gamedata.Instance.CardByMemberId[id]; ok && len(cards) > 0 {
-			entry.RepresentativeCardId = cards[0].Id
+			entry.ImageAssetPath = cards[0].IdolAppearance.ThumbnailAssetPath
 		}
 		resp = append(resp, entry)
 	}

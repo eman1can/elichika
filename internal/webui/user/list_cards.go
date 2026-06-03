@@ -10,26 +10,45 @@ import (
 	"elichika/internal/subsystem/user_card"
 	"elichika/internal/userdata"
 	"elichika/internal/utils"
-	"elichika/internal/webui/request"
-	"elichika/internal/webui/response"
 
 	"github.com/gin-gonic/gin"
 )
 
+type WebUIListCardsRequest struct {
+	Language string `form:"l" json:"l"`
+}
+
+type WebUICardEntry struct {
+	Id                     int32  `json:"card_id"`
+	ImageAssetPath         string `json:"image_asset_path"`
+	Name                   string `json:"card_name"`
+	MemberId               int32  `json:"member_id"`
+	MemberName             string `json:"member_name"`
+	GroupId                int32  `json:"group_id"`
+	GroupName              string `json:"group_name"`
+	Grade                  int32  `json:"grade"`
+	Rarity                 int32  `json:"rarity"`
+	IsAllTrainingActivated bool   `json:"is_all_training_activated"`
+}
+
 func cardList(ctx *gin.Context) {
-	resp := response.WebUICardListResponse{}
-	req := request.WebUILanguageRequest{}
-	err := ctx.ShouldBindQuery(&req)
-	utils.CheckErr(err)
+	var req WebUIListCardsRequest
+	var resp []WebUICardEntry
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	session := ctx.MustGet("session").(*userdata.Session)
 	dictionary := gamedata.DictionaryByLanguage(req.Language)
 
 	for id, masterCard := range gamedata.Instance.Card {
 		card := user_card.GetUserCard(session, id)
-		entry := response.WebUICardEntry{
+		entry := WebUICardEntry{
 			Id:                     id,
 			Name:                   dictionary.Resolve(masterCard.Appearance.CardName),
+			ImageAssetPath:         masterCard.IdolAppearance.ThumbnailAssetPath,
 			MemberId:               *masterCard.MemberMasterId,
 			MemberName:             dictionary.Resolve(masterCard.Member.Name),
 			GroupId:                masterCard.Member.MemberGroupId,

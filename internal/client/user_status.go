@@ -3,6 +3,7 @@ package client
 import "elichika/internal/generic"
 
 type UserStatus struct {
+	UserId                                    int32                   `xorm:"pk 'user_id'" json:"user_id"`
 	Name                                      LocalizedText           `xorm:"'name'" json:"name"`                                         // player name
 	Nickname                                  LocalizedText           `xorm:"'nickname'" json:"nickname"`                                 // nickname in story
 	LastLoginAt                               int64                   `json:"last_login_at"`                                              // in unix second

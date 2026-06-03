@@ -25,7 +25,7 @@ type WebUIUserInfoResponse struct {
 }
 
 func getUserInfo(ctx *gin.Context) {
-	resp := WebUIUserInfoResponse{}
+	var resp WebUIUserInfoResponse
 
 	session := ctx.MustGet("session").(*userdata.Session)
 

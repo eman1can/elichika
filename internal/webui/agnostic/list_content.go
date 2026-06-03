@@ -1,12 +1,12 @@
 package agnostic
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"elichika/internal/enum"
 	"elichika/internal/server"
 	"elichika/internal/utils"
-	"elichika/internal/webui/response"
-	"encoding/json"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,11 +15,18 @@ var (
 	GenericContentTypeToName = map[int32]string{}
 )
 
+type WebUIContent struct {
+	Name        string `json:"name"`
+	ContentType int32  `json:"content_type"`
+}
+
+type WebUIContentListResponse []WebUIContent
+
 func listContent(ctx *gin.Context) {
-	resp := response.WebUIContentListResponse{}
+	var resp WebUIContentListResponse
 
 	for contentType, name := range GenericContentTypeToName {
-		resp.Items = append(resp.Items, response.WebUIContent{
+		resp = append(resp, WebUIContent{
 			ContentType: contentType,
 			Name:        name,
 		})

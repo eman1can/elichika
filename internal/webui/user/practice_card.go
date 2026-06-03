@@ -80,7 +80,7 @@ type WebUIPracticeCardRequest struct {
 }
 
 func practiceCard(ctx *gin.Context) {
-	req := WebUIPracticeCardRequest{}
+	var req WebUIPracticeCardRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

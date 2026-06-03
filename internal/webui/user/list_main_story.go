@@ -13,25 +13,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type WebUIMainStoryChapterEntry struct {
-	gamedata.StoryMainChapter
-	IsNew bool `xorm:"-" json:"is_new"`
+type WebUIListMainStoryRequest struct {
+	Language string `form:"l" json:"l"`
 }
 
-type WebUIListMainStoryResponse struct {
-	Chapters []WebUIMainStoryChapterEntry `json:"chapters"`
+type WebUIMainStoryChapterEntry struct {
+	Id             int32  `json:"id"`
+	Title          string `json:"title"`
+	ImageAssetPath string `json:"image_asset_path"`
+	IsNew          bool   `json:"is_new"`
 }
 
 func listMainStory(ctx *gin.Context) {
-	var resp WebUIListMainStoryResponse
+	var req WebUIListMainStoryRequest
+	var resp []WebUIMainStoryChapterEntry
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	session := ctx.MustGet("session").(*userdata.Session)
+	dictionary := gamedata.DictionaryByLanguage(req.Language)
 
-	for _, masterChapter := range gamedata.Instance.StoryMainChapter {
-		chapter := user_story_main.IsStoryFinished(session, masterChapter.Id)
-		resp.Chapters = append(resp.Chapters, WebUIMainStoryChapterEntry{
-			StoryMainChapter: *masterChapter,
-			IsNew:            chapter,
+	for _, storyMainChapter := range gamedata.Instance.StoryMainChapter {
+		finished := user_story_main.IsStoryFinished(session, storyMainChapter.Id)
+		resp = append(resp, WebUIMainStoryChapterEntry{
+			Id:             storyMainChapter.Id,
+			Title:          dictionary.Resolve(storyMainChapter.Title),
+			ImageAssetPath: storyMainChapter.ThumbnailAssetPath,
+			IsNew:          finished,
 		})
 	}
 

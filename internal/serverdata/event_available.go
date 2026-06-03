@@ -22,7 +22,7 @@ func init() {
 
 func initEventAvailable(session *xorm.Session) {
 	eventOrders := []int32{}
-	parser.ParseJson(config.AssetPath+"event/event_order.json", &eventOrders)
+	parser.ParseJson(config.AssetPath+"event/events.json", &eventOrders)
 	eventOrderMap := map[int32]int32{}
 	for order, eventId := range eventOrders {
 		eventOrderMap[eventId] = int32(order + 1)
