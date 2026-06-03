@@ -36,7 +36,7 @@ func getVoiceSound(ctx *gin.Context) {
 }
 
 func init() {
-	server.AddHandler("/webui", "GET", "/item/sound", getVoiceSound)
+	server.AddHandler("/webui", "GET", "/sound", getVoiceSound)
 	err := os.MkdirAll(filepath.Join(config.StaticDataPath, "sounds", "wav"), os.ModePerm)
 	utils.CheckErr(err)
 }
