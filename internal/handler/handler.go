@@ -1,6 +1,8 @@
 package handler
 
 // the only job of this package is to import all the handler package so they're actually registered
+// Call Register() from main() instead of blank-importing this package.
+
 import (
 	_ "elichika/internal/server"
 
@@ -62,3 +64,6 @@ import (
 	_ "elichika/internal/handler/user_profile"
 	_ "elichika/internal/handler/voltage_ranking"
 )
+
+// Register triggers all handler registrations by importing this package.
+func Register() {}

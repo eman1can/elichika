@@ -10,7 +10,7 @@ import (
 	"xorm.io/xorm"
 )
 
-func init() {
+func Init() {
 	var err error
 	engine, err = xorm.NewEngine("sqlite", config.ServerstatePath)
 	utils.CheckErr(err)

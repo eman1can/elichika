@@ -14,8 +14,8 @@ import (
 	"xorm.io/xorm"
 )
 
-// initialise the engine and add the tables that is constructed from client types
-func init() {
+// Init opens the userdata database engine. Must be called before InitTables.
+func Init() {
 	_ = os.Remove(config.UserdataPath + "-journal") // remove the dirty transactions, if any
 
 	var err error
@@ -24,7 +24,10 @@ func init() {
 	Engine.SetMaxOpenConns(1)
 	Engine.SetMaxIdleConns(10)
 	// Engine.ShowSQL(true)
+}
 
+// init registers all table type definitions. No database connection is needed here.
+func init() {
 	AddTable("u_status", generic.UserIdWrapper[client.UserStatus]{})
 	AddTable("u_content", generic.InterfaceWithAddedKey[int32](
 		// user_id can't be pk because we can't mark client content as pk to fetch into map

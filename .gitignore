@@ -18,3 +18,5 @@ local_git_server/
 *.sql
 *.dll
 template.go
+
+mockery

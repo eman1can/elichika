@@ -7,18 +7,29 @@ import (
 	"runtime"
 
 	"elichika/internal/config"
-	_ "elichika/internal/handler"
+	"elichika/internal/handler"
+	"elichika/internal/locale"
 	"elichika/internal/server"
-	_ "elichika/internal/subsystem"
+	"elichika/internal/serverdata"
+	"elichika/internal/serverstate"
+	"elichika/internal/subsystem"
 	"elichika/internal/userdata"
-	_ "elichika/internal/webui"
+	"elichika/internal/webui"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	config.Init()
+	serverstate.Init()
+	serverdata.Init()
 	userdata.Init()
+	locale.Init()
+	handler.Register()
+	subsystem.Register()
+	webui.Register()
+
 	runtime.GC()
 	gin.SetMode(gin.ReleaseMode)
 

@@ -31,3 +31,4 @@ nav:
     - Declaration Style: design/declaration_style.md
     - Package Overview: design/package.md
     - The assets/ Folder: design/assets-folder.md
+    - Unit Testing: design/testing.md

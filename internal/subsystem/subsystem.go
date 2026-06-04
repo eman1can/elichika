@@ -1,5 +1,8 @@
 package subsystem
 
+// the only job of this package is to import all subsystem packages so they're actually registered
+// Call Register() from main() instead of blank-importing this package.
+
 import (
 	_ "elichika/internal/subsystem/banner"
 	_ "elichika/internal/subsystem/cache"
@@ -62,3 +65,6 @@ import (
 	_ "elichika/internal/subsystem/user_voice"
 	_ "elichika/internal/subsystem/voltage_ranking"
 )
+
+// Register triggers all subsystem registrations by importing this package.
+func Register() {}

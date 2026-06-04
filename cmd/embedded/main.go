@@ -6,19 +6,30 @@ import (
 	"log"
 
 	"elichika/internal/config"
-	_ "elichika/internal/handler"
+	"elichika/internal/handler"
+	"elichika/internal/locale"
 	"elichika/internal/server"
-	_ "elichika/internal/subsystem"
+	"elichika/internal/serverdata"
+	"elichika/internal/serverstate"
+	"elichika/internal/subsystem"
 	"elichika/internal/userdata"
-	_ "elichika/internal/webui"
+	"elichika/internal/webui"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
 	log.Println("Entered main init")
+	config.Init()
+	serverstate.Init()
+	serverdata.Init()
 	log.Println("Start loading userdata")
 	userdata.Init()
+	locale.Init()
+	handler.Register()
+	subsystem.Register()
+	webui.Register()
+
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()

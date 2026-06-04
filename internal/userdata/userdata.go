@@ -7,9 +7,11 @@ import (
 )
 
 var (
-	Engine *xorm.Engine = database.Engine
+	Engine *xorm.Engine
 )
 
 func Init() {
+	database.Init()
+	Engine = database.Engine
 	database.InitTables(Engine)
 }

@@ -50,7 +50,7 @@ var (
 	GenerateStageFromScratch = false
 )
 
-func init() {
+func Init() {
 	err := os.MkdirAll(UserDataBackupPath, 0755)
 	utils.CheckErr(err)
 	Conf = Load("./data/config.json")

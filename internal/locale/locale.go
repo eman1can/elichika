@@ -76,7 +76,7 @@ func addLocale(path, language, masterVersion, startUpKey string) {
 	Locales[language] = &locale
 }
 
-func init() {
+func Init() {
 	start := time.Now()
 	gamedata.GenerateLoadOrder()
 	Locales = make(map[string](*Locale))
