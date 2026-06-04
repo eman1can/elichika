@@ -9,7 +9,15 @@ import (
 
 // TODO(sns_coin): Handle paid(?)
 func addSnsCoin(session *userdata.Session, content *client.Content) any {
-	user_content.OverflowCheckedAdd(&session.UserStatus.FreeSnsCoin, &content.ContentAmount)
+	if content.ContentType == enum.ContentTypeSnsCoin {
+		if content.ContentId == enum.SnsCoinFree {
+			user_content.OverflowCheckedAdd(&session.UserStatus.FreeSnsCoin, &content.ContentAmount)
+		} else if content.ContentId == enum.SnsCoinGoogle {
+			user_content.OverflowCheckedAdd(&session.UserStatus.GoogleSnsCoin, &content.ContentAmount)
+		} else {
+			user_content.OverflowCheckedAdd(&session.UserStatus.AppleSnsCoin, &content.ContentAmount)
+		}
+	}
 	return nil
 }
 

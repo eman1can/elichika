@@ -8,7 +8,9 @@ import (
 )
 
 func addSubscriptionCoin(session *userdata.Session, content *client.Content) any {
-	user_content.OverflowCheckedAdd(&session.UserStatus.SubscriptionCoin, &content.ContentAmount)
+	if content.ContentType == enum.ContentTypeSubscriptionCoin {
+		user_content.OverflowCheckedAdd(&session.UserStatus.SubscriptionCoin, &content.ContentAmount)
+	}
 	return nil
 }
 

@@ -8,7 +8,9 @@ import (
 )
 
 func addCardExp(session *userdata.Session, content *client.Content) any {
-	user_content.OverflowCheckedAdd(&session.UserStatus.CardExp, &content.ContentAmount)
+	if content.ContentType == enum.ContentTypeCardExp {
+		user_content.OverflowCheckedAdd(&session.UserStatus.CardExp, &content.ContentAmount)
+	}
 	return nil
 }
 
