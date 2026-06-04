@@ -13,10 +13,8 @@ There are three ways to play on Android, depending on how much control you want 
 Use a pre-built client pointed at a community-hosted server — no setup required.
 
 1. Download the APK for your preferred version:
-    - **Global:
-      ** [ALL_STARS_3.12.0_gl.apk](https://ethanthesleepy.one/public/lovelive/sifas/public_server/ALL_STARS_3.12.0_gl.apk)
-    - **Japanese:
-      ** [ALL_STARS_3.12.0_ja.apk](https://ethanthesleepy.one/public/lovelive/sifas/public_server/ALL_STARS_3.12.0_ja.apk)
+    - **Global**: [ALL_STARS_3.12.0_gl.apk](https://ethanthesleepy.one/public/lovelive/sifas/public_server/ALL_STARS_3.12.0_gl.apk)
+    - **Japanese**: [ALL_STARS_3.12.0_ja.apk](https://ethanthesleepy.one/public/lovelive/sifas/public_server/ALL_STARS_3.12.0_ja.apk)
 2. Install the APK ([how to install an APK](https://www.wikihow.com/Install-APK-Files-on-Android)) and launch the game.
 
 ### Option 2: Embedded Server
@@ -25,7 +23,7 @@ The embedded client bundles its own server inside the APK — no separate machin
 
 > **Note:** Embedded clients are 64-bit only. If your device is 32-bit, use a public server or self-host instead.
 
-1. Download the latest embedded APK from the [releases page]({{ config.repo_url }}/releases/tag/embedded) and install
+1. Download the latest embedded APK from the [releases page]({{ config.repo_url }}/releases) and install
    it.
 2. Open the game and wait until the title screen appears:
     - **Japanese:** just wait for the title screen.
@@ -40,8 +38,12 @@ The embedded client bundles its own server inside the APK — no separate machin
 
 Run the server yourself on a PC, a separate Android device (via Termux), or Docker. This gives you full control over
 server configuration. See [Hosting Your Own Server](hosting.md) to get started.
-Make sure to install the patched client from the [releases page]({{ config.repo_url }}/releases/tag/embedded) and
+Make sure to install the patched client from the [releases page]({{ config.repo_url }}/release) and
 install it.
+
+There are a number of APKs pre-created for self-hosting.
+- **Global**: [localhost - For Self-Hosting on PC/Termux - ALL_STARS_3.12.0_gl_localhost.apk]({{ config.repo_url }}/releases)
+- **Gobal**: [10.0.0.2 - For Android Emulator → Local - ALL_STARS_3.12.0_gl_emulator.apk]({{ config.repo_url }}/releases)
 
 ### Updating (Embedded or Self-Hosted)
 
