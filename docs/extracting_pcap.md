@@ -1,80 +1,111 @@
-# Extracting gamedata from pcap
+# Extracting Game Data from a PCAP
 
-*This is considered [advanced usage](https://github.com/arina999999997/elichika/blob/master/docs/advanced_usage.md): you should know what pcap is and you need to have a generated pcap from before EOS to do this with.*
+> **Advanced usage.** You need to know what a PCAP is and have a valid capture from before EOS. See [Advanced Usage](advanced_usage.md).
 
-This guide assume that you used PcapDroid to capture the network data. If you have used something else, it will be mostly applicable.
+This guide assumes you used **PCAPdroid** to capture the network data. The steps are mostly the same for other capture tools.
 
-Assuming that you have correctly captured the network data, you will have the 2 files:
+---
 
-- `PCAPdroid_<day>_<Month>_<hour>_<minute>_<second>.pcap`
-- And `sslkeylog.txt` (or some similar name).
+## What You Need
 
-THe PCAPdroid file is the raw data, the `sslkeylog.txt` file contain the key to decrypt the network data. FYI, it should looks something like the following:
+A valid capture produces two files:
 
+- `PCAPdroid_<date>_<time>.pcap` — the raw encrypted network data
+- `sslkeylog.txt` (or similar) — the TLS session keys needed to decrypt it
+
+The key file should look like this:
 ```
 CLIENT_RANDOM <some_data> <some_other_data>
-CLIENT_RANDOM <some_other_other_data> <some_other_other_other_data>
-....
+CLIENT_RANDOM <some_other_data> <yet_more_data>
+...
 ```
 
-If you haven't got both files then this won't work. If you have got only the `.pcap`, then in theory you can crack the code, but cracking the code would take so long that you might as well reconstruct your account from scratch.
+**Both files are required.** Without the key file, the capture cannot be decrypted in any reasonable amount of time.
 
-## Installing wireshark
+> The decrypted capture will contain sensitive account data, including your SIF2 transfer password. Only share it with people you fully trust.
 
-There are multiple way to read captured network data, but the most common way is to use wireshark. You can download it [here](https://www.wireshark.org/download.html).
+---
 
-Note that you will need to have a PC with Windows or MacOs, or you can try emulation / build from source if you have linux. In the case that you don't have access to a PC, you can get a trusted friend to do the extraction for you. Do note that the data will contain a lot of things with regard to your account, including your sif2 transfer password, so only ask trusted friend to do it.
-## Reading the network data
-Once you have installed wireshark, open it up.
+## Step 1: Install Wireshark
 
-First you will need to give wireshark the relevant key:
-- Select Edit -> Preferences (Ctrl + Shift + P on windows).
-- On the left, select Protocols, expands it, then scroll down to TLS. You will see the following menu:
-![](images/pcap_1.png)
-- Select your `sslkeylog.txt` file for the Master-Secret log filename field.
+Download Wireshark from [wireshark.org](https://www.wireshark.org/download.html). It is available for Windows and macOS natively. On Linux, install from your package manager or build from source.
 
-Then you can open the `.pcap` file, just select File -> Open (Ctrl + O on windows) and select the file. If you have done things correctly, you will see something similar to this:
+---
 
-![](images/pcap_2.png)
+## Step 2: Load the TLS Key
 
-Click on the `Apply a display filter` bar and type json. This will filter the network so only json traffic show up, which is the game data we're interested in.
+1. Open Wireshark.
+2. Go to **Edit → Preferences** (`Ctrl+Shift+P` on Windows).
+3. In the left panel, expand **Protocols** and scroll to **TLS**.
+4. Set the **Master-Secret log filename** field to your `sslkeylog.txt` file.
 
-## Extracting login data
+![TLS preferences panel](images/pcap_1.png)
 
-With the file opened and the display filter on, select Edit -> Find Packet (Ctrl + F on windows). This will pop out a find bar. You should select `Packet list`, `Narrow & Wide`, uncheck `Case sensitive` select `String` and type in `login/login`, like this image:
-![](images/pcap_3.png)
+---
 
-If your network data has a login data, the program will select and highlight a packet that has the login data, like so:
-![](images/pcap_4.png)
+## Step 3: Open the PCAP File
 
-Note that if you login for the first time on a device, you might get 2 `login/login` request like I did in the image. You should ignore the one with lower length as that one don't contain relevant data.
+Go to **File → Open** (`Ctrl+O`) and select your `.pcap` file. If the key was loaded correctly, you should see decrypted HTTP/2 traffic.
 
-Select the packet right after the highlighted login one (in the above image it would be the one with length 4854). You should then right click it and select Follow->HTTP/2 stream. A new window will pop up to show you the data, hopefully it will look something like this:
+![Wireshark with decrypted traffic](images/pcap_2.png)
 
-![](images/pcap_6.png)
+Click the **Apply a display filter** bar and type `json`. This filters to only JSON traffic, which is the game data.
 
-Now on the bottom left side, click on entire conversation and choose whichever is larger. You know you gave the correct option when the only displayed text are blues. Then on the bottom mid, click save as and save the file. Let's say we save it as `login.json`.
+---
 
-We still need to modify the file a bit, so open up the file with some text editor that can handle the big file like Notepad or Notepad++.
+## Step 4: Find the Login Packet
 
-You should then delete the first block of text, so from `status: 200` to the end of the `x-amz`... line. Yours might be different, but just remove everything from the beginning to the first empty line.
+Go to **Edit → Find Packet** (`Ctrl+F`). Set the options to:
 
-Then you should remove the beginning until the `{"session_key:"` part. For example, my data was:
+- **Search in:** Packet list
+- **String type:** Narrow & Wide
+- **Case sensitive:** unchecked
+- **Search for:** `login/login`
+
+![Find packet dialog](images/pcap_3.png)
+
+The matching packet will be highlighted.
+
+![Highlighted login packet](images/pcap_4.png)
+
+> If you see two `login/login` packets (from logging in on a new device), ignore the one with the smaller length — it does not contain account data.
+
+---
+
+## Step 5: Extract the Login Response
+
+Select the packet **immediately after** the highlighted login request. Right-click it and choose **Follow → HTTP/2 Stream**.
+
+A new window opens showing the stream data.
+
+![HTTP/2 stream window](images/pcap_6.png)
+
+At the bottom left, click **Entire conversation** and choose whichever side is larger. You know you have the right side when all the displayed text turns blue. Then click **Save As** and save the file — for example, as `login.json`.
+
+---
+
+## Step 6: Clean Up the JSON File
+
+Open `login.json` in a text editor that can handle large files (Notepad or Notepad++ work well).
+
+**Remove the HTTP headers at the top.** Delete everything from the beginning of the file up to and including the first blank line (the line with `status: 200`, the `x-amz-...` header line, etc.).
+
+**Remove the framing data at the start.** Your data will look something like:
 ```
 [16xxxxxxxxxxx,"2d61e7b4e89961c7",0,{"session_key":...
 ```
-
-So I removed the `[16xxxxxxxxxxx,"2d61e7b4e89961c7",0,` part, leaving:
+Delete everything before `{"session_key":`, leaving:
 ```
 {"session_key":...
 ```
-Similarly go to the end of the file, you will find something like:
+
+**Remove the framing data at the end.** The file will end with something like:
 ```
 ..."check_maintenance":true,"repro_info":{"group_no":1}},"somerandomhexstring"]
 ```
-Remove the last part to get
+Remove the trailing `,"somerandomhexstring"]` to leave:
 ```
 ..."check_maintenance":true,"repro_info":{"group_no":1}}
 ```
-and save the file. Now you should have a correct `login.json` file that can be used in account importing.
 
+Save the file. You now have a valid `login.json` that can be imported using the [WebUI import feature](import_export.md).

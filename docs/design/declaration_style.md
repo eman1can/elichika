@@ -1,17 +1,24 @@
-# Bottom up declaration
-We don't want big files because they will be a pain to work with:
+# Declaration Style
 
-- It's harder to find where things are and harder to nagivate within the file.
-- There are increased chance of multiple working versions modifying the same file and causing conflicts.
+## File Size and Splitting
 
-To do that, we should split big package into smaller packages, and then functions can be in its own file. This is not necessary, but it helps and there is pretty much no cost in doing so, as we can still user stuff from the same package.
+Large files are hard to navigate and create unnecessary merge conflicts. To keep files manageable:
 
-However, multiple smaller packages can again lead to giant import list. Particularly, the router package might have to import one package for each endpoint if each end point are in their own package. To solve this, we use a bottom up method of declaring stuff:
+- Split large packages into smaller sub-packages. There is almost no cost to doing this — Go's package system makes cross-package access straightforward.
+- Put each function or type in its own file when it helps readability.
 
-- We implement the handler and declare its endpoint in a single file (using `func init()`).
-- The files are imported into a single master file that will be imported into main. We can generate this import list using the file system, so there's no chance of missing things. We can also temporarily disable a feature if we want.
+## Bottom-Up Registration
 
-This type of bottom up declaration should also be used for other types of handler.
+Splitting into many packages can lead to large import lists. In particular, a router package might need to import one package per endpoint. To avoid this, handlers use bottom-up registration via `init()`:
 
-## Naming
-File dedicated to a type / function should be named after that type / function, except we need to use snake_case for the file name and camelCase for the type/function. If we want the type to be exported outside the package, we also need to use CamelCase or PascalCase.
+- Each handler file implements its endpoint handler **and** registers it using `func init()`.
+- All handler files are imported into a single master file, which is imported by `main`. This import list can be generated from the file system automatically, so nothing gets accidentally omitted.
+- A feature can be temporarily disabled by removing its entry from the master import file.
+
+This pattern should be used for all types of handlers, not just endpoint handlers.
+
+## Naming Conventions
+
+- File names use `snake_case`.
+- Type and function names use `camelCase` (unexported) or `PascalCase` (exported).
+- A file dedicated to a single type or function should be named after that type or function, converted to `snake_case`.

@@ -1,84 +1,109 @@
-# Hosting your own server
-*Hosting your own server is considered [advanced usage](https://github.com/arina999999997/elichika/blob/master/docs/advanced_usage.md). It can be easy or hard to do depending on your specific setup, but it is not the bare minimum required to play the game, therefore it's on you to put in the work if you still want to host the server yourself.*
+# Hosting Your Own Server
+
+> **Advanced usage:** Hosting your own server is not required to play the game. If you just want to play, use the
+> embedded Android client described in [Installing the Game](getting-started.md). Self-hosting can range from
+> straightforward to complex depending on your setup — see [Advanced Usage](advanced_usage.md) for expectations.
+
+---
+
+## Prerequisites
+
+Before installing, make sure you have the following depending on your platform:
+
+| Platform      | Requirements                                                                                                                  |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Android       | Termux (from [F-Droid](https://f-droid.org/en/packages/com.termux/) or [GitHub](https://github.com/termux/termux-app#github)) |
+| Windows       | Git, Go (both must be in `%PATH%`), and a bash shell (Git Bash works)                                                         |
+| Linux / macOS | Git, Go                                                                                                                       |
+| Docker        | Docker + Docker Compose                                                                                                       |
 
 
-## Installing the server
-### Android
-To host the server on android, you need a shell emulator. If you have root / custom ROM, then you might be able to run it natively. Termux is recommended for this, you can get it from [f-droid](https://f-droid.org/en/packages/com.termux/) or [github](https://github.com/termux/termux-app#github). Note that the google play store version will probably works too, but there had been time when it wasn't updated for a long while and doesn't work.
+If you are hosting on your PC (Windows/Linux/macOS/Docker), the default asset CDN will download all files to `/static/packs/`, taking around 31GB of disk space. Make sure you have enough, or follow the instructions in [Assets](assets.md) to use only the public CDN. If you are hosting on PC, you will also need a compatible client. Check client availability before proceeding.
 
-There is a server installing script you can use, the following command fetch the script and run it automatically:
+---
+
+## Installing the Server
+
+### Android (Termux) and Linux/macOS
+
+Run the install script, which fetches and sets everything up automatically:
+
+```bash
+curl -L {{ repo_raw }}/master/bin/install.sh | bash
 ```
-curl -L https://raw.githubusercontent.com/arina999999997/elichika/master/bin/install.sh | bash
+
+It is highly recommended to use only the public CDN in this case, to avoid a total download size of ~50GB.
+
+### Windows (Manual)
+
+Install Git and Go, ensure both are on your `%PATH%`, then run the same install script using Git Bash:
+
+```bash
+curl -L {{ repo_raw }}/master/bin/install.sh | bash
 ```
 
-### PC (Windows, Linux, MacOS)
-Note that if you host the server on your PC, you will also need to make your own client, so you might want to look into that to see if you want to do it before installing the server.
+The script leaves some temporary files behind. If you prefer a clean setup, clone the repository and build manually —
+the install script documents the necessary steps.
 
-You can setup the server in a desktop machine to play on android or iOS.
+### Docker
 
-#### Setup manually
+See the dedicated [Docker Deployment](docker.md) guide. Docker skips several of the manual steps below and manages
+configuration through a volume-mounted `data/config.json`.
 
-You can use the same script with android, but you have to install git and go first (and they have to be in your `%PATH%` for windows, and the equivalent places for Linux/MacOS). After that you can just use the same command (for windows, you also need some version of bash, git bash will works):
+---
 
-```
-curl -L https://raw.githubusercontent.com/arina999999997/elichika/master/bin/install.sh | bash
-```
+## Running the Server
 
-Using scripts ill leave some trashes, so you can clone the respository and build manually, look at the scripts for the necessary steps.
+You must have the server running whenever you want to play.
 
-#### Using Docker
-There is a public docker image available on docker hub: https://hub.docker.com/r/arina999999997/elichika
+**Android/Linux (installed via script):**
 
-Assuming you're familiar with docker, this can be a faster way of getting things working. Keep in mind that using docker, some of the step below will not apply, you should reference the docker docs instead.
-
-All config options should be set in the data/config.json file, which will be created after first startup.
-
-[docker compose](./docker/docker-compose.yml) example
-
-## Running the server
-If you host the server separately from the client, you need to run the server to play it. For Android/Linux, if you have used the script, you can use a running script:
-
-```
+```bash
 ~/run_elichika
 ```
 
-If you have GUI for Windows/Linux, you can also just run the executable directly.
+**Windows/Linux with a GUI:** run the compiled executable directly.
 
-Note that whenever you want to play, the server need to be on, so if you already closed termux or the server, you will have to run it again.
+If you close Termux or the terminal, the server stops — reopen it and run the command again before playing.
 
-## Updating the server
-It is recommended to backup at least `userdata.db` before updating. You can also backup `serverstate.db`. If you have backed up your userdata separately, it's fine to not backup here. After that, you have 2 ways to update the server:
+---
 
-- The basic update is more stable but will take longer because it will be downloading more stuff and rebuilding more stuff.
-- The normal update is faster, but if your server version is too old, something might break.
+## Configuration
 
-### Basic update
-You can update the server using a basic update logic:
+On first startup, the server creates a `data/config.json` file with default settings. Most settings are manageable
+through the [Admin WebUI](webui.md#admin-webui) at `http://<server_address>:8080/webui/admin`.
 
+---
+
+## Updating the Server
+
+It is recommended to back up `userdata.db` (and optionally `serverstate.db`) before updating. The WebUI's import/export
+feature can also serve as a backup — see [Import & Export](import_export.md).
+
+### Basic Update (Recommended for large version gaps)
+
+This backs up your data, reinstalls the server, and restores your data. It is slower but works from any version:
+
+```bash
+curl -L {{ repo_raw }}/master/bin/basic_update.sh | bash
 ```
-curl -L https://raw.githubusercontent.com/arina999999997/elichika/master/bin/basic_update.sh | bash
-```
 
-For Android/Linux where the shortcut are setup, you can also run:
+Or via the installed shortcut:
 
-```
+```bash
 ~/basic_update_elichika
 ```
-to do the same thing.
 
-The basic update basically backup your data, reinstall, and then restore your data. This will work for pretty much every version, but it can be slower than the normal update.
+### Normal Update (Recommended for regular updates)
 
-### Normal update
-If you update the server regularly, then you can use the normal update and it should work:
+Faster than the basic update, but may break if your version is very old:
 
-```
-curl -L https://raw.githubusercontent.com/arina999999997/elichika/master/bin/update.sh | bash
+```bash
+curl -L {{ repo_raw }}/master/bin/update.sh | bash
 ```
 
-If your version is new enough, then running:
+Or via the installed shortcut:
 
-```
+```bash
 ~/update_elichika
 ```
-
-would be enough.

@@ -1,37 +1,38 @@
-# Importing/Exporting account
-You can use the user WebUI to export and import your account.
+# Import & Export
 
-You can use either `json` or `db` formats.
+You can export and import your account using the [User WebUI](webui.md#user-webui). Two formats are supported: `.db` and `.json`.
 
-## DB
-This is the prefered format for this implementation. It's basically a database that contain only 1 account. It save every data, and exporting and reimporting should result in no change in the account. Howerver, there are some limitation:
+---
 
-- The friend data is not extracted, as the friends are not guaranteed to exists in whatever server you import to:
-    
-    - More precisely, the friends are server side only, and doesn't change no matter what account you import.
-    - Even if you import another account to your current user id, you still have the same friend set.
-    - But importing your exported account to another server will use that server's friend set.
+## DB Format (Recommended)
 
-- Credential data is also not extracted in a similar manner.
+The `.db` export is a SQLite database containing all data for a single account. Exporting and re-importing produces an identical account with two exceptions:
 
-## JSON
-You can import account from the login json or export account to json. This help with recovering your account, moving it, or update to a new server version (or another different server).
+- **Friend data is not included.** Friends are server-scoped — they remain tied to the original server and do not transfer. Importing to a different server uses that server's friend list for your user ID.
+- **Credential data is not included** for the same reason.
 
-The server also generate a backup exported data everytime you login. You can find the backup in `elichika/backup` on the server machine.
+Use this format for backups and for migrating between compatible Elichika instances.
 
-This can also be used to recover data from captured network data (pcap), you can check out this [guide](https://github.com/arina999999997/elichika/blob/master/docs/extracting_pcap.md) on how to do that.
+---
 
-### How it work
+## JSON Format
 
-- This is done using the login response from the server, which contain almost (but not quite) everything relevant to your account.
-- For the information not contained in login, they are sometime can be reconstructed from context, but sometime they are just lost:
+The `.json` export is based on the login response from the server, which contains almost all account-relevant data. It is useful for:
 
-    - For example, card practice data are reconstructed from the stat of the cards given in login.
+- Recovering an account from captured network data (see [Extracting from PCAP](extracting_pcap.md))
+- Importing accounts from older server versions
+- Cross-server migration to non-Elichika implementations
 
-        - Note that we also only reconstruct a possible set of practice tiles, not the specific set as there could have been many.
-    - Member stats on how many card they have and how many training tree filled are also reconstructed.
-    - But things like how many time you used a card or how many time a card's skill was activated are not present.
+### Automatic Backups
 
-        - This is avalable for at most 6 card if you have captured your profile data or have a screenshot of it, but it is just not accessible to players.
+The server generates a JSON backup of your account on every login. Backups are stored in `elichika/backup/` on the server machine.
 
-- For now we don't care that much about those data as it's not core to the gameplay experience. 
+### Limitations
+
+The login response does not contain every piece of account data. Where possible, missing data is reconstructed:
+
+- Card practice data is reconstructed from card stats (the specific tile layout may differ from the original).
+- Member stats (card count, training tree fill) are reconstructed.
+- Usage statistics (times a card was used, skill activations) are **not** recoverable — this data is only present in profile captures for up to 6 cards.
+
+These limitations have minimal impact on the core gameplay experience.

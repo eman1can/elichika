@@ -1,84 +1,75 @@
-# Encapsulation layers
-*This documentations is for an older version of the implementation and has not been updated in a long time. It is keep for archival purpose, but the information in it is most likely not up-to-date*
+# Encapsulation Layers
 
-We divide the codebase into layers of encapsulations for easier handling of things: 
+The codebase is divided into layers of encapsulation. Each layer can access packages in the same layer or any earlier (lower) layer. The layers below are listed from closest to the database outward to the network.
 
-- Each layers can contain multiple packages that can use (access) earlier layers.
-- The orders of package in each layer is not defined, although it helps to keep things simple.
-- The layers are mostly conceptual, there is no enforced naming/grouping convention just yet. 
-- You can check out the [packake listing](package.md) for a view of what each package does and which layer it fall in.
+Some older code predates this architecture and has not yet been refactored to conform — in particular, some game logic still lives in handler files rather than subsystems. When writing new features, follow the layer rules described here.
 
-Here we will list the layers in the distance from the databases.
+See [Package Overview](package.md) for the full current package listing.
 
-## Primitive layers
-This layer contains definitions, like types, configs, enums, and constants.
+---
 
-There should be no handling logic in this part, although field taggings are allowed. For example, we can have `xorm` and `json` tags and we can have methods to modify simple things / construct things.
- 
+## Primitive Layer
 
-## Database layers
-The database layers handle initialising, reading, and writing the database.
+Contains definitions: types, configs, enums, and constants. No handling logic lives here, though field tags (`xorm`, `json`) and simple constructors/methods are allowed.
 
-Here is a quick summary of the types of databases:
+Key packages: `internal/config`, `internal/generic`, `internal/client`, `internal/client/request`, `internal/client/response`, `internal/enum`, `internal/item`.
 
-### Userdata database
-Userdata database store userdata, and only userdata. It should not store things like aggregated results (ranking and such).
+---
 
-The table should be created using one and only one type.
+## Database Layer
 
-- Preferablly the type should be a `client` type plus the relevant ids like `user_id`, and should not be a merger of multiple types.
-- If the interface has arrays/maps, then the arrays/maps can be split into other tables then combined when necessary.
-- If the arrays/maps are simple enough, it's also fine to store them just as `json` or binary `blob`.
+Handles initializing, reading, and writing the databases. There are several distinct databases:
 
-    - If we are always going to need the array/map field when we access the table,
-    - and we are always going to need the whole of the array/map instead of just a single element,
-    - then it make sense to just store the thing directly, unless it's huge.
-- For now it's good enough that we can consistently save/load from the database.
+### Userdata Database
+Stores per-user progress (`internal/userdata/database`). Rules:
+- Each table is created from exactly one type.
+- Types should be `client` types plus relevant IDs (e.g., `user_id`), not mergers of multiple types.
+- Arrays and maps may be split into separate tables and joined on read, or stored as JSON/blob if they are always read as a whole and are not large.
 
+### Serverdata Database
+Stores server-level settings: active exchanges, gacha banners, event schedules, login bonuses (`internal/serverdata`). Created from source code or initialization JSON files.
 
-### Serverdata database
-Serverdata database store server settings like what exchange are avaiable, what gacha banner is on and so on. Currently these database is created directly from source code, or created from the initialisation jsons.
+### Masterdata Database
+The game's client database (`internal/clientdb`, `internal/gamedata`). Elichika does not modify it directly — modifications are made separately and applied as SQL scripts. See [Modifying the Database](../modify_database.md).
 
-### Masterdata database 
-This is the client database of the game. There is no reason to modify them directly inside `elichika`, although `elichika` will try to accept them modification. The modification used to setup all the feature are done using another repository.
+### Gamedata Database
+The combined view of serverdata and masterdata (`internal/gamedata`). Represents the current game state. This is the primary database interface used by subsystems and handlers — they should not query masterdata or serverdata directly.
 
-### Gamedata database
-The gamedata database is the combination of the serverdata and masterdata database. It should represent the state of the games.
+### Caching Database
+Stores derived data: rankings, other-user profiles, etc. Rules:
+- Must only contain data derived from the userdata database.
+- Cached entries expire either on a time basis or when the relevant user makes a request.
+- Currently not fully implemented; the policy is defined but not uniformly enforced.
 
-This database can have its own type or use `client` types.
+---
 
-### Cacheing database
-The cacheing database store things like ranking, other user profile, .... This database should only store things derived from the userdata database.
+## Asset Layer
 
-To make handling things simple, this database should ONLY be CALCULATED from the userdata database, with a caching invalidation policy.
+Handles game assets (textures, sounds, packs) separately from the game databases (`internal/assetdata`, `internal/asset_manager`). Assets are served to clients via CDN or directly by the server.
 
-For now, there is no cache, but the following polity should work in general:
+---
 
-- Each data cache has a expiration time, and will be recalculated if expired.
-- Cached data related to specific user expires if that user request it.
+## Subsystem Layer
 
+Handles the game's subsystems — profile, gacha, missions, live, etc. All game logic should live here so it can be reused independently of the network layer.
 
-## Subsystems layer
-The subsystem (name subjected to change) layer handle the subsystems of the game.
+There are 60 subsystems total. Each is its own package under `internal/subsystem/` and self-registers via `func init()`. The master `internal/subsystem/subsystem.go` blank-imports all of them to trigger registration.
 
-For example, handling profile, gacha or handling missions.
+The cascade model is central to how subsystems work: one action triggers others. For example:
+- Finishing a live adds experience → may trigger a rank-up → rank-up sends a reward.
+- Drawing gacha adds a card → may update bond limit → may unlock new bond board tiles.
 
-All the logic for handling things should be in this layer. This make it so we can reuse functionality without having to also execute the network logic, allowing us to mock client request, for example. 
+Subsystems handle these chains internally, so the network layer only needs to invoke the top-level action.
 
-See [subsystem docs](../../internal/subsystem/subsystem.md) for more information. 
+---
 
-## Network (handler) layer
-The network (handler) layer handle network request and response.
+## Network (Handler) Layer
 
-It should read the request and use the subsystem layer to do things, then generate / return the response:
+Reads network requests, calls the subsystem layer to perform actions, and returns responses. There are 49 handler packages under `internal/handler/`, each corresponding to a URL path segment.
 
-- More precisely, the network layer should identify what need to be done, and use the subsystem layer to do that thing.
-- The handling should depend entirely on the subsystems and not the network handler.
+The handler layer should **not** contain game logic — it should identify what needs to happen and delegate to subsystems. For example:
+- Clearing a live triggers bond level-up, user level-up, drops, etc.
+- The handler only tells the subsystem "clear this live."
+- The subsystem handles all consequences and returns what the handler needs to build the response.
 
-    - For example, clearing a live can lead to bond level up, user level up, drop, ...
-    - The network handler only need to tell the subsystem to clear a live.
-    - The subsystem should then handler clearing a live, returning what the network handler need and handle the conseqeuence if necessary.
-    - The network handler finalize the whole process and send the response back.
-
-Currently the code base can contain handling code in the network layer, but that should not be the case. When developing new features, we should move old handling code or write new handling code in the subsystem instead of the handling layer. Unless a functionality is used in multiple place, it's probably fine to just leave them be until there is a need to move them or until we want to further improve the code.
-
+**Registration:** Each handler file registers its endpoint via `server.AddHandler()` in `func init()`. The master `internal/handler/handler.go` blank-imports all handler packages to trigger registration. There is no dedicated middleware package — common request processing is handled in `internal/server/router.go` and shared utilities are in `internal/handler/common`.

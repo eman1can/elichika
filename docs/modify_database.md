@@ -1,45 +1,47 @@
-# Modifying database
-*This is considered [advanced usage](https://github.com/arina999999997/elichika/blob/master/docs/advanced_usage.md)*
+# Modifying the Database
 
-## Why?
-This server by default provide the databases as they were at EOS, plus the relevant modification for the features (turning DLP on and so). If you wanted to, you can modify the databases that the game and the server use.
+> **Advanced usage.** See [Advanced Usage](advanced_usage.md) for what is expected before attempting this.
 
-This can be done to achieve the following, but also much more:
+---
 
-- Daily songs contain all songs instead of the 3 songs per day that we have.
-- Use more than 20 skip tickets at once.
-- Add contents that were only in JP to WW or adding new content entirely.
-- Model swap to make 12 of an idol doing a song.
+## Why Modify the Database?
 
-You only have to modify the unencrypted database, the server will handle the rest, although it's up to you to understand the database structure and add / modify things correctly.
+The server ships with databases as they were at EOS, with minor modifications to enable server features. You can edit these databases to customize the game in ways that go beyond what the WebUI offers, for example:
 
-## Something to keep in mind
-The database the server use is at `elichika/assets/db/jp` or `elichika/assets/db/gl`, depending on the version you want to use.
+- Include all songs in the daily rotation instead of the usual 3 per day
+- Raise the skip ticket limit above 20
+- Add JP-exclusive content to the Global version (or vice versa)
+- Perform model swaps or other visual changes
 
-The server read this database to operate, and the client download this database from the server.
+---
 
-However, there is a catch:
+## How It Works
 
-- The database in `elichika/assets/db` are in `sqlite` format.
-- But the client expect an encrypted database.
-- So we have to encrypt the database and send it to the client, not just the `sqlite` database
+The server reads its masterdata database from:
 
-    - In theory, it's possible to modify the client to directly load the raw `sqlite`, but until that is done, we have to encrypt.
+- `elichika/assets/db/jp` — Japanese version
+- `elichika/assets/db/gl` — Global version
 
-## How to modify database with elichika?
+The client downloads this database from the server. However, the client expects an encrypted database, not raw SQLite, so the server automatically encrypts it before sending. You only need to edit the unencrypted SQLite files — the server handles encryption on the fly.
 
-To modify the database, directly modify the server's database in `elichika/assets/db/jp` or `elichika/assets/db/gl`:
+---
 
-- This can be done manually using some program like [DB brower for SQLite](https://sqlitebrowser.org/)
-- It can also be done through SQL scripts, that can be executed by [DB brower for SQLite](https://sqlitebrowser.org/) or any program that support handling such scripts.
-- And you can also just replace the files with files you got from elsewhere.
+## Editing the Database
 
-After that, you only need to restart the server and it will automatically generate the necessary files. Then you only have to login or move around with the client to trigger a database update on client side.
+You can modify the SQLite database using any SQLite-compatible tool:
 
-## Notes
+- **[DB Browser for SQLite](https://sqlitebrowser.org/)** — visual GUI, good for browsing and manual edits
+- **SQL scripts** — repeatable and version-controllable; can be run via DB Browser or any SQLite tool
+- **File replacement** — replace the database files entirely with files obtained elsewhere
 
-- This only modify the database, if you want to modify / add assets, you will also have to encrypt them. The document on doing so is not available for now.
-- You might want to backup the files before trying anything.
-- If your modification is inconsistent or not synced between server and client, the server or client might not work properly.
-- Ideally, you should save the modification you made as SQL scripts, so you can repeat them whenever you want with a fresh database instance.
-- New version of elichika WILL make change to the database, so having a modification and updating will not work properly. You have to update first, then apply your modification again.
+After making changes, restart the server. It will regenerate the encrypted files automatically. Log in or move around in the client to trigger a database update on the client side.
+
+---
+
+## Important Notes
+
+- **Back up the database files before making any changes.**
+- This only modifies game data. Modifying or adding assets requires additional encryption steps (not documented here).
+- If your database changes are inconsistent with the client's expectations, either the client or server may behave incorrectly.
+- **Save modifications as SQL scripts.** Server updates will reset the database, so you will need to reapply your changes after updating — scripts make this repeatable.
+- **Update first, then apply modifications.** Applying your changes before updating will likely cause conflicts.
