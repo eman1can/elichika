@@ -17,8 +17,10 @@ Before installing, make sure you have the following depending on your platform:
 | Linux / macOS | Git, Go                                                                                                                       |
 | Docker        | Docker + Docker Compose                                                                                                       |
 
-
-If you are hosting on your PC (Windows/Linux/macOS/Docker), the default asset CDN will download all files to `/static/packs/`, taking around 31GB of disk space. Make sure you have enough, or follow the instructions in [Assets](assets.md) to use only the public CDN. If you are hosting on PC, you will also need a compatible client. Check client availability before proceeding.
+If you are hosting on your PC (Windows/Linux/macOS/Docker), the default asset CDN will download all files to
+`/static/packs/`, taking around 31GB of disk space. Make sure you have enough, or follow the instructions
+in [Assets](assets.md) to use only the public CDN. If you are hosting on PC, you will also need a compatible client.
+Check client availability before proceeding.
 
 ---
 

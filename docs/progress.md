@@ -1,6 +1,7 @@
 # Implementation Progress
 
-This page tracks what is working, partially working, or not yet implemented. For a technical view of which API endpoints are handled, see [API Endpoints](endpoints.md).
+This page tracks what is working, partially working, or not yet implemented. For a technical view of which API endpoints
+are handled, see [API Endpoints](endpoints.md).
 
 ## Feature Status
 
@@ -25,7 +26,8 @@ This page tracks what is working, partially working, or not yet implemented. For
     - [x] Working gacha with one banner per group.
     - [ ] Scouting tickets are not yet implemented.
 - [x] **Training**
-    - Training works and drops skills similarly to the real server. See [SIFAS-Lesson-Data](https://github.com/eman1can/SIFAS-Lesson-Data) for more details.
+    - Training works and drops skills similarly to the real server.
+      See [SIFAS-Lesson-Data](https://github.com/eman1can/SIFAS-Lesson-Data) for more details.
     - "Adjusted" mode (configurable) makes passive skills harder to obtain, increasing meta difficulty.
     - Items drop according to the real server; rally megaphones drop during channel live.
 - [x] **Member bond**
@@ -69,4 +71,5 @@ This page tracks what is working, partially working, or not yet implemented. For
 
 ## Embedded Client
 
-For details on how the embedded Android client works, see the [elichika_embedded project](https://github.com/arina999999997/elichika_embedded).
+For details on how the embedded Android client works, see
+the [elichika_embedded project](https://github.com/arina999999997/elichika_embedded).

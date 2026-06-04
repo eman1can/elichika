@@ -1,10 +1,12 @@
 # Endpoints
+
 Here is a list of endpoints found in the client, for reference.
 
-Ticked endpoint means that the server see the end point (not 404), it doesn't mean the feature is correctly or fully handled.
+Ticked endpoint means that the server see the end point (not 404), it doesn't mean the feature is correctly or fully
+handled.
 
-Also note that some endpoints won't need to be handled at all either because they're no longer used, or because they are just irrelevant, or because they are not even endpoint and just look like one.
-
+Also note that some endpoints won't need to be handled at all either because they're no longer used, or because they are
+just irrelevant, or because they are not even endpoint and just look like one.
 
 - [x] /accessory/allUnequip
 - [x] /accessory/melt
@@ -13,7 +15,7 @@ Also note that some endpoints won't need to be handled at all either because the
 - [x] /accessory/updateIsLock
 - [x] /accessory/updateIsNew
 - [x] /asset/getPackUrl
-- [ ] (not necessary) /billing/applePurchase 
+- [ ] (not necessary) /billing/applePurchase
 - [x] /billing/fetchBillingHistory
 - [ ] (not necessary) /billing/googlePurchase
 - [ ] (not necessary) /billing/prePurchase
@@ -38,7 +40,7 @@ Also note that some endpoints won't need to be handled at all either because the
 - [x] /communicationMember/setFavoriteMember
 - [x] /communicationMember/setTheme
 - [ ] (not necessary) /communicationMember/updateUserCardNewFlag
-- [x] /communicationMember/updateUserCommunicationMemberDetailBadge       
+- [x] /communicationMember/updateUserCommunicationMemberDetailBadge
 - [ ] (not necessary) /communicationMember/updateUserCustomBackgroundNewFlag
 - [x] /communicationMember/updateUserLiveDifficultyNewFlag
 - [ ] (not necessary) /communicationMember/updateUserStoryMemberNewFlag
@@ -81,7 +83,7 @@ Also note that some endpoints won't need to be handled at all either because the
 - [x] /eventMarathon/fetchEventMarathon
 - [x] /eventMarathon/finishEventStory
 - [x] /eventMarathonRanking/fetchEventMarathonRanking
-- [x] /eventMining/fetchEventMining 
+- [x] /eventMining/fetchEventMining
 - [x] /eventMining/finishEventMiningStory
 - [x] /eventMining/likeEventMiningPanel
 - [x] /eventMiningRanking/fetchEventMiningRanking

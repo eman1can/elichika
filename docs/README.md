@@ -1,14 +1,18 @@
 # Elichika docs
+
 Check out the specific documentations on how the server work and on how to do certain things.
 
 ## Server implement progress
-Quick summary of what works and what doesn't. If you want to see it in a more technical sense, checkout the [endpoints](https://github.com/eman1can/elichika/blob/master/docs/endpoints.md) listing.
+
+Quick summary of what works and what doesn't. If you want to see it in a more technical sense, checkout
+the [endpoints](https://github.com/eman1can/elichika/blob/master/docs/endpoints.md) listing.
 
 TODO(docs): Add specific docs for specific contents if necessary.
 
 - [x] Start up / New account
     - [x] Account creation upon trying to log in, or created using the transfer system.
-    - [x] New account will trigger the opening MV and the tutorial mode. The tutorial process all work although some part can be improved.
+    - [x] New account will trigger the opening MV and the tutorial mode. The tutorial process all work although some
+      part can be improved.
 - [x] Login
     - [x] User can log in and play.
     - [x] There are login bonus types like normal login bonus, idol birthday login bonus, and new player login bonus.
@@ -18,23 +22,26 @@ TODO(docs): Add specific docs for specific contents if necessary.
 - [x] Live show
     - [x] Fully working normal live, skip ticket, and 3DMV mode.
     - [x] Correctly award bond points.
-    - [x] You can use your own partner guests. 
+    - [x] You can use your own partner guests.
     - [x] Drops are handled "correctly"
 - [x] Story
     - [x] Fully working, you can read all kind of stories and play story songs.
-    - [x] You can start from fresh and progress through the story, unlocking things that would be unlocked by story normally.
+    - [x] You can start from fresh and progress through the story, unlocking things that would be unlocked by story
+      normally.
 - [ ] Gacha
     - [x] Working gacha with one banner for each group.
     - [ ] Things like scouting tickets are not implemented as of now.
 - [x] Training
     - [x] Training works and will drop skills similarly to real server.
-      - See https://github.com/eman1can/SIFAS-Lesson-Data for more details
-      - Insight skills can be made more difficult in the meta by changing to "adjusted" mode in the config, which will make passive skills harder to obtain.
+        - See https://github.com/eman1can/SIFAS-Lesson-Data for more details
+        - Insight skills can be made more difficult in the meta by changing to "adjusted" mode in the config, which will
+          make passive skills harder to obtain.
     - [x] Training drops items according to the real server, and drops rally megaphone while channel live is on.
 - [x] Member bond
     - [x] Working member bond system.
     - [x] Fully working bond board system.
-    - [x] Bond stories are unlocked by level once you unlock the bond story feature for one member (get to level 3 bond).
+    - [x] Bond stories are unlocked by level once you unlock the bond story feature for one member (get to level 3
+      bond).
     - [x] Bond songs unlocked at specific levels.
 - [x] Bond ranking
     - [x] Working bond ranking, but it might be slow if there are a lot of account.
@@ -52,7 +59,8 @@ TODO(docs): Add specific docs for specific contents if necessary.
 - [x] Accessories
     - [x] Fully working accessory power up system.
     - [x] Accessory drops from live and can be exchanged in shop.
-    - [x] The WebUi functionality to add accessory is still there for accessory that are limited or can't be dropped, if you wish to get them
+    - [x] The WebUi functionality to add accessory is still there for accessory that are limited or can't be dropped, if
+      you wish to get them
 - [x] Channel
     - [x] Working channel system with ranking reward and reward.
 - [x] Present box
@@ -74,11 +82,12 @@ TODO(docs): Add specific docs for specific contents if necessary.
     - [x] User can obtain title through goals and suchs
 - [x] Datalink
     - [x] The datalink system is used as account creation / account transfer, things should work properly.
-    - [x] Password is stored using bcrypt, so no worry of leaking password. 
+    - [x] Password is stored using bcrypt, so no worry of leaking password.
 - [x] Daily theater
-    - [x] Working daily theater server code. 
+    - [x] Working daily theater server code.
     - [x] Working Global client with the feature enabled.
-    - [x] Japanese text use network log or transcript, English text use translation (thanks to [SIFAStheatre](https://twitter.com/SIFAStheatre) and [Idol Story](https://twitter.com/idoldotst))
+    - [x] Japanese text use network log or transcript, English text use translation (thanks
+      to [SIFAStheatre](https://twitter.com/SIFAStheatre) and [Idol Story](https://twitter.com/idoldotst))
     - [ ] Korean and Chinese (zh) translation is not avaialble.
 - [x] User model
     - [x] Working user model.
@@ -97,7 +106,8 @@ TODO(docs): Add specific docs for specific contents if necessary.
 
 ## How the embedded version work
 
-If you want to learn more about embedded version, checkout the [embedded project](https://github.com/arina999999997/elichika_embedded).
+If you want to learn more about embedded version, checkout
+the [embedded project](https://github.com/arina999999997/elichika_embedded).
 
 ## How the server work
 
