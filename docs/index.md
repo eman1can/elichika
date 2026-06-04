@@ -1,5 +1,10 @@
 # Elichika
 
+Note: This is a development fork of [arina999999997/elichika](https://github.com/arina999999997/elichika).
+
+> Expect bugs, breaking features, and differing implementation details / defaults from the official fork.
+> Refer to the official fork for playing the game!
+
 Elichika is a private server implementation for *School Idol Festival ALL STARS* (SIFAS). It is a fork
 of [YumeMichi/elichika](https://github.com/YumeMichi/elichika) with substantial additional features and fixes.
 
@@ -49,6 +54,7 @@ Key highlights:
 
 Special thanks to the LL Hax community for archiving databases and assets, and specifically:
 
+- **arina999999997** — significant development and management of the primary project fork
 - **YumeMichi** — original elichika
 - **triangle** — database encoding/decoding scripts, iOS client patches, daily theater logs, databases across all
   versions, missing asset files
