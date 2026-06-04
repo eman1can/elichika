@@ -1,8 +1,9 @@
 # Hosting Your Own Server
 
 > **Advanced usage:** Hosting your own server is not required to play the game. If you just want to play, use the
-> embedded Android client described in [Installing the Game](getting-started.md). Self-hosting can range from
-> straightforward to complex depending on your setup — see [Advanced Usage](advanced_usage.md) for expectations.
+> embedded Android client described in [Installing the Game](getting-started.md) or connect to the official public
+> server using one of the release APKs found in [releases page]({{ config.repo_url }}/releases). Self-hosting can range from straightforward to complex
+> depending on your setup — see [Advanced Usage](advanced_usage.md) for expectations.
 
 ---
 
