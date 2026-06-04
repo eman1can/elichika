@@ -1,0 +1,33 @@
+site_name: Elichika Documentation
+repo_url: https://github.com/eman1can/elichika
+repo_name: eman1can/elichika
+theme:
+  name: readthedocs
+extra:
+  repo_raw: https://raw.githubusercontent.com/eman1can/elichika
+plugins:
+  - search
+  - macros
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installing the Game: getting-started.md
+    - Hosting Your Own Server: hosting.md
+    - Docker Deployment: docker.md
+  - Using the Server:
+    - WebUI Guide: webui.md
+    - Account Management: account.md
+    - Import & Export: import_export.md
+    - Asset Management: assets.md
+    - Modifying the Database: modify_database.md
+    - Extracting from PCAP: extracting_pcap.md
+    - Advanced Usage: advanced_usage.md
+  - Reference:
+    - Implementation Progress: progress.md
+    - API Endpoints: endpoints.md
+  - Developer Docs:
+    - Encapsulation Layers: design/encapsulation_layers.md
+    - Type System: design/types.md
+    - Declaration Style: design/declaration_style.md
+    - Package Overview: design/package.md
+    - The assets/ Folder: design/assets-folder.md

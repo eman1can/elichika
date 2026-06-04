@@ -1,115 +1,115 @@
+# WebUI Guide
 
-# WebUI
-The WebUI allow you to interact with the server in a more direct way, both to change the server and to change your player data.
+The WebUI lets you interact with the server directly — outside of the game client — to manage your account and configure
+server behaviour.
 
-To use the WebUI, navigate to the relevant address using a web browser.
+To open the WebUI, navigate to the relevant address in any web browser.
+
+---
 
 ## User WebUI
 
-The User WebUI's address is: `<server_address>/webui/user`, which default to http://127.0.0.1:8080/webui/user:
+**Address:** `http://<server_address>:8080/webui/user`
 
-- This is the case for the embedded server. You have to keep the client open and open the browser to access this.
-- For other setup, it's up to you to figure out what the address is.
+For the embedded server, the default address is `http://127.0.0.1:8080/webui/user`. Keep the game client open and use
+your device's browser to access it.
 
-### Authentication
-You need to login to the WebUI to use it:
+### Logging In
 
-- Enter your user id (viewable on the title screen / profile menu) and password (empty string if you haven't set one).
+Enter your **User ID** (visible on the title screen or in the profile menu) and your **password** (leave blank if you
+have not set one).
 
-Furthermore, you must have completed the tutorial in the game (skipping is fine). The requirements are necessary for some feature, but they also prevent spamming for multiplayer servers.
+You must have completed the tutorial before the WebUI will allow access. Tutorial-skip is fine — just reach the main
+menu. This requirement exists to prevent account spam on multi-user servers.
 
 ### Locale
-When using the WebUI, it's important to choose the correct client language. This is mainly for the server, as some content might not exist for other languages and will brick your account.
 
-In the future, maybe the client language can also change how the WebUI display things.
+Select the correct client language before using the WebUI. Some content only exists for a specific locale (Japanese or
+Global), and using the wrong locale can make your account unplayable. The locale setting is primarily a server-side
+signal.
 
 ### Features
-Some features and what they do. Viewing them on the webui also explain the feature a bit more.
-#### Account builder
-This allow you to do things fast in the game, it also has a button to get you a maxed out account (based on your locale).
-#### Resource helper
-This allow you to get items in the game so you can progress faster, but it won't do the thing for you like the account builder.
-#### Reset progress
-This allow you to reset and play stuff again, while keeping the other data of your account.
-#### Import/Export account
-Allow you to export / import your account:
 
-- Exporting to .db file allow you to save all data that is compatible with elichika.
-- Exporting to .json allow you to get the canonical network data, so you can import them elsewhere if necessary.
+#### Account Builder
 
-Importing an account will overwrite your (account logged into webui's) current progress.
+Automates common progression tasks. Includes a one-click button to produce a fully maxed-out account based on your
+selected locale.
 
-For more details, check [import export docs](https://github.com/arina999999997/elichika/blob/master/docs/import_export.md).
+#### Resource Helper
 
-#### Other features
-*This is considered [advanced usage](https://github.com/arina999999997/elichika/blob/master/docs/advanced_usage.md)*.
+Grants items to your account so you can progress faster. Unlike the Account Builder, it adds resources but does not
+automate gameplay actions.
 
-You have access to some other features from the user WebUI, but they required advanced understanding of the game's internal. Be prepared to figure it out with minimal help, otherwise don't touch these features as it might brick your account.
+#### Reset Progress
+
+Resets specific gameplay progress (e.g., DLP floors, live history) while keeping the rest of your account intact.
+
+#### Import / Export Account
+
+Export your account to `.db` (recommended) or `.json` format, and import from either format. Useful for:
+
+- Backing up before an update
+- Moving your account to another server
+- Recovering from a pcap capture
+
+See [Import & Export](import_export.md) for full details.
+
+#### Other Features (Advanced)
+
+> These features require detailed knowledge of the game's internals. Use them at your own risk — incorrect use can make
+> your account unplayable. See [Advanced Usage](advanced_usage.md).
+
+---
 
 ## Admin WebUI
 
-The Admin WebUI's address is: `<server_address>/webui/admin`, which default to http://127.0.0.1:8080/webui/admin:
-- This is the case for the embedded server. You have to keep the client open and open the browser to access this.
-- For other setup, it's up to you to figure out what the address is.
+**Address:** `http://<server_address>:8080/webui/admin`
 
-The admin WebUI is used to change the server's behaviors, to use the admin WebUI, you have to have the admin password:
+For the embedded server, the default address is `http://127.0.0.1:8080/webui/admin`. Keep the game client open and use
+your device's browser to access it.
 
-- By default this is empty (no need to enter anything, just press the login button).
-- If you use the embedded version or host your own server for yourself, changing the admin password is not recommended.
-- If for some reason you want to change the password, you can change it in the config editor or by editting the config file directly (figure out how yourself).
+The Admin WebUI controls server-wide settings. The default admin password is empty — just press the login button.
+Changing the password is not recommended unless you are running a public server.
 
-### Config editor
-Detailed explanations of some config options:
+### Config Editor
 
-- Default item count:
-    - The amount of items to give a player to start with.
-    - Default to a generous amount, but you can set it to 0 to have a more true experience.
-    - Note that you have to obtain the item in game first before you are given the "default item count" amount of that item.
-- Mission progress multiplier:
-    - How much progress you get for doing 1 thing in the mission.
-    - If you want to complete mission faster, set this number to something big.
-    - But don't set it too big otherwise you might have some issue.
-- Resource config:
-    - The config of how the resources work on the server.
-    - `original` means the resources behave like it would in the original server. Every action that cost resources will consume those resources.
-    - `comfortable` is the default settings. Things like star gems, LP, AP are unlimited. The daily song play limit or the daily tap bond limit is also removed. This is the recommended settings if you just want to play and experience the game without all the money-making limitation.
-    - `free` is the free settings. Generally, resources can only go up and not down.
-    - Keep in mind that some resources/systems are not controlled by these settings, but they are pretty minor.
-    - And this doesn't apply to the accessories (but apply to the accessory items).
-- Event frequency:
-    - How fast the events cycle around.
+| Option                          | Description                                                                                                                               |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| **Default item count**          | Items given to a player when they first obtain that item type. Defaults to a generous amount; set to `0` for a more authentic experience. |
+| **Mission progress multiplier** | Multiplies the progress earned per action in missions. Set higher to complete missions faster. Avoid extreme values.                      |
+| **Resource config**             | Controls how in-game resources behave (see below).                                                                                        |
+| **Event frequency**             | Controls how quickly events cycle.                                                                                                        |
 
-Modifying any other field is considered *[advanced usage](https://github.com/arina999999997/elichika/blob/master/docs/advanced_usage.md)*. If you know what you are doing, here's some more explanation for some other field:
+**Resource config modes:**
 
-- Server's address:
+- `original` — Resources behave exactly as on the official server. All costs apply.
+- `comfortable` *(default)* — Star gems, LP, and AP are unlimited. Daily song and tap bond limits are removed.
+  Recommended for casual play.
+- `free` — Resources can only increase, never decrease.
 
-    - The address to host the server at.
-    - Default to ``0.0.0.0:8080`` (server listen at port 8080 on all interfaces).
+Note: accessories are not affected by resource config, though accessory *items* are.
 
-- CDN server's address:
+Advanced config fields (server address, CDN address, etc.) are documented in the editor itself. Modifying them is
+considered [advanced usage](advanced_usage.md).
 
-    - The server for clients to download assets.
-    - Default to  https://llsifas.imsofucking.gay/static/ (special thanks to sarah for hosting it).
-    - `elichika` also has the ability to host the CDN itself:
+#### CDN Server Address
 
-        - To do this, put the relevant files in `elichika/static`:
-          - For each package, the server expect it in `elichika/static/<package_name>`
-        - Then set the CDN server address to the STRING (no protocol) `elichika` (or `elichika_tls` if you're using HTTPS).
-        - This will automatically use whatever the address the client reach `elichika` with as the CDN server.
-        - Aside from that, you can also just use the address like normal.
-        - You should look into this if you want to further develop the game/server, as doing so might require redownloading things a lot.
-    - You can also use other CDNs, but keep in mind that there are some requirements that need to be met, otherwise some download will result in errors.
+By default, assets are served from a public CDN. You can configure `elichika` to host its own CDN:
+
+1. Place asset packages in `elichika/static/<package_name>`.
+2. Set the CDN server address to the string `elichika` (or `elichika_tls` for HTTPS).
+
+The server will then serve assets directly, using whatever address the client used to reach it.
 
 ### Event Selector
 
-Select the event you want to play. Note that each events need to be recreated, so only the events ready to play are shown.
+Choose the active event. Only events that have been fully prepared are shown.
 
 ### Event Scheduler
 
-Schedule the next event you want to play, it will be loaded once the current event is over. Note that each events need to be recreated, so only the events ready to play are shown.
+Schedule the next event to load automatically when the current one ends. Only prepared events are shown.
 
+### Other Features (Advanced)
 
-### Other features
-*This is considered [advanced usage](https://github.com/arina999999997/elichika/blob/master/docs/advanced_usage.md)*.
-
-Use at your own risk, the features might not even work properly on your install. 
+> Use at your own risk. Some features may not work correctly on all installations.
+> See [Advanced Usage](advanced_usage.md).

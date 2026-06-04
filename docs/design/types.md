@@ -1,63 +1,69 @@
-# Type design
-The server has to handle a lot of types, from types to talk to the clients to types to handle and store data. Therefore, we split the types into categories to make them easier to handle. The caterogies are listed in the order of how "basic" they are. Types from a category can only use types from the same category or a simpler category in its construction. 
+# Type System
 
-## Client types
-Client types are all the types used by the client (with exception being mentioned later on), mirrored here to read/write network data or just general handling.
+The server manages many kinds of types: types for client communication, types for storing user data, and types for
+internal handling. These are divided into categories with clear rules about how they may depend on each other. Types in
+a given category may only use types from the same category or a simpler (lower) one.
 
-These types are defined in the `client` package, and they must have the exact same construction as the type in the client. This includes the following:
+---
 
-- The name must match perfectly, down to the which letter are capitalised (with the exception of the first letter since we're using Go).
-- The fields' types must match:
+## Client Types
 
-  - `int32` must be `int32` and `int64` must be `int64` and so on.
-  - Replicate the type of the fields if necessary, and do not use annonymous types.
-  - If the field has type `Nullable`, use the Nullable generic.
-  - If the field is a pointer then it should be `Nullable` or just a value, depending on whether it can actually be `null` or not.
-  
-    - For example, `string` are always kept as pointer, but some strings are always filled while other can be `null` without having to be marked `Nullable`.
-    - For the time being, we will use the Nullable wrapper for pointer fields that can be `null` and mark them as pointer using the comment
-  - For fields that are `Dictionary`, use the `Dictionary generic`.
-  - For fields that are `enum`, an enum tag to the enum name is required. This currently doesn't do anything but we might want to do enum checking and stuff later, and it just make it easier to keep track of things.
+Client types mirror the types used by the game client. They are defined in the `client` package and used to read and
+write network data.
 
-    - Note that enum sometime are stored as enum, sometime are just stored as `int32_t` in the client.
+**Rules:**
 
-- If the type is used with `json`, it must works correctly with Marshal and Unmarshal, and it no information would be lost in doing so.
+- The type name must match the client's name exactly, including capitalisation of every letter except the first (Go
+  requires the first letter to be uppercase for exported types).
+- Field types must match precisely: `int32` must be `int32`, `int64` must be `int64`, etc.
+- Do not use anonymous types for subfields — replicate the type and name it.
+- Use the `Nullable` generic for fields that can be `null` in JSON.
+- Use the `Dictionary` generic for `Dictionary` fields.
+- Fields with an `enum` type require an `enum` struct tag naming the enum, even though it is not enforced at runtime
+  yet.
+- The type must round-trip through `json.Marshal` / `json.Unmarshal` without loss. Write a custom marshaler/unmarshaler
+  if necessary.
+- Field order is not important, but array element order is — preserve it.
+- Client types must not be modified to assist handling logic. If you need to attach extra data, use an embedded type or
+  wrapper.
+- Each type lives in its own file. File names use `snake_case` derived from the type name.
 
-  - Use a custom marshal / unmarshaler if necessary.
-  - The order of fields is not important but should still be kept.
-  - The order of array elements IS important, and should be kept.
-- Client types can be used by other types or used directly by handling codes, but they should not be modified to help the handling. 
+### Request / Response Types
 
-  - If necessary, use an embedded type or a wrapper type.
-- Finally, each type should be in its own file. The file name is derived from the type name, but we use snake_case for file names.
+Request and response types are client types and follow the same rules, but they go into `client/request` and
+`client/response` respectively. Any subtype used exclusively by a request or response type still belongs in `client`,
+not in `client/request` or `client/response`.
 
-### Request / response types
-Request and response types are also client types and follow the same rules, but they should be put into the `client/request` and `client/response` package instead. This is only done to make them easier to see. Maybe we can also do something like spliting user type into `client/user`.
+---
 
-Note that even if a type is only used as a subtype of a request/response type, it should be in client instead of being in `client/request` or being annonymous.
+## Gamedata Types
 
-## Gamedata types
-Gamedata types are types used to store how the server should work, for example, which event is there, which gacha is available, etc. These types are less constrained than the client types but should still follow:
+Gamedata types represent server-side game state: which event is active, which gacha banners are available, etc. They are
+less strictly constrained than client types, but should:
 
-- The naming/typing convention shoulds follow that of the same system in client's type.
-- The types must be able to load from and save to database.
+- Follow the naming and field conventions of the corresponding client types.
+- Be loadable from and savable to the database.
 
-Gamedata types are defined in the package `gamedata` along with their loaders.
+Gamedata types are defined in the `gamedata` package alongside their loaders.
 
-## Userdata types
-Userdata types are types used to store users' data (progress). These type should be made from `client` types. The general rule is as follow:
+---
 
-- Userdata types should generally be an UserIdWrapper on top of the relevant User.. types of the client.
-- If no relevant client type exist, but we still need to store the infomation, then we should follow the naming of the relevant places the information is used.
-- Userdata types should not merge multiple data into the same table, even if that is possible:
-  
-  - For example, the table for `UserStatus` should not have any other info in it, even though we can store more info.
-  - Or the, table for `UserMember` should only store the general, member info not things like how many card are owned.
-- Userdata types should not store derivative/aggregated infomation, unless it's based on a `client` type:
+## Userdata Types
 
-  - We should calculate aggregated/derivative data from userdata and cache them instead of keeping a copy and modifying them everytime the userdata change, because it should be less work and easier that way.
+Userdata types store per-user progress. They should be built on top of `client` types:
 
-Userdata types are defined in the package `userdata/database`. 
+- The general pattern is a `UserIdWrapper` around the relevant `User*` client type.
+- If no matching client type exists, follow the naming used by the parts of the codebase that use the data.
+- One table per type — do not merge unrelated data into the same table even if it is technically possible.
+- Do not store derived or aggregated data unless it directly mirrors a `client` type. Calculate aggregates from userdata
+  at read time and cache them separately.
 
-## Handling types
-Handling types are types defined and used by handlers. These types can generally be just about anything. The naming convention should apply, and the handler should keep only the relevant types to itself. If a type is used a lot, it should be placed in the common utilities package instead of copied / replicated.
+Userdata types are defined in `userdata/database`.
+
+---
+
+## Handling Types
+
+Types defined and used within handler packages. These can be almost anything, but should follow the same naming
+conventions as the rest of the codebase. Types used across multiple handlers should live in a shared utilities package
+rather than being copied.

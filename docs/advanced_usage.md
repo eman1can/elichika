@@ -1,22 +1,33 @@
-# Advanced usage
-The first and foremost aim of this server implementation is to help players play the game. Therefore, if you have trouble with that part, you can reach out through various community channels to ask for help. However, advanced usage of the server / tools that come along with the server can be very difficult. As we cannot commit to helping everyone who want advanced usage, the following are expected if you want to do anything we consider advanced usage:
+# Advanced Usage
 
-- You are expected to know about computer:
-  - You should know how to use common shell utilities.
-- You are expected to know about online video games:
-  - You should know what is a server, what is a client, what is a connection.
-- If you asked for help, you should only expect help in the form of hard-to-get information or pointers:
-  - Hard-to-get information is anything that will take a long time to figure out on your own (i.e. where a functionaility is implemented or the specific behaviour of some system).
-  - Pointers are topics that you should know about first before doing something advanced. Once you are given pointers, you are expected to study them yourself using the Internet (blogs, wiki, video essays, llm, ...).
-- If you asked for help and get pointed to a documentation page/section, you are expected to read that page/section, and point out where you didn't understand or where the tool failed, etc.
+The primary goal of this server is to let players play the game. If you have trouble with basic gameplay, you can ask
+for help through community channels. However, advanced server usage is a different matter — the authors cannot commit to
+supporting everyone who wants to go beyond the basics.
 
-Throughout this repository, you will find this page referenced whenever an advanced topic is discussed:
+---
 
-- Any topic that is discussed this repository but do not reference this page is NOT considered advanced.
-- Any topic that is discussed this repository and reference this page is considered to the EXPLICITLY ADVANCED.
-- Any topic that is NOT DISCUSSED in this repository is considered IMPLICITLY ADVANCED:
+## What Is Considered Advanced
 
-    - You you can ask for help but the amount of help you get will depend on whether people are interested in helping you or not.
-- Usually, the reference will also include a short list of things you should know to make sure you can do it.
+Throughout this repository, pages and sections that require advanced knowledge link here. The rules are:
 
-tl; dr: if you want to do anything harder than playing the game + using the basic webui features, expect to study and do most of the work yourself. 
+- Topics discussed in this repository that **do not** link to this page are **not** considered advanced.
+- Topics discussed in this repository that **do** link to this page are **explicitly advanced**.
+- Topics **not discussed** in this repository are **implicitly advanced** — you may ask for help, but the amount of help
+  you get depends on whether anyone is interested in helping.
+
+---
+
+## Expectations for Advanced Topics
+
+If you want to do anything beyond playing the game and using the basic WebUI features:
+
+- **You are expected to know how to use a computer.** This includes common shell utilities and the command line.
+- **You are expected to understand online games.** You should know what a server, client, and network connection are.
+- **Help will come as pointers, not walkthroughs.** If you ask for help, expect to receive:
+    - Hard-to-find information (e.g., where a feature is implemented, the specific behaviour of a system)
+    - Pointers to topics you should study on your own (documentation, blog posts, wikis, etc.)
+- **If you are pointed to a documentation page, read it.** Then ask specifically about what you did not understand or
+  where something failed.
+
+In short: if you want to do anything harder than playing the game and using the basic WebUI features, expect to study
+and do most of the work yourself.
