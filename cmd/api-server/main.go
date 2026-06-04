@@ -6,6 +6,7 @@ import (
 	"log"
 	"runtime"
 
+	"elichika/internal/clientdb"
 	"elichika/internal/config"
 	"elichika/internal/handler"
 	"elichika/internal/locale"
@@ -21,6 +22,7 @@ import (
 )
 
 func main() {
+	clientdb.Init()
 	config.Init()
 	serverstate.Init()
 	serverdata.Init()

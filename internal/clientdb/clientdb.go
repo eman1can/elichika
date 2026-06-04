@@ -1,15 +1,14 @@
 package clientdb
 
 import (
-	"elichika/internal/config"
-	"elichika/internal/utils"
-
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/hex"
-
 	"log"
 	"os"
+
+	"elichika/internal/config"
+	"elichika/internal/utils"
 
 	hwdecrypt "github.com/arina999999997/gohwdecrypt"
 )
@@ -133,7 +132,7 @@ func updateClientDb(baseDir string, masterdataRefs []string) {
 	}
 }
 
-func init() {
+func Init() {
 	databaseInit()
 
 	// Gl
