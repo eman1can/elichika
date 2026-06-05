@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 	"sort"
 
@@ -10,13 +9,11 @@ import (
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type WebUIListVoiceRequest struct {
-	Language     string `form:"l"`
 	ReleaseRoute *int32 `form:"route"`
 	ListType     *int32 `form:"list_type"`
 }
@@ -46,12 +43,12 @@ func naviVoiceList(ctx *gin.Context) {
 	}
 
 	session := ctx.MustGet("session").(*userdata.Session)
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
 	route := req.ReleaseRoute
 	listType := req.ListType
 
-	for id, voice := range gamedata.Instance.NaviVoice {
+	for id, voice := range session.Gamedata.NaviVoice {
 		userVoice := user_voice.GetUserVoice(session, id)
 
 		member := session.Gamedata.Member[voice.MemberMId]
@@ -91,10 +88,7 @@ func naviVoiceList(ctx *gin.Context) {
 		return resp[i].DisplayOrder < resp[j].DisplayOrder
 	})
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

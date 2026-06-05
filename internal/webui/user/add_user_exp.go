@@ -16,7 +16,7 @@ func addExperience(ctx *gin.Context) {
 		user_status.AddUserExp(session, amount)
 
 		session.Finalize()
-		ctx.Status(http.StatusOK)
+		ctx.JSON(http.StatusOK, gin.H{})
 	}
 }
 

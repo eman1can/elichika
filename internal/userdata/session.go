@@ -127,11 +127,15 @@ func GetSession(ctx *gin.Context, userId int32) *Session {
 	return GetSessionWithSharedDb(ctx, userId, nil)
 }
 
-func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Session) *Session {
+func GetPlainSession(ctx *gin.Context) *Session {
+	return GetPlainSessionWithSharedDb(ctx, nil)
+}
+
+func GetPlainSessionWithSharedDb(ctx *gin.Context, otherSession *Session) *Session {
 	s := Session{}
 	s.Time = time.Now()
 	s.Ctx = ctx
-	s.UserId = userId
+
 	{
 		g, exist := ctx.Get("gamedata")
 		if exist {
@@ -140,6 +144,7 @@ func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Sessio
 			s.Gamedata = gamedata.Instance
 		}
 	}
+
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -147,6 +152,7 @@ func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Sessio
 			log.Panic(err)
 		}
 	}()
+
 	if otherSession != nil {
 		s.Db = otherSession.Db
 		s.IsSharedDb = true
@@ -158,6 +164,13 @@ func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Sessio
 		// run scheduled tasks everytime a session is started
 		server.HandleScheduledTasks(s.Db, s.Time)
 	}
+
+	return &s
+}
+
+func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Session) *Session {
+	s := GetPlainSessionWithSharedDb(ctx, otherSession)
+	s.UserId = userId
 
 	exist, err := s.Db.Table("u_status").Where("user_id = ?", userId).Get(&s.UserModel.UserStatus)
 	utils.CheckErr(err)
@@ -174,7 +187,7 @@ func GetSessionWithSharedDb(ctx *gin.Context, userId int32, otherSession *Sessio
 		s.MemberLovePanels[memberId] = make(map[int32]client.MemberLovePanel)
 		s.MemberLovePanelDiffs[memberId] = make(map[int32]client.MemberLovePanel)
 	}
-	return &s
+	return s
 }
 
 // these sessions are used for updating initiated by server

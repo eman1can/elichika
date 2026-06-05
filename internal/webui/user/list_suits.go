@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 	"sort"
 
@@ -9,14 +8,9 @@ import (
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_suit"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
-
-type WebUIListSuitsRequest struct {
-	Language string `form:"l" json:"l"`
-}
 
 type WebUISuitEntry struct {
 	Id             int32  `json:"suit_id"`
@@ -30,18 +24,12 @@ type WebUISuitEntry struct {
 }
 
 func suitList(ctx *gin.Context) {
-	var req WebUIListSuitsRequest
 	var resp []WebUISuitEntry
 
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	session := ctx.MustGet("session").(*userdata.Session)
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
-	for id, suit := range gamedata.Instance.Suit {
+	for id, suit := range session.Gamedata.Suit {
 		entry := WebUISuitEntry{
 			Id:             id,
 			Name:           dictionary.Resolve(suit.Name),
@@ -62,10 +50,7 @@ func suitList(ctx *gin.Context) {
 		return resp[i].Id < resp[j].Id
 	})
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

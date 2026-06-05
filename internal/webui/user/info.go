@@ -1,14 +1,12 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_status"
 	"elichika/internal/subsystem/user_story_main"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,10 +36,7 @@ func getUserInfo(ctx *gin.Context) {
 	resp.LoginDays = session.UserStatus.LoginDays
 	resp.StoryFinished = user_story_main.AllStoryFinished(session)
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

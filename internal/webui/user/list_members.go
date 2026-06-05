@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 	"sort"
 
@@ -10,14 +9,9 @@ import (
 	"elichika/internal/subsystem/user_member"
 	"elichika/internal/subsystem/user_story_member"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
-
-type WebUIListMembersRequest struct {
-	Language string `form:"l" json:"l"`
-}
 
 type WebUIMemberEntry struct {
 	Id                 int32  `json:"member_id"`
@@ -32,18 +26,12 @@ type WebUIMemberEntry struct {
 }
 
 func memberList(ctx *gin.Context) {
-	var req WebUIListMembersRequest
 	var resp []WebUIMemberEntry
 
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	session := ctx.MustGet("session").(*userdata.Session)
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
-	for id, member := range gamedata.Instance.Member {
+	for id, member := range session.Gamedata.Member {
 		userMember := user_member.GetMember(session, id)
 		entry := WebUIMemberEntry{
 			Id:                 id,
@@ -56,7 +44,7 @@ func memberList(ctx *gin.Context) {
 			IsAllStoryUnlocked: user_story_member.AllStoryMembersUnlocked(session, id),
 		}
 
-		if cards, ok := gamedata.Instance.CardByMemberId[id]; ok && len(cards) > 0 {
+		if cards, ok := session.Gamedata.CardByMemberId[id]; ok && len(cards) > 0 {
 			entry.ImageAssetPath = cards[0].IdolAppearance.ThumbnailAssetPath
 		}
 		resp = append(resp, entry)
@@ -69,10 +57,7 @@ func memberList(ctx *gin.Context) {
 		return resp[i].Id < resp[j].Id
 	})
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

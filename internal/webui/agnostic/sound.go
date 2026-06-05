@@ -22,7 +22,7 @@ type WebUIItemSoundRequest struct {
 func getVoiceSound(ctx *gin.Context) {
 	var req WebUIItemSoundRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.Status(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

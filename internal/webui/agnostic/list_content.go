@@ -1,12 +1,10 @@
 package agnostic
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"elichika/internal/enum"
 	"elichika/internal/server"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,11 +30,7 @@ func listContent(ctx *gin.Context) {
 		})
 	}
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

@@ -3,7 +3,6 @@ package user
 import (
 	"net/http"
 
-	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_story_main"
 	"elichika/internal/userdata"
@@ -25,7 +24,7 @@ func finishMainStory(ctx *gin.Context) {
 	session := ctx.MustGet("session").(*userdata.Session)
 
 	for _, mainStoryMasterId := range req.MainStoryMasterIds {
-		if masterMainStory, ok := gamedata.Instance.StoryMainChapter[mainStoryMasterId]; ok {
+		if masterMainStory, ok := session.Gamedata.StoryMainChapter[mainStoryMasterId]; ok {
 			if finished := user_story_main.IsStoryFinished(session, mainStoryMasterId); finished {
 				continue
 			}

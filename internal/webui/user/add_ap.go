@@ -16,7 +16,7 @@ func addActivityPoints(ctx *gin.Context) {
 		user_status.AddUserActivityPoints(session, amount)
 
 		session.Finalize()
-		ctx.Status(http.StatusOK)
+		ctx.JSON(http.StatusOK, gin.H{})
 	}
 }
 
