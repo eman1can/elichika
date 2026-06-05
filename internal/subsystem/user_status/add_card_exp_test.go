@@ -42,3 +42,25 @@ func TestShouldOnlyAddExp(t *testing.T) {
 	addCardExp(&session, new(item.Gold.Amount(100)))
 	assert.Equal(t, int32(123), session.UserStatus.CardExp)
 }
+
+// TestAddExpNegative - Should remove 10 EXP
+func TestAddExpNegative(t *testing.T) {
+	session := userdata.Session{
+		UserStatus: &client.UserStatus{
+			CardExp: 123,
+		},
+	}
+	addCardExp(&session, new(item.EXP.Amount(-10)))
+	assert.Equal(t, int32(113), session.UserStatus.CardExp)
+}
+
+// TestAddExpNegativeBelowZero - Should remove 5 EXP, taking us to 0
+func TestAddExpNegativeBelowZero(t *testing.T) {
+	session := userdata.Session{
+		UserStatus: &client.UserStatus{
+			CardExp: 5,
+		},
+	}
+	addCardExp(&session, new(item.EXP.Amount(-10)))
+	assert.Equal(t, int32(0), session.UserStatus.CardExp)
+}

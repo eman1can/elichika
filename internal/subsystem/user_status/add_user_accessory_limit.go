@@ -1,7 +1,10 @@
 package user_status
 
-import "elichika/internal/userdata"
+import (
+	"elichika/internal/subsystem/user_content"
+	"elichika/internal/userdata"
+)
 
 func AddUserAccessoryLimit(session *userdata.Session, accessoryLimit int32) {
-	session.UserStatus.AccessoryBoxAdditional += accessoryLimit
+	user_content.OverflowCheckedAdd(&session.UserStatus.AccessoryBoxLimit, &accessoryLimit)
 }
