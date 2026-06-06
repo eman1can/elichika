@@ -17,7 +17,7 @@ func addMoney(ctx *gin.Context) {
 		user_content.AddContent(session, item.Gold.Amount(min(amount, 1_000_000_000)))
 
 		session.Finalize()
-		ctx.Status(http.StatusOK)
+		ctx.JSON(http.StatusOK, gin.H{})
 	}
 }
 

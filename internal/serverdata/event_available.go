@@ -17,7 +17,7 @@ type EventAvailable struct {
 }
 
 func init() {
-	addTable("s_event_available", EventAvailable{}, initEventAvailable)
+	// addTable("s_event_available", EventAvailable{}, initEventAvailable)
 }
 
 func initEventAvailable(session *xorm.Session) {

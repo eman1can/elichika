@@ -1,56 +1,58 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_story_main"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-type WebUIListMainStoryRequest struct {
-	Language string `form:"l" json:"l"`
-}
-
-type WebUIMainStoryChapterEntry struct {
-	Id             int32  `json:"id"`
-	Title          string `json:"title"`
-	ImageAssetPath string `json:"image_asset_path"`
-	IsNew          bool   `json:"is_new"`
-}
-
 func listMainStory(ctx *gin.Context) {
-	var req WebUIListMainStoryRequest
-	var resp []WebUIMainStoryChapterEntry
-
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	var resp []WebUIStoryChapterEntry
 
 	session := ctx.MustGet("session").(*userdata.Session)
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
-	for _, storyMainChapter := range gamedata.Instance.StoryMainChapter {
-		finished := user_story_main.IsStoryFinished(session, storyMainChapter.Id)
-		resp = append(resp, WebUIMainStoryChapterEntry{
+	for _, storyMainChapter := range session.Gamedata.StoryMainChapter {
+		entry := WebUIStoryChapterEntry{
 			Id:             storyMainChapter.Id,
 			Title:          dictionary.Resolve(storyMainChapter.Title),
+			Description:    dictionary.Resolve(storyMainChapter.Description),
+			DisplayOrder:   storyMainChapter.Id,
 			ImageAssetPath: storyMainChapter.ThumbnailAssetPath,
-			IsNew:          finished,
-		})
+			Chapters:       make([]WebUIStoryCellEntry, 0),
+		}
+
+		for _, cellId := range storyMainChapter.Cells {
+			cell := session.Gamedata.StoryMainChapterCell[cellId]
+			chapter := WebUIStoryCellEntry{
+				Id:          cellId,
+				Title:       dictionary.Resolve(cell.Title),
+				Description: dictionary.Resolve(cell.Description),
+				Chapter:     cell.DisplayOrder,
+				IsNew:       !user_story_main.HasStoryMainCell(session, cellId),
+				Unlocked:    true,
+			}
+
+			if cell.ThumbnailAssetPath != nil {
+				chapter.ImageAssetPath = *cell.ThumbnailAssetPath
+			} else {
+				live := session.Gamedata.LiveDifficulty[*cell.LiveDifficultyId].Live
+				chapter.ImageAssetPath = live.JacketAssetPath
+				chapter.Title = dictionary.Resolve(live.Name)
+			}
+
+			entry.Chapters = append(entry.Chapters, chapter)
+		}
+
+		resp = append(resp, entry)
 	}
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

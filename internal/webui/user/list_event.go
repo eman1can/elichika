@@ -1,21 +1,16 @@
 package user
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"elichika/internal/enum"
 	"elichika/internal/gamedata"
 	"elichika/internal/server"
-	"elichika/internal/utils"
+	"elichika/internal/userdata"
 
 	"github.com/gin-gonic/gin"
 )
-
-type WebUIListEventRequest struct {
-	Language string `form:"l" json:"l"`
-}
 
 type WebUIListEventEntry struct {
 	EventId        int32  `xorm:"pk 'id'" json:"id"`
@@ -26,17 +21,12 @@ type WebUIListEventEntry struct {
 }
 
 func listEvent(ctx *gin.Context) {
-	var req WebUIListEventRequest
 	var resp []WebUIListEventEntry
 
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	session := ctx.MustGet("session").(*userdata.Session)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
-
-	for _, event := range gamedata.Instance.Event {
+	for _, event := range session.Gamedata.Event {
 		var name string
 		if event.EventType == enum.EventTypeMining {
 			name = fmt.Sprintf("m.event_mining_title_%d", event.EventId)
@@ -53,11 +43,7 @@ func listEvent(ctx *gin.Context) {
 		})
 	}
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

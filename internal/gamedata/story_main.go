@@ -10,35 +10,30 @@ import (
 
 type StoryMainChapter struct {
 	// from m_story_main_chapter
-	Id int32 `xorm:"pk 'id'" json:"id"`
-	// StoryMainPartMasterId int32 `xorm:"'story_main_part_master_id'"`
-	Title string `xorm:"title" json:"title"`
-	// Description string `xorm:"'description'"`
-	ThumbnailAssetPath string `xorm:"thumbnail_asset_path" json:"-"`
-	// BackgroundAssetPath string `xorm:"'background_asset_path'"`
-	// HardBackgroundAssetPath string `xorm:"'hard_background_asset_path'"`
-	// BgmAssetPath string `xorm:"'bgm_asset_path'"`
+	Id                 int32  `xorm:"pk 'id'" json:"id"`
+	Title              string `xorm:"title"`
+	Description        string `xorm:"description"`
+	ThumbnailAssetPath string `xorm:"thumbnail_asset_path"`
 
-	// from m_story_main_cell
+	// Linked from m_story_main_cell
 	Cells      []int32 `xorm:"-" json:"-"`
 	LastCellId int32   `xorm:"-" json:"-"`
 }
 
 func (smc *StoryMainChapter) populate(gamedata *Gamedata) {
-	var err error
-	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
-		err = session.Table("m_story_main_cell").Where("chapter_id = ?", smc.Id).Cols("id").Find(&smc.Cells)
-	})
-	utils.CheckErr(err)
-	for _, cellId := range smc.Cells {
-		if smc.LastCellId < cellId {
-			smc.LastCellId = cellId
+	for _, cell := range gamedata.StoryMainChapterCell {
+		if cell.ChapterId != smc.Id {
+			continue
+		}
+
+		smc.Cells = append(smc.Cells, cell.Id)
+		if smc.LastCellId < cell.Id {
+			smc.LastCellId = cell.Id
 		}
 	}
 }
 
 func loadStoryMain(gamedata *Gamedata) {
-	log.Println("Loading StoryMainChapter")
 	gamedata.StoryMainChapter = make(map[int32]*StoryMainChapter)
 	var err error
 	gamedata.MasterdataDb.Do(func(session *xorm.Session) {
@@ -48,8 +43,11 @@ func loadStoryMain(gamedata *Gamedata) {
 	for _, storyMainChapter := range gamedata.StoryMainChapter {
 		storyMainChapter.populate(gamedata)
 	}
+
+	log.Println("Loaded", len(gamedata.StoryMainChapter), "Main Story Chapters")
 }
 
 func init() {
 	addLoadFunc(loadStoryMain)
+	addPrequisite(loadStoryMain, loadStoryMainCell)
 }

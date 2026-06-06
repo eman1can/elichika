@@ -5,9 +5,9 @@ import (
 	"elichika/internal/userdata"
 )
 
-func IsStoryFinished(session *userdata.Session, storyMainMasterId int32) bool {
+func HasStoryMainCell(session *userdata.Session, storyMainCellId int32) bool {
 	userStoryMain := client.UserStoryMain{
-		StoryMainMasterId: storyMainMasterId,
+		StoryMainCellId: storyMainCellId,
 	}
 	return userdata.GenericDatabaseExist(session, "u_story_main", userStoryMain)
 }

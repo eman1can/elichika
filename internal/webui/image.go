@@ -1,10 +1,11 @@
-package agnostic
+package webui
 
 import (
 	"log"
 	"net/http"
 
 	"elichika/internal/server"
+	"elichika/internal/webui/asset"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,14 +23,14 @@ func getImage(ctx *gin.Context) {
 	}
 
 	log.Println("Received request for image asset path:", req.ImageAssetPath)
-	output, err := loadAssetImage(req.ImageAssetPath)
+	output, err := asset.LoadAssetImage(ctx, req.ImageAssetPath)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Print(err)
 		return
 	}
 
-	file(ctx, output, "image/png")
+	asset.SendFile(ctx, output, "image/png")
 }
 
 func init() {

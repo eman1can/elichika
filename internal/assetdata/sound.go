@@ -6,21 +6,19 @@ import (
 	"xorm.io/xorm"
 )
 
-var SoundBySheetName = map[string]*Sound{}
-
 type Sound struct {
 	SheetName   string `xorm:"sheet_name"`
 	AcbPackName string `xorm:"acb_pack_name"`
 	AwbPackName string `xorm:"awb_pack_name"`
 }
 
-func loadSound(session *xorm.Session) {
+func loadSound(session *xorm.Session, ad *Assetdata) {
 	var sounds []*Sound
 
 	err := session.Table("m_asset_sound").Find(&sounds)
 	utils.CheckErr(err)
 
 	for _, sound := range sounds {
-		SoundBySheetName[sound.SheetName] = sound
+		ad.SoundBySheetName[sound.SheetName] = sound
 	}
 }

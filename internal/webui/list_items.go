@@ -1,7 +1,6 @@
-package agnostic
+package webui
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -95,8 +94,7 @@ func loadItemFromUITextureTable(contentType int32, textureKey int32) {
 }
 
 type WebUIItemListRequest struct {
-	ContentType int32  `form:"type"`
-	Language    string `form:"l"`
+	ContentType int32 `form:"type"`
 }
 
 func listItems(ctx *gin.Context) {
@@ -108,7 +106,7 @@ func listItems(ctx *gin.Context) {
 		return
 	}
 
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
 	for itemId, item := range ItemsByItemId[req.ContentType] {
 		resp = append(resp, WebUIItem{
@@ -118,11 +116,7 @@ func listItems(ctx *gin.Context) {
 		})
 	}
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

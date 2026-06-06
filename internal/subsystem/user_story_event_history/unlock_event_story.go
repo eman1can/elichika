@@ -8,7 +8,6 @@ import (
 func UnlockEventStory(session *userdata.Session, storyEventId int32) {
 	userStoryEventHistory := client.UserStoryEventHistory{
 		StoryEventId: storyEventId,
-		IsNew:        false,
 	}
 	if userdata.GenericDatabaseExist(session, "u_story_event_history", userStoryEventHistory) {
 		return

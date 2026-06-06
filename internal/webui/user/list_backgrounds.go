@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 	"sort"
 
@@ -9,14 +8,9 @@ import (
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_custom_background"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
-
-type WebUIListBackgroundRequest struct {
-	Language string `form:"l" json:"l"`
-}
 
 type WebUIBackgroundEntry struct {
 	Id             int32  `json:"id"`
@@ -27,18 +21,12 @@ type WebUIBackgroundEntry struct {
 }
 
 func backgroundList(ctx *gin.Context) {
-	var req WebUIListBackgroundRequest
 	var resp []WebUIBackgroundEntry
 
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 	session := ctx.MustGet("session").(*userdata.Session)
 
-	for id, background := range gamedata.Instance.CustomBackground {
+	for id, background := range session.Gamedata.CustomBackground {
 		userBackground := user_custom_background.GetUserCustomBackground(session, id)
 		entry := WebUIBackgroundEntry{
 			Id:             id,
@@ -57,10 +45,7 @@ func backgroundList(ctx *gin.Context) {
 		return resp[i].Id < resp[j].Id
 	})
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

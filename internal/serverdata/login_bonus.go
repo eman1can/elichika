@@ -1,31 +1,34 @@
 package serverdata
 
 import (
+	"log"
+	"os"
+	"path/filepath"
+
 	"elichika/internal/client"
 	"elichika/internal/config"
 	"elichika/internal/generic"
 	"elichika/internal/parser"
 	"elichika/internal/utils"
-	"os"
 
 	"xorm.io/xorm"
 )
 
 type LoginBonus struct {
-	LoginBonusId            int32 `xorm:"pk"`
-	LoginBonusType          int32 `xorm:"pk"`
-	StartAt                 int64
-	EndAt                   int64
-	BackgroundId            int32
-	WhiteboardTextureAsset  *client.TextureStruktur `xorm:"varchar(3)"`
-	DotUnderText            string
-	LoginBonusHandler       string
-	LoginBonusHandlerConfig string
+	LoginBonusId            int32   `xorm:"pk 'login_bonus_id'"`
+	LoginBonusType          int32   `xorm:"login_bonus_type"`
+	StartAt                 int64   `xorm:"start_at"`
+	EndAt                   int64   `xorm:"end_at"`
+	BackgroundId            int32   `xorm:"background_id"`
+	WhiteboardTextureAsset  *string `xorm:"varchar(3)"`
+	DotUnderText            string  `json:"dot_under_text"`
+	LoginBonusHandler       string  `json:"login_bonus_handler"`
+	LoginBonusHandlerConfig string  `json:"login_bonus_handler_config"`
 }
 
 type LoginBonusRewardDay struct {
-	LoginBonusId int32 `xorm:"pk"`
-	Day          int32 `xorm:"pk"`
+	LoginBonusId int32 `xorm:"pk 'login_bonus_id'"`
+	Day          int32 `xorm:"pk 'day'"`
 	ContentGrade int32 `enum:"LoginBonusContentGrade"`
 }
 
@@ -44,16 +47,16 @@ type LoginBonusRewardContentJson struct {
 }
 
 type LoginBonusJson struct {
-	Id                      int32 `xorm:"pk"`
-	LoginBonusType          int32 `xorm:"pk"`
+	Id                      int32 `json:"login_bonus_id"`
+	LoginBonusType          int32 `json:"login_bonus_type"`
 	StartAt                 int64
 	EndAt                   int64
-	BackgroundId            int32
-	WhiteboardTextureAsset  *client.TextureStruktur `xorm:"varchar(3)"`
-	DotUnderText            string
-	LoginBonusHandler       string
-	LoginBonusHandlerConfig string
-	Rewards                 []LoginBonusRewardContentJson `xorm:"extends"`
+	BackgroundId            int32                         `json:"background_id"`
+	WhiteboardTextureAsset  *string                       `json:"whiteboard_texture_asset"`
+	DotUnderText            string                        `json:"dot_under_text"`
+	LoginBonusHandler       string                        `json:"login_bonus_handler"`
+	LoginBonusHandlerConfig string                        `json:"login_bonus_handler_config"`
+	Rewards                 []LoginBonusRewardContentJson `json:"rewards"`
 }
 
 func LoadLoginBonus(path string, loginBonus *LoginBonus, loginBonusRewardDay *generic.List[LoginBonusRewardDay], loginBonusRewardContent *generic.List[LoginBonusRewardContent]) {
@@ -61,6 +64,7 @@ func LoadLoginBonus(path string, loginBonus *LoginBonus, loginBonusRewardDay *ge
 }
 
 func InsertLoginBonus(session *xorm.Session, path string) {
+	log.Println("Parsing login bonus file:", path)
 	var loginBonus = new(LoginBonus)
 
 	var loginBonusJson = new(LoginBonusJson)
@@ -112,15 +116,15 @@ func InsertLoginBonus(session *xorm.Session, path string) {
 func InitializeLoginBonus(session *xorm.Session) {
 	path := config.ServerInitJsons + "login_bonus"
 
-	files, err := os.ReadDir(path)
+	entries, err := os.ReadDir(path)
 	utils.CheckErr(err)
 
-	for _, file := range files {
-		if file.IsDir() {
+	for _, entry := range entries {
+		if entry.IsDir() {
 			continue
 		}
 
-		InsertLoginBonus(session, path+file.Name())
+		InsertLoginBonus(session, filepath.Join(path, entry.Name()))
 	}
 }
 

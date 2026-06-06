@@ -1,4 +1,4 @@
-package agnostic
+package asset
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/eman1can/sound_decrypt/awb"
 	"github.com/eman1can/sound_decrypt/wav"
+	"github.com/gin-gonic/gin"
 )
 
 func loadPackBytes(packName string) ([]byte, error) {
@@ -29,7 +30,7 @@ func loadPackBytes(packName string) ([]byte, error) {
 // ConvertVoiceToWAV finds the AWB pack for sheetName, extracts and fixes the
 // HCA, converts it to WAV via ffmpeg, and caches the result in static/sounds/.
 // Returns the WAV path, or an error when the sound is unavailable.
-func ConvertVoiceToWAV(sheetName string) ([]byte, error) {
+func ConvertVoiceToWAV(ctx *gin.Context, sheetName string) ([]byte, error) {
 	path := filepath.Join(config.StaticDataPath, "sounds", "wav", sheetName+".wav")
 	if _, err := os.Stat(path); err == nil {
 		data, err := os.ReadFile(path)
@@ -39,7 +40,8 @@ func ConvertVoiceToWAV(sheetName string) ([]byte, error) {
 		return data, nil // already cached
 	}
 
-	sound, ok := assetdata.SoundBySheetName[sheetName]
+	ad := ctx.MustGet("assetdata").(*assetdata.Assetdata)
+	sound, ok := ad.SoundBySheetName[sheetName]
 	if !ok {
 		return []byte{}, fmt.Errorf("sound not found: %s", sheetName)
 	}

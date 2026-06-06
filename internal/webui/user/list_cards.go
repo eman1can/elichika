@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"net/http"
 	"sort"
 
@@ -9,14 +8,9 @@ import (
 	"elichika/internal/server"
 	"elichika/internal/subsystem/user_card"
 	"elichika/internal/userdata"
-	"elichika/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
-
-type WebUIListCardsRequest struct {
-	Language string `form:"l" json:"l"`
-}
 
 type WebUICardEntry struct {
 	Id                     int32  `json:"card_id"`
@@ -32,18 +26,12 @@ type WebUICardEntry struct {
 }
 
 func cardList(ctx *gin.Context) {
-	var req WebUIListCardsRequest
 	var resp []WebUICardEntry
 
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	session := ctx.MustGet("session").(*userdata.Session)
-	dictionary := gamedata.DictionaryByLanguage(req.Language)
+	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
-	for id, masterCard := range gamedata.Instance.Card {
+	for id, masterCard := range session.Gamedata.Card {
 		card := user_card.GetUserCard(session, id)
 		entry := WebUICardEntry{
 			Id:                     id,
@@ -67,10 +55,7 @@ func cardList(ctx *gin.Context) {
 		return resp[i].Id < resp[j].Id
 	})
 
-	jsonBytes, err := json.Marshal(resp)
-	utils.CheckErr(err)
-	ctx.Header("Content-Type", "application/json")
-	ctx.String(http.StatusOK, string(jsonBytes))
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func init() {

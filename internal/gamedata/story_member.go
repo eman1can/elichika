@@ -11,14 +11,14 @@ import (
 
 type StoryMember struct {
 	// from m_story_member
-	Id        int32 `xorm:"pk 'id'"`
-	MemberMId int32 `xorm:"'member_m_id'"`
-	// StoryNo int
-	LoveLevel int32 `xorm:"'love_level'"`
-	// Title string
-	// Description string
+	Id          int32  `xorm:"pk 'id'"`
+	MemberMId   int32  `xorm:"member_m_id"`
+	StoryNumber int32  `xorm:"story_no"`
+	LoveLevel   int32  `xorm:"love_level"`
+	Title       string `xorm:"title"`
+	Description string `xorm:"description"`
 	// ScenarioScriptAssetPath string
-	// CardImageAssetPath string
+	CardImageAssetPath string `xorm:"card_image_asset_path"`
 	// DisplayOrder int
 	UnlockLiveId *int32 `xorm:"'unlock_live_id'"`
 

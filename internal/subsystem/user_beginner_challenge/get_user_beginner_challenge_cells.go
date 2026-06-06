@@ -31,7 +31,7 @@ func GetBeginnerChallengeCells(session *userdata.Session) map[int32]*client.Chal
 			chapterId := cell.MissionClearConditionCount
 			requiredStoryCell := session.Gamedata.StoryMainChapter[chapterId].LastCellId
 			userStoryMain := client.UserStoryMain{
-				StoryMainMasterId: requiredStoryCell,
+				StoryMainCellId: requiredStoryCell,
 			}
 			if userdata.GenericDatabaseExist(session, "u_story_main", userStoryMain) {
 				result[cell.Id].Progress = chapterId

@@ -1,4 +1,4 @@
-package agnostic
+package webui
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 	"elichika/internal/config"
 	"elichika/internal/server"
 	"elichika/internal/utils"
+	"elichika/internal/webui/asset"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,17 +23,17 @@ type WebUIItemSoundRequest struct {
 func getVoiceSound(ctx *gin.Context) {
 	var req WebUIItemSoundRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.Status(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	output, err := ConvertVoiceToWAV(req.SoundAssetPath)
+	output, err := asset.ConvertVoiceToWAV(ctx, req.SoundAssetPath)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	file(ctx, output, "audio/wav")
+	asset.SendFile(ctx, output, "audio/wav")
 }
 
 func init() {

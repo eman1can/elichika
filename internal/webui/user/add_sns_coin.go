@@ -17,7 +17,7 @@ func addSnsCoin(ctx *gin.Context) {
 		user_content.AddContent(session, item.StarGem.Amount(min(amount, 1_000_000)))
 
 		session.Finalize()
-		ctx.Status(http.StatusOK)
+		ctx.JSON(http.StatusOK, gin.H{})
 	}
 }
 

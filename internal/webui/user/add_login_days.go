@@ -15,7 +15,7 @@ func addLoginDays(ctx *gin.Context) {
 		session.UserStatus.LoginDays += min(amount, 10_000)
 
 		session.Finalize()
-		ctx.Status(http.StatusOK)
+		ctx.JSON(http.StatusOK, gin.H{})
 	}
 }
 

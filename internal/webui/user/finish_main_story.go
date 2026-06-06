@@ -3,41 +3,35 @@ package user
 import (
 	"net/http"
 
-	"elichika/internal/gamedata"
+	"elichika/internal/client"
+	"elichika/internal/enum"
+	"elichika/internal/generic"
+	"elichika/internal/item"
 	"elichika/internal/server"
+	"elichika/internal/subsystem/user_present"
 	"elichika/internal/subsystem/user_story_main"
-	"elichika/internal/userdata"
 
 	"github.com/gin-gonic/gin"
 )
 
-type WebUIFinishMainStoryRequest struct {
-	MainStoryMasterIds []int32 `json:"main_story_master_ids"`
-}
-
 func finishMainStory(ctx *gin.Context) {
-	var req WebUIFinishMainStoryRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	session, masterIds := getMasterIdsSession(ctx)
 
-	session := ctx.MustGet("session").(*userdata.Session)
-
-	for _, mainStoryMasterId := range req.MainStoryMasterIds {
-		if masterMainStory, ok := gamedata.Instance.StoryMainChapter[mainStoryMasterId]; ok {
-			if finished := user_story_main.IsStoryFinished(session, mainStoryMasterId); finished {
-				continue
-			}
-
-			for _, cell := range masterMainStory.Cells {
-				user_story_main.InsertUserStoryMain(session, cell)
+	if session != nil {
+		for _, cellId := range masterIds {
+			// TODO: Should we move present awarding to the completion handler?
+			if user_story_main.InsertUserStoryMainCell(session, cellId) {
+				user_present.AddPresent(session, client.PresentItem{
+					Content:          item.StarGem.Amount(10),
+					PresentRouteType: enum.PresentRouteTypeStoryMain,
+					PresentRouteId:   generic.NewNullable(cellId),
+				})
 			}
 		}
-	}
 
-	session.Finalize()
-	ctx.JSON(http.StatusOK, gin.H{})
+		session.Finalize()
+		ctx.JSON(http.StatusOK, gin.H{})
+	}
 }
 
 func init() {

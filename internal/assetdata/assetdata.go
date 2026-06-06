@@ -64,15 +64,24 @@ import (
 	"xorm.io/xorm"
 )
 
+type Assetdata struct {
+	SoundBySheetName   map[string]*Sound
+	TextureByAssetPath map[string]*Texture
+}
+
+// Pack / Metapack names are unique across all locales
 var NameToLocale = map[string]string{}
 var Metapack = map[string]*MetapackType{}
 var Pack = map[string]*PackType{}
 
-func Init(locale string, assetdata *xorm.Engine) {
+func (ad *Assetdata) Init(locale string, assetdata *xorm.Engine) {
+	ad.SoundBySheetName = make(map[string]*Sound)
+	ad.TextureByAssetPath = make(map[string]*Texture)
+
 	session := assetdata.NewSession()
 	defer session.Close()
 	loadMetapack(locale, session)
 	loadPack(locale, session)
-	loadSound(session)
-	loadTexture(session)
+	loadSound(session, ad)
+	loadTexture(session, ad)
 }

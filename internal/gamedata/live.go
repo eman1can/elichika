@@ -25,7 +25,7 @@ type Live struct {
 	// OriginalDeckName string
 	// Copyright string
 	// Source *string
-	// JacketAssetPath string
+	JacketAssetPath string `xorm:"jacket_asset_path"`
 	// BackgroundAssetPath string
 	// DisplayOrder int
 
@@ -55,7 +55,6 @@ func loadLive(gamedata *Gamedata) {
 	utils.CheckErr(err)
 	for _, live := range gamedata.Live {
 		live.LiveMemberMapping = gamedata.LiveMemberMapping[*live.LiveMemberMappingId]
-		live.Name = gamedata.Dictionary.Resolve(live.Name)
 		live.Gamedata = gamedata
 	}
 }

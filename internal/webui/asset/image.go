@@ -1,4 +1,4 @@
-package agnostic
+package asset
 
 import (
 	"errors"
@@ -9,28 +9,12 @@ import (
 	"elichika/internal/utils"
 
 	hwdecrypt "github.com/arina999999997/gohwdecrypt"
+	"github.com/gin-gonic/gin"
 )
 
-type Texture struct {
-	AssetPath string `xorm:"asset_path"`
-	PackName  string `xorm:"pack_name"`
-	Head      int    `xorm:"head"`
-	Size      int    `xorm:"size"`
-	Key1      uint32 `xorm:"key1"`
-	Key2      uint32 `xorm:"key2"`
-}
-
-type PackageMapping struct {
-	PackageKey     string  `xorm:"package_key"`
-	PackName       string  `xorm:"pack_name"`
-	FileSize       int     `xorm:"file_size"`
-	MetapackName   *string `xorm:"metapack_name"`
-	MetapackOffset int     `xorm:"metapack_offset"`
-	Category       int     `xorm:"category"`
-}
-
-func loadAssetImage(assetPath string) ([]byte, error) {
-	texture, exists := assetdata.TextureByAssetPath[assetPath]
+func LoadAssetImage(ctx *gin.Context, assetPath string) ([]byte, error) {
+	ad := ctx.MustGet("assetdata").(*assetdata.Assetdata)
+	texture, exists := ad.TextureByAssetPath[assetPath]
 	if !exists {
 		return nil, errors.New("asset not found in database")
 	}
