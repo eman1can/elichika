@@ -25,6 +25,7 @@ func finishEventStory(ctx *gin.Context) {
 
 	for _, masterId := range req.MasterIds {
 		user_story_event_history.UnlockEventStory(session, masterId)
+		// TODO: Add completion rewards to present box
 	}
 
 	session.Finalize()

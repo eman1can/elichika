@@ -5,14 +5,14 @@ import (
 	"elichika/internal/userdata"
 )
 
-func InsertUserStoryMain(session *userdata.Session, storyMainMasterId int32) bool {
+func InsertUserStoryMainCell(session *userdata.Session, storyMainCellId int32) bool {
 	userStoryMain := client.UserStoryMain{
-		StoryMainMasterId: storyMainMasterId,
+		StoryMainCellId: storyMainCellId,
 	}
 	if userdata.GenericDatabaseExist(session, "u_story_main", userStoryMain) {
 		return false
 	}
-	session.UserModel.UserStoryMainByStoryMainId.Set(storyMainMasterId, userStoryMain)
+	session.UserModel.UserStoryMainByStoryMainId.Set(storyMainCellId, userStoryMain)
 	// Before EOS, main story would also unlock scenes, but that part of the tutorial has been removed from the client
 	return true
 }

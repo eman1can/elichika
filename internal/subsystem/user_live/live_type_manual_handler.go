@@ -108,7 +108,7 @@ func liveTypeManualHandler(session *userdata.Session, req request.FinishLiveRequ
 	if lastPlayDeck.IsCleared {
 		// add story if it is a story mode
 		if live.CellId.HasValue {
-			user_story_main.InsertUserStoryMain(session, live.CellId.Value)
+			user_story_main.InsertUserStoryMainCell(session, live.CellId.Value)
 		}
 
 		// update clear record

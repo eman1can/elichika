@@ -1,4 +1,4 @@
-package agnostic
+package webui
 
 import (
 	"log"

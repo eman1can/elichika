@@ -3,7 +3,6 @@ package webui
 import (
 	"elichika/internal/locale"
 	"elichika/internal/server"
-	_ "elichika/internal/webui/agnostic"
 	_ "elichika/internal/webui/auth"
 	_ "elichika/internal/webui/user"
 
@@ -22,13 +21,27 @@ func webuiInitial(ctx *gin.Context) {
 	if lang == "" {
 		lang = "en"
 	}
+
 	ctx.Set("locale", locale.Locales[lang])
 	ctx.Set("gamedata", locale.Locales[lang].Gamedata)
 	ctx.Set("dictionary", locale.Locales[lang].Dictionary)
+
+	platform, _ := ctx.GetQuery("p")
+	if platform == "" {
+		platform = "a"
+	}
+
+	if platform == "a" {
+		ctx.Set("assetdata", locale.Locales[lang].AssetdataAndroid)
+	} else {
+		ctx.Set("assetdata", locale.Locales[lang].AssetdataIos)
+	}
 
 	ctx.Next()
 }
 
 func init() {
 	server.AddInitialHandler("/webui", webuiInitial)
+	server.AddInitialHandler("/webui/user", webuiInitial)
+	server.AddInitialHandler("/webui/admin", webuiInitial)
 }

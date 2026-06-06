@@ -1,4 +1,4 @@
-package agnostic
+package asset
 
 import (
 	"crypto/md5"
@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func file(ctx *gin.Context, data []byte, mime string) {
+func SendFile(ctx *gin.Context, data []byte, mime string) {
 	currentEtag := fmt.Sprintf("%x", md5.Sum(data))
 	clientEtag := ctx.GetHeader("If-None-Match")
 	if clientEtag != "" && clientEtag == currentEtag {

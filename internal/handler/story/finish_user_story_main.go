@@ -33,7 +33,7 @@ func finishUserStoryMain(ctx *gin.Context) {
 		UserModelDiff: &session.UserModel,
 	}
 
-	if user_story_main.InsertUserStoryMain(session, req.CellId) { // newly inserted story, award some gem
+	if user_story_main.InsertUserStoryMainCell(session, req.CellId) { // newly inserted story, award some gem
 		resp.FirstClearReward.Append(item.StarGem.Amount(10))
 		user_present.AddPresent(session, client.PresentItem{
 			Content:          item.StarGem.Amount(10),

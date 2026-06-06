@@ -11,44 +11,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type WebUIListEventStoryRequest struct {
-	EventId int32 `form:"id" json:"id"`
-}
-
-type WebUIStoryEventEntry struct {
-	StoryEventId   int32  `json:"story_event_id"`
-	Title          string `json:"title"`
-	Description    string `json:"description"`
-	ImageAssetPath string `json:"image_asset_path"`
-	StoryNumber    int32  `json:"chapter"`
-	IsNew          bool   `json:"is_new"`
-}
-
 func listEventStory(ctx *gin.Context) {
-	var req WebUIListEventStoryRequest
-	var resp []WebUIStoryEventEntry
-
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	var resp []WebUIStoryChapterEntry
 
 	session := ctx.MustGet("session").(*userdata.Session)
 	dictionary := ctx.MustGet("dictionary").(*gamedata.Dictionary)
 
-	for _, storyEvent := range session.Gamedata.StoryEventHistory {
-		if req.EventId != storyEvent.EventMasterId {
-			continue
+	for eventId, event := range session.Gamedata.Event {
+		entry := WebUIStoryChapterEntry{
+			Id:             eventId,
+			Title:          dictionary.Resolve(event.Title),
+			Description:    dictionary.Resolve(event.Description),
+			DisplayOrder:   event.ReleaseOrder,
+			ImageAssetPath: *event.BannerNoticeLargeAssetPath,
+			Chapters:       make([]WebUIStoryCellEntry, 0),
 		}
 
-		resp = append(resp, WebUIStoryEventEntry{
-			StoryEventId:   storyEvent.StoryEventId,
-			Title:          dictionary.Resolve(storyEvent.Title),
-			Description:    dictionary.Resolve(storyEvent.Description),
-			ImageAssetPath: storyEvent.BannerThumbnailPath,
-			StoryNumber:    storyEvent.StoryNumber,
-			IsNew:          !user_story_event_history.IsEventStoryFinished(session, storyEvent.StoryEventId),
-		})
+		for _, storyEvent := range session.Gamedata.StoryEventHistory {
+			if storyEvent.EventMasterId != eventId {
+				continue
+			}
+
+			entry.Chapters = append(entry.Chapters, WebUIStoryCellEntry{
+				Id:             storyEvent.StoryEventId,
+				Chapter:        storyEvent.StoryNumber,
+				Title:          dictionary.Resolve(storyEvent.Title),
+				Description:    dictionary.Resolve(storyEvent.Description),
+				ImageAssetPath: storyEvent.BannerThumbnailPath,
+				IsNew:          !user_story_event_history.IsEventStoryFinished(session, storyEvent.StoryEventId),
+				Unlocked:       true,
+			})
+		}
+
+		resp = append(resp, entry)
 	}
 
 	ctx.JSON(http.StatusOK, resp)

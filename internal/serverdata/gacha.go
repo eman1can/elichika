@@ -2,6 +2,8 @@ package serverdata
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 
 	"elichika/internal/client"
 	"elichika/internal/config"
@@ -112,35 +114,39 @@ func InsertGacha(session *xorm.Session, file string) {
 	// insert gacha from json format, with some exceptions.
 	gachaJsons := utils.ReadAllText(file)
 
-	gachas := []client.Gacha{}
-	err := json.Unmarshal([]byte(gachaJsons), &gachas)
+	var gacha client.Gacha
+	err := json.Unmarshal([]byte(gachaJsons), &gacha)
 	utils.CheckErr(err)
 
-	gachaSetups := []GachaSetupInfo{}
-	err = json.Unmarshal([]byte(gachaJsons), &gachaSetups)
+	var gachaSetup GachaSetupInfo
+	err = json.Unmarshal([]byte(gachaJsons), &gachaSetup)
 	utils.CheckErr(err)
 
-	for pos, gacha := range gachas {
-		serverGacha := ServerGacha{
-			GachaMasterId:  gacha.GachaMasterId,
-			GachaGroups:    gachaSetups[pos].GachaGroups,
-			DrawGuarantees: [][]int32{},
-		}
-
-		for i := range gacha.GachaDraws.Slice {
-			// TODO(gacha): Remove this magic id and use a link or something
-			gacha.GachaDraws.Slice[i].GachaDrawMasterId = gacha.GachaMasterId*10 + int32(i)
-			serverGacha.DrawGuarantees = append(serverGacha.DrawGuarantees, gachaSetups[pos].GachaDraws[i].Guarantees)
-		}
-		serverGacha.ClientGacha = gacha
-		_, err = session.Table("s_gacha").Insert(serverGacha)
-		utils.CheckErr(err)
+	serverGacha := ServerGacha{
+		GachaMasterId:  gacha.GachaMasterId,
+		GachaGroups:    gachaSetup.GachaGroups,
+		DrawGuarantees: [][]int32{},
 	}
+
+	for i := range gacha.GachaDraws.Slice {
+		// TODO(gacha): Remove this magic id and use a link or something
+		gacha.GachaDraws.Slice[i].GachaDrawMasterId = gacha.GachaMasterId*10 + int32(i)
+		serverGacha.DrawGuarantees = append(serverGacha.DrawGuarantees, gachaSetup.GachaDraws[i].Guarantees)
+	}
+	serverGacha.ClientGacha = gacha
+	_, err = session.Table("s_gacha").Insert(serverGacha)
+	utils.CheckErr(err)
 }
 
 func gachaInitializer(session *xorm.Session) {
 	InitGacha(session)
-	InsertGacha(session, config.ServerInitJsons+"gacha.json")
+
+	path := config.ServerInitJsons + "gacha"
+	entries, err := os.ReadDir(path)
+	utils.CheckErr(err)
+	for _, entry := range entries {
+		InsertGacha(session, filepath.Join(path, entry.Name()))
+	}
 }
 
 func init() {
